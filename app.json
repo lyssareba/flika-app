@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "spark-app",
-    "slug": "spark-app",
+    "name": "flika-app",
+    "slug": "flika-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "sparkapp",
+    "scheme": "flikaapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
