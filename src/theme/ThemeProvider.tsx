@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+} from 'react';
 import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeProvider as EmotionThemeProvider } from '@emotion/react';
@@ -21,17 +27,21 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const systemColorScheme = useColorScheme();
-  const [userPreference, setUserPreference] = useState<ThemePreference>('system');
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [userPreference, setUserPreference] =
+    useState<ThemePreference>('system');
 
   useEffect(() => {
-    // Load saved preference
-    AsyncStorage.getItem(THEME_STORAGE_KEY).then((saved) => {
-      if (saved) {
-        setUserPreference(saved as ThemePreference);
+    const loadPreference = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        if (saved) {
+          setUserPreference(saved as ThemePreference);
+        }
+      } catch {
+        // Silently fall back to system preference
       }
-      setIsLoaded(true);
-    });
+    };
+    loadPreference();
   }, []);
 
   const effectiveMode: ThemeMode =
@@ -39,22 +49,25 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       ? (systemColorScheme ?? 'light')
       : userPreference;
 
-  const theme = createTheme(effectiveMode);
+  const theme = useMemo(() => createTheme(effectiveMode), [effectiveMode]);
 
   const setMode = async (mode: ThemePreference) => {
     setUserPreference(mode);
-    await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
+    try {
+      await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
+    } catch {
+      // Preference updated in memory but failed to persist
+      // Will fall back to system on next app launch
+    }
   };
 
-  // Don't render until we've loaded the preference to avoid flash
-  if (!isLoaded) {
-    return null;
-  }
+  const contextValue = useMemo(
+    () => ({ theme, mode: userPreference, setMode, effectiveMode }),
+    [theme, userPreference, effectiveMode]
+  );
 
   return (
-    <ThemeContext.Provider
-      value={{ theme, mode: userPreference, setMode, effectiveMode }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       <EmotionThemeProvider theme={theme}>{children}</EmotionThemeProvider>
     </ThemeContext.Provider>
   );

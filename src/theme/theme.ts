@@ -4,6 +4,28 @@ import { spacing, borderRadius } from './spacing';
 
 export type ThemeMode = 'light' | 'dark';
 
+interface Shadow {
+  shadowColor: string;
+  shadowOffset: { width: number; height: number };
+  shadowOpacity: number;
+  shadowRadius: number;
+  elevation: number;
+}
+
+const createShadow = (
+  mode: ThemeMode,
+  offsetY: number,
+  radius: number,
+  opacity: { light: number; dark: number },
+  elevation: number
+): Shadow => ({
+  shadowColor: '#000000',
+  shadowOffset: { width: 0, height: offsetY },
+  shadowOpacity: mode === 'light' ? opacity.light : opacity.dark,
+  shadowRadius: radius,
+  elevation,
+});
+
 export const createTheme = (mode: ThemeMode) => ({
   mode,
   colors: {
@@ -35,18 +57,9 @@ export const createTheme = (mode: ThemeMode) => ({
   spacing,
   borderRadius,
   shadows: {
-    sm:
-      mode === 'light'
-        ? '0px 1px 2px rgba(0, 0, 0, 0.05)'
-        : '0px 1px 2px rgba(0, 0, 0, 0.3)',
-    md:
-      mode === 'light'
-        ? '0px 4px 6px rgba(0, 0, 0, 0.07)'
-        : '0px 4px 6px rgba(0, 0, 0, 0.4)',
-    lg:
-      mode === 'light'
-        ? '0px 10px 15px rgba(0, 0, 0, 0.1)'
-        : '0px 10px 15px rgba(0, 0, 0, 0.5)',
+    sm: createShadow(mode, 1, 2, { light: 0.05, dark: 0.3 }, 1),
+    md: createShadow(mode, 2, 4, { light: 0.07, dark: 0.4 }, 3),
+    lg: createShadow(mode, 4, 8, { light: 0.1, dark: 0.5 }, 6),
   },
 });
 
