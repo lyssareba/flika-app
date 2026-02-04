@@ -5,20 +5,20 @@ interface CardContainerProps {
 }
 
 export const CardContainer = styled.View<CardContainerProps>`
-  background-color: ${({ theme, elevated }) =>
-    elevated ? theme.colors.backgroundElevated : theme.colors.backgroundCard};
   border-radius: ${({ theme }) => theme.borderRadius.lg}px;
   padding: ${({ theme }) => theme.spacing[4]}px;
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.border};
+  background-color: ${({ theme, elevated }) =>
+    elevated ? theme.colors.backgroundElevated : theme.colors.backgroundCard};
 `;
 
 export const PressableCardContainer = styled.TouchableOpacity<CardContainerProps>`
-  background-color: ${({ theme, elevated }) =>
-    elevated ? theme.colors.backgroundElevated : theme.colors.backgroundCard};
   border-radius: ${({ theme }) => theme.borderRadius.lg}px;
   padding: ${({ theme }) => theme.spacing[4]}px;
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.border};
+  background-color: ${({ theme, elevated }) =>
+    elevated ? theme.colors.backgroundElevated : theme.colors.backgroundCard};
   min-height: 44px;
 `;

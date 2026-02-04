@@ -1,4 +1,5 @@
 import styled from '@emotion/native';
+import { Theme } from '@/theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -9,32 +10,39 @@ interface ButtonContainerProps {
   disabled?: boolean;
 }
 
+const backgroundColors: Record<ButtonVariant, (theme: Theme) => string> = {
+  primary: (theme) => theme.colors.primary,
+  secondary: (theme) => theme.colors.secondary,
+  outline: () => 'transparent',
+  ghost: () => 'transparent',
+};
+
+const textColors: Record<ButtonVariant, (theme: Theme) => string> = {
+  primary: () => '#FFFFFF',
+  secondary: () => '#FFFFFF',
+  outline: (theme) => theme.colors.primary,
+  ghost: (theme) => theme.colors.primary,
+};
+
+const paddings: Record<ButtonSize, (theme: Theme) => string> = {
+  sm: (theme) => `${theme.spacing[2]}px ${theme.spacing[3]}px`,
+  md: (theme) => `${theme.spacing[3]}px ${theme.spacing[4]}px`,
+  lg: (theme) => `${theme.spacing[4]}px ${theme.spacing[6]}px`,
+};
+
+const fontSizes: Record<ButtonSize, (theme: Theme) => number> = {
+  sm: (theme) => theme.typography.fontSize.sm,
+  md: (theme) => theme.typography.fontSize.base,
+  lg: (theme) => theme.typography.fontSize.lg,
+};
+
 export const ButtonContainer = styled.TouchableOpacity<ButtonContainerProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
   border-radius: ${({ theme }) => theme.borderRadius.lg}px;
-  background-color: ${({ variant, theme }) => {
-    switch (variant) {
-      case 'primary':
-        return theme.colors.primary;
-      case 'secondary':
-        return theme.colors.secondary;
-      case 'outline':
-      case 'ghost':
-        return 'transparent';
-    }
-  }};
-  padding: ${({ size, theme }) => {
-    switch (size) {
-      case 'sm':
-        return `${theme.spacing[2]}px ${theme.spacing[3]}px`;
-      case 'md':
-        return `${theme.spacing[3]}px ${theme.spacing[4]}px`;
-      case 'lg':
-        return `${theme.spacing[4]}px ${theme.spacing[6]}px`;
-    }
-  }};
+  background-color: ${({ variant, theme }) => backgroundColors[variant](theme)};
+  padding: ${({ size, theme }) => paddings[size](theme)};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
   min-height: 44px;
   ${({ variant, theme }) =>
@@ -47,25 +55,7 @@ interface ButtonTextProps {
 }
 
 export const ButtonText = styled.Text<ButtonTextProps>`
-  color: ${({ variant, theme }) => {
-    switch (variant) {
-      case 'primary':
-      case 'secondary':
-        return '#FFFFFF';
-      case 'outline':
-      case 'ghost':
-        return theme.colors.primary;
-    }
-  }};
-  font-size: ${({ size, theme }) => {
-    switch (size) {
-      case 'sm':
-        return theme.typography.fontSize.sm;
-      case 'md':
-        return theme.typography.fontSize.base;
-      case 'lg':
-        return theme.typography.fontSize.lg;
-    }
-  }}px;
+  color: ${({ variant, theme }) => textColors[variant](theme)};
+  font-size: ${({ size, theme }) => fontSizes[size](theme)}px;
   font-weight: 600;
 `;

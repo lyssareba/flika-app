@@ -1,4 +1,5 @@
 import styled from '@emotion/native';
+import { Theme } from '@/theme';
 
 export type TypographyVariant =
   | 'h1'
@@ -11,6 +12,13 @@ export type TypographyVariant =
 
 export type TypographyColor = 'primary' | 'secondary' | 'muted' | 'error';
 
+const textColors: Record<TypographyColor, (theme: Theme) => string> = {
+  primary: (theme) => theme.colors.textPrimary,
+  secondary: (theme) => theme.colors.textSecondary,
+  muted: (theme) => theme.colors.textMuted,
+  error: (theme) => theme.colors.error,
+};
+
 interface TextProps {
   variant: TypographyVariant;
   color: TypographyColor;
@@ -18,18 +26,7 @@ interface TextProps {
 }
 
 export const StyledText = styled.Text<TextProps>`
-  color: ${({ color, theme }) => {
-    switch (color) {
-      case 'primary':
-        return theme.colors.textPrimary;
-      case 'secondary':
-        return theme.colors.textSecondary;
-      case 'muted':
-        return theme.colors.textMuted;
-      case 'error':
-        return theme.colors.error;
-    }
-  }};
+  color: ${({ color, theme }) => textColors[color](theme)};
   font-size: ${({ variant, theme }) => theme.typography.styles[variant].fontSize}px;
   font-weight: ${({ variant, theme }) => theme.typography.styles[variant].fontWeight};
   line-height: ${({ variant, theme }) =>
