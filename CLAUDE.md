@@ -14,24 +14,52 @@ npm run lint       # Run ESLint
 
 ## Architecture
 
-This is an Expo/React Native cross-platform app (iOS, Android, Web) using TypeScript.
+This is an Expo/React Native cross-platform app (iOS, Android, Web) using TypeScript with a `src/` directory layout.
 
-### Routing (Expo Router - File-Based)
+### Directory Structure
 
-- `app/` - Route definitions using file-based routing
-- `app/_layout.tsx` - Root layout with ThemeProvider and Stack navigator
-- `app/(tabs)/` - Tab group with bottom navigation (Home, Explore)
-- `app/modal.tsx` - Modal presentation screen
-
-### Theming System
-
-- `constants/theme.ts` - Color palette (`Colors.light`/`Colors.dark`) and platform-specific fonts (`Fonts`)
-- `hooks/use-color-scheme.ts` - System color scheme detection (with `.web.ts` variant)
-- `hooks/use-theme-color.ts` - Returns appropriate color for current theme
-- `components/themed-text.tsx` and `components/themed-view.tsx` - Theme-aware base components
+```
+src/
+├── app/                    # Expo Router file-based routes
+│   ├── _layout.tsx         # Root layout with Stack navigator
+│   ├── (tabs)/             # Tab group with bottom navigation
+│   │   ├── _layout.tsx     # Tabs navigator config
+│   │   ├── index.tsx       # Home tab
+│   │   ├── archive.tsx     # Archive tab
+│   │   └── settings.tsx    # Settings tab
+│   ├── prospect/
+│   │   ├── [id].tsx        # Prospect detail screen
+│   │   ├── [id]/traits.tsx # Prospect traits screen
+│   │   ├── [id]/dates.tsx  # Prospect dates screen
+│   │   └── add.tsx         # Add prospect screen
+│   └── onboarding/
+│       ├── index.tsx       # Onboarding start
+│       ├── attributes.tsx  # Attributes setup
+│       └── security.tsx    # Security setup
+├── components/
+│   ├── ui/                 # Generic UI components
+│   ├── prospects/          # Prospect-related components
+│   ├── traits/             # Trait-related components
+│   ├── dates/              # Date-related components
+│   ├── mascot/             # Mascot components
+│   └── common/             # Shared components
+├── hooks/                  # Custom React hooks
+├── context/                # React Context providers
+├── services/
+│   ├── firebase/           # Firebase integration
+│   └── storage/            # Local storage
+├── utils/                  # Utility functions
+├── theme/                  # Theme configuration
+├── constants/
+│   └── translations/       # Translation strings
+├── types/                  # TypeScript type definitions
+└── i18n/
+    └── locales/            # Locale files
+```
 
 ### Key Patterns
 
+- **Path alias**: `@/*` resolves to `src/*` (configured in tsconfig.json)
 - **Platform-specific files**: Use `.ios.tsx`, `.android.tsx`, `.web.ts` suffixes for platform variants
-- **Path alias**: `@/*` resolves to project root (configured in tsconfig.json)
-- **Typed routes**: Expo Router generates type-safe route names (`experiments.typedRoutes` enabled)
+- **Typed routes**: Expo Router generates type-safe route names
+- **Barrel exports**: Each directory has an `index.ts` for clean imports
