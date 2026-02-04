@@ -1,5 +1,5 @@
 import styled from '@emotion/native';
-import { Theme, radius, color } from '@/theme';
+import { Theme, theme } from '@/theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -40,14 +40,14 @@ export const ButtonContainer = styled.TouchableOpacity<ButtonContainerProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  border-radius: ${radius('lg')};
-  background-color: ${({ variant, theme }) => backgroundColors[variant](theme)};
-  padding: ${({ size, theme }) => paddings[size](theme)};
+  border-radius: ${theme.radius('lg')};
+  background-color: ${({ variant, theme: t }) => backgroundColors[variant](t)};
+  padding: ${({ size, theme: t }) => paddings[size](t)};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
   min-height: 44px;
   ${({ variant }) => (variant === 'outline' ? `border-width: 2px;` : '')}
   ${({ variant }) => (variant === 'outline' ? `border-style: solid;` : '')}
-  border-color: ${color('primary')};
+  border-color: ${theme.color('primary')};
 `;
 
 interface ButtonTextProps {
@@ -56,7 +56,7 @@ interface ButtonTextProps {
 }
 
 export const ButtonText = styled.Text<ButtonTextProps>`
-  color: ${({ variant, theme }) => textColors[variant](theme)};
-  font-size: ${({ size, theme }) => fontSizes[size](theme)}px;
+  color: ${({ variant, theme: t }) => textColors[variant](t)};
+  font-size: ${({ size, theme: t }) => fontSizes[size](t)}px;
   font-weight: 600;
 `;

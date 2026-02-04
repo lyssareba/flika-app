@@ -1,25 +1,25 @@
 import React from 'react';
 import styled from '@emotion/native';
-import { sp } from '@/theme';
+import { theme } from '@/theme';
 import { Typography, Button } from '@/components/ui';
 
 const Container = styled.View`
   flex: 1;
   align-items: center;
   justify-content: center;
-  padding: ${sp(6)};
+  padding: ${theme.spacing(6)};
 `;
 
 const IconContainer = styled.View`
-  margin-bottom: ${sp(4)};
+  margin-bottom: ${theme.spacing(4)};
 `;
 
 const MessageContainer = styled.View`
-  margin-bottom: ${sp(4)};
+  margin-bottom: ${theme.spacing(4)};
 `;
 
 const MessageText = styled(Typography)`
-  margin-top: ${sp(2)};
+  margin-top: ${theme.spacing(2)};
 `;
 
 interface EmptyStateProps {
