@@ -1,6 +1,5 @@
 import { useTheme as useEmotionTheme } from '@emotion/react';
 import { Theme } from '@/theme/theme';
-import { useThemeContext } from '@/theme/ThemeProvider';
 
 /**
  * Hook to access the current theme object.
