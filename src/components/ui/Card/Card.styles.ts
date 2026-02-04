@@ -1,36 +1,35 @@
 import styled from '@emotion/native';
+import { sp, color, radius, shadow } from '@/theme';
 
 interface CardContainerProps {
   elevated?: boolean;
 }
 
 export const CardContainer = styled.View<CardContainerProps>`
-  border-radius: ${({ theme }) => theme.borderRadius.lg}px;
-  padding: ${({ theme }) => theme.spacing[4]}px;
+  border-radius: ${radius('lg')};
+  padding: ${sp(4)};
   border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.border};
+  border-color: ${color('border')};
   background-color: ${({ theme, elevated }) =>
     elevated ? theme.colors.backgroundElevated : theme.colors.backgroundCard};
-  shadow-color: ${({ theme }) => theme.shadows.sm.shadowColor};
-  shadow-offset: ${({ theme }) =>
-    `${theme.shadows.sm.shadowOffset.width}px ${theme.shadows.sm.shadowOffset.height}px`};
-  shadow-opacity: ${({ theme }) => theme.shadows.sm.shadowOpacity};
-  shadow-radius: ${({ theme }) => theme.shadows.sm.shadowRadius}px;
-  elevation: ${({ theme }) => theme.shadows.sm.elevation};
+  shadow-color: ${shadow('sm', 'shadowColor')};
+  shadow-offset: ${shadow('sm', 'shadowOffset')};
+  shadow-opacity: ${shadow('sm', 'shadowOpacity')};
+  shadow-radius: ${shadow('sm', 'shadowRadius')}px;
+  elevation: ${shadow('sm', 'elevation')};
 `;
 
 export const PressableCardContainer = styled.TouchableOpacity<CardContainerProps>`
-  border-radius: ${({ theme }) => theme.borderRadius.lg}px;
-  padding: ${({ theme }) => theme.spacing[4]}px;
+  border-radius: ${radius('lg')};
+  padding: ${sp(4)};
   border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.border};
+  border-color: ${color('border')};
   background-color: ${({ theme, elevated }) =>
     elevated ? theme.colors.backgroundElevated : theme.colors.backgroundCard};
-  shadow-color: ${({ theme }) => theme.shadows.sm.shadowColor};
-  shadow-offset: ${({ theme }) =>
-    `${theme.shadows.sm.shadowOffset.width}px ${theme.shadows.sm.shadowOffset.height}px`};
-  shadow-opacity: ${({ theme }) => theme.shadows.sm.shadowOpacity};
-  shadow-radius: ${({ theme }) => theme.shadows.sm.shadowRadius}px;
-  elevation: ${({ theme }) => theme.shadows.sm.elevation};
+  shadow-color: ${shadow('sm', 'shadowColor')};
+  shadow-offset: ${shadow('sm', 'shadowOffset')};
+  shadow-opacity: ${shadow('sm', 'shadowOpacity')};
+  shadow-radius: ${shadow('sm', 'shadowRadius')}px;
+  elevation: ${shadow('sm', 'elevation')};
   min-height: 44px;
 `;

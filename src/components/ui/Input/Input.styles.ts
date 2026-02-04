@@ -1,14 +1,15 @@
 import styled from '@emotion/native';
+import { sp, color, radius, fontSize } from '@/theme';
 
 export const Container = styled.View`
   width: 100%;
 `;
 
 export const Label = styled.Text`
-  color: ${({ theme }) => theme.colors.textSecondary};
-  font-size: ${({ theme }) => theme.typography.fontSize.sm}px;
+  color: ${color('textSecondary')};
+  font-size: ${fontSize('sm')};
   font-weight: 500;
-  margin-bottom: ${({ theme }) => theme.spacing[1]}px;
+  margin-bottom: ${sp(1)};
 `;
 
 interface StyledInputProps {
@@ -16,19 +17,19 @@ interface StyledInputProps {
 }
 
 export const StyledInput = styled.TextInput<StyledInputProps>`
-  background-color: ${({ theme }) => theme.colors.backgroundCard};
+  background-color: ${color('backgroundCard')};
   border-width: 1px;
   border-color: ${({ theme, hasError }) =>
     hasError ? theme.colors.error : theme.colors.border};
-  border-radius: ${({ theme }) => theme.borderRadius.md}px;
-  padding: ${({ theme }) => theme.spacing[3]}px;
-  font-size: ${({ theme }) => theme.typography.fontSize.base}px;
-  color: ${({ theme }) => theme.colors.textPrimary};
+  border-radius: ${radius('md')};
+  padding: ${sp(3)};
+  font-size: ${fontSize('base')};
+  color: ${color('textPrimary')};
   min-height: 48px;
 `;
 
 export const ErrorText = styled.Text`
-  color: ${({ theme }) => theme.colors.error};
-  font-size: ${({ theme }) => theme.typography.fontSize.xs}px;
-  margin-top: ${({ theme }) => theme.spacing[1]}px;
+  color: ${color('error')};
+  font-size: ${fontSize('xs')};
+  margin-top: ${sp(1)};
 `;

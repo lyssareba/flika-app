@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator } from 'react-native';
 import styled from '@emotion/native';
+import { sp } from '@/theme';
 import { useTheme } from '@/hooks';
 import { Typography } from '@/components/ui';
 
@@ -12,11 +13,11 @@ const Container = styled.View<ContainerProps>`
   ${({ fullScreen }) => (fullScreen ? 'flex: 1;' : '')}
   align-items: center;
   justify-content: center;
-  padding: ${({ theme }) => theme.spacing[6]}px;
+  padding: ${sp(6)};
 `;
 
 const MessageText = styled(Typography)`
-  margin-top: ${({ theme }) => theme.spacing[3]}px;
+  margin-top: ${sp(3)};
 `;
 
 interface LoadingSpinnerProps {

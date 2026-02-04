@@ -1,4 +1,5 @@
 import styled from '@emotion/native';
+import { sp, color, fontSize } from '@/theme';
 
 export const Container = styled.View`
   flex-direction: row;
@@ -8,8 +9,8 @@ export const Container = styled.View`
 `;
 
 export const Label = styled.Text`
-  color: ${({ theme }) => theme.colors.textPrimary};
-  font-size: ${({ theme }) => theme.typography.fontSize.base}px;
+  color: ${color('textPrimary')};
+  font-size: ${fontSize('base')};
   flex: 1;
-  margin-right: ${({ theme }) => theme.spacing[3]}px;
+  margin-right: ${sp(3)};
 `;

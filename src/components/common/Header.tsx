@@ -1,15 +1,16 @@
 import React from 'react';
 import { View } from 'react-native';
 import styled from '@emotion/native';
+import { sp, color } from '@/theme';
 import { Typography } from '@/components/ui';
 
 const HeaderContainer = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing[4]}px;
-  padding-top: ${({ theme }) => theme.spacing[6]}px;
-  background-color: ${({ theme }) => theme.colors.background};
+  padding: ${sp(4)};
+  padding-top: ${sp(6)};
+  background-color: ${color('background')};
 `;
 
 const TitleContainer = styled.View`

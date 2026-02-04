@@ -12,11 +12,11 @@ export type TypographyVariant =
 
 export type TypographyColor = 'primary' | 'secondary' | 'muted' | 'error';
 
-const textColors: Record<TypographyColor, (theme: Theme) => string> = {
-  primary: (theme) => theme.colors.textPrimary,
-  secondary: (theme) => theme.colors.textSecondary,
-  muted: (theme) => theme.colors.textMuted,
-  error: (theme) => theme.colors.error,
+const textColors: Record<TypographyColor, keyof Theme['colors']> = {
+  primary: 'textPrimary',
+  secondary: 'textSecondary',
+  muted: 'textMuted',
+  error: 'error',
 };
 
 interface TextProps {
@@ -26,7 +26,7 @@ interface TextProps {
 }
 
 export const StyledText = styled.Text<TextProps>`
-  color: ${({ color, theme }) => textColors[color](theme)};
+  color: ${({ color, theme }) => theme.colors[textColors[color]]};
   font-size: ${({ variant, theme }) => theme.typography.styles[variant].fontSize}px;
   font-weight: ${({ variant, theme }) => theme.typography.styles[variant].fontWeight};
   line-height: ${({ variant, theme }) =>

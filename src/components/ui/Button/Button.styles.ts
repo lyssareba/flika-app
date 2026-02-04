@@ -1,5 +1,5 @@
 import styled from '@emotion/native';
-import { Theme } from '@/theme';
+import { Theme, radius, color } from '@/theme';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -40,13 +40,14 @@ export const ButtonContainer = styled.TouchableOpacity<ButtonContainerProps>`
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  border-radius: ${({ theme }) => theme.borderRadius.lg}px;
+  border-radius: ${radius('lg')};
   background-color: ${({ variant, theme }) => backgroundColors[variant](theme)};
   padding: ${({ size, theme }) => paddings[size](theme)};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
   min-height: 44px;
-  ${({ variant, theme }) =>
-    variant === 'outline' ? `border: 2px solid ${theme.colors.primary};` : ''}
+  ${({ variant }) => (variant === 'outline' ? `border-width: 2px;` : '')}
+  ${({ variant }) => (variant === 'outline' ? `border-style: solid;` : '')}
+  border-color: ${color('primary')};
 `;
 
 interface ButtonTextProps {
