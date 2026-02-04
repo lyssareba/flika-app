@@ -1,15 +1,9 @@
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View } from 'react-native';
 import styled from '@emotion/native';
-import { useTheme } from '@/hooks';
 import { Typography } from '@/components/ui';
-import { Theme } from '@/theme';
 
-interface HeaderContainerProps {
-  theme: Theme;
-}
-
-const HeaderContainer = styled.View<HeaderContainerProps>`
+const HeaderContainer = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -22,7 +16,7 @@ const TitleContainer = styled.View`
   flex: 1;
 `;
 
-const ActionButton = styled.TouchableOpacity<{ theme: Theme }>`
+const ActionButton = styled.TouchableOpacity`
   min-width: 44px;
   min-height: 44px;
   align-items: center;
@@ -46,13 +40,10 @@ export const Header: React.FC<HeaderProps> = ({
   leftAction,
   rightAction,
 }) => {
-  const theme = useTheme();
-
   return (
-    <HeaderContainer theme={theme}>
+    <HeaderContainer>
       {leftAction ? (
         <ActionButton
-          theme={theme}
           onPress={leftAction.onPress}
           accessibilityRole="button"
           accessibilityLabel={leftAction.label}
@@ -73,7 +64,6 @@ export const Header: React.FC<HeaderProps> = ({
 
       {rightAction ? (
         <ActionButton
-          theme={theme}
           onPress={rightAction.onPress}
           accessibilityRole="button"
           accessibilityLabel={rightAction.label}

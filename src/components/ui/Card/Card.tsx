@@ -1,5 +1,4 @@
 import React from 'react';
-import { ViewProps, TouchableOpacityProps } from 'react-native';
 import { useTheme } from '@/hooks';
 import { CardContainer, PressableCardContainer } from './Card.styles';
 
@@ -19,7 +18,6 @@ export const Card: React.FC<CardProps> = ({
   if (onPress) {
     return (
       <PressableCardContainer
-        theme={theme}
         elevated={elevated}
         onPress={onPress}
         activeOpacity={0.7}
@@ -32,7 +30,7 @@ export const Card: React.FC<CardProps> = ({
   }
 
   return (
-    <CardContainer theme={theme} elevated={elevated} style={theme.shadows.sm}>
+    <CardContainer elevated={elevated} style={theme.shadows.sm}>
       {children}
     </CardContainer>
   );

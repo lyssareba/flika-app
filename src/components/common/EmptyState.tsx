@@ -2,24 +2,19 @@ import React from 'react';
 import styled from '@emotion/native';
 import { useTheme } from '@/hooks';
 import { Typography, Button } from '@/components/ui';
-import { Theme } from '@/theme';
 
-interface ContainerProps {
-  theme: Theme;
-}
-
-const Container = styled.View<ContainerProps>`
+const Container = styled.View`
   flex: 1;
   align-items: center;
   justify-content: center;
   padding: ${({ theme }) => theme.spacing[6]}px;
 `;
 
-const IconContainer = styled.View<ContainerProps>`
+const IconContainer = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing[4]}px;
 `;
 
-const MessageContainer = styled.View<ContainerProps>`
+const MessageContainer = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing[4]}px;
 `;
 
@@ -41,10 +36,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   const theme = useTheme();
 
   return (
-    <Container theme={theme}>
-      {icon && <IconContainer theme={theme}>{icon}</IconContainer>}
+    <Container>
+      {icon && <IconContainer>{icon}</IconContainer>}
 
-      <MessageContainer theme={theme}>
+      <MessageContainer>
         <Typography variant="h3" align="center">
           {title}
         </Typography>

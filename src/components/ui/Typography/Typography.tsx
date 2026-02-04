@@ -1,6 +1,5 @@
 import React from 'react';
 import { TextProps as RNTextProps, StyleProp, TextStyle } from 'react-native';
-import { useTheme } from '@/hooks';
 import {
   StyledText,
   TypographyVariant,
@@ -23,11 +22,8 @@ export const Typography: React.FC<TypographyProps> = ({
   style,
   ...props
 }) => {
-  const theme = useTheme();
-
   return (
     <StyledText
-      theme={theme}
       variant={variant}
       color={color}
       align={align}

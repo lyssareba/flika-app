@@ -3,10 +3,8 @@ import { ActivityIndicator } from 'react-native';
 import styled from '@emotion/native';
 import { useTheme } from '@/hooks';
 import { Typography } from '@/components/ui';
-import { Theme } from '@/theme';
 
 interface ContainerProps {
-  theme: Theme;
   fullScreen?: boolean;
 }
 
@@ -32,7 +30,6 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   return (
     <Container
-      theme={theme}
       fullScreen={fullScreen}
       accessibilityRole="progressbar"
       accessibilityLabel={message || 'Loading'}

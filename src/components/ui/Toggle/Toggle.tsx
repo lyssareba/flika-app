@@ -20,8 +20,8 @@ export const Toggle: React.FC<ToggleProps> = ({
   const theme = useTheme();
 
   return (
-    <Container theme={theme}>
-      <Label theme={theme}>{label}</Label>
+    <Container>
+      <Label>{label}</Label>
       <Switch
         value={value}
         onValueChange={onValueChange}

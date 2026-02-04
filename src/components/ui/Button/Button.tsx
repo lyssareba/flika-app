@@ -1,6 +1,5 @@
 import React from 'react';
 import { TouchableOpacityProps } from 'react-native';
-import { useTheme } from '@/hooks';
 import {
   ButtonContainer,
   ButtonText,
@@ -24,11 +23,8 @@ export const Button: React.FC<ButtonProps> = ({
   onPress,
   ...props
 }) => {
-  const theme = useTheme();
-
   return (
     <ButtonContainer
-      theme={theme}
       variant={variant}
       size={size}
       disabled={disabled}
@@ -39,7 +35,7 @@ export const Button: React.FC<ButtonProps> = ({
       accessibilityLabel={title}
       {...props}
     >
-      <ButtonText theme={theme} variant={variant} size={size}>
+      <ButtonText variant={variant} size={size}>
         {title}
       </ButtonText>
     </ButtonContainer>

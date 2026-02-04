@@ -1,8 +1,6 @@
 import styled from '@emotion/native';
-import { Theme } from '@/theme';
 
 interface CardContainerProps {
-  theme: Theme;
   elevated?: boolean;
 }
 

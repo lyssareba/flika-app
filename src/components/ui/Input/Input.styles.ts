@@ -1,19 +1,10 @@
 import styled from '@emotion/native';
-import { Theme } from '@/theme';
 
-interface ContainerProps {
-  theme: Theme;
-}
-
-export const Container = styled.View<ContainerProps>`
+export const Container = styled.View`
   width: 100%;
 `;
 
-interface LabelProps {
-  theme: Theme;
-}
-
-export const Label = styled.Text<LabelProps>`
+export const Label = styled.Text`
   color: ${({ theme }) => theme.colors.textSecondary};
   font-size: ${({ theme }) => theme.typography.fontSize.sm}px;
   font-weight: 500;
@@ -21,7 +12,6 @@ export const Label = styled.Text<LabelProps>`
 `;
 
 interface StyledInputProps {
-  theme: Theme;
   hasError?: boolean;
 }
 
@@ -37,11 +27,7 @@ export const StyledInput = styled.TextInput<StyledInputProps>`
   min-height: 48px;
 `;
 
-interface ErrorTextProps {
-  theme: Theme;
-}
-
-export const ErrorText = styled.Text<ErrorTextProps>`
+export const ErrorText = styled.Text`
   color: ${({ theme }) => theme.colors.error};
   font-size: ${({ theme }) => theme.typography.fontSize.xs}px;
   margin-top: ${({ theme }) => theme.spacing[1]}px;
