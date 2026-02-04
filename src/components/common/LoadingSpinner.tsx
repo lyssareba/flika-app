@@ -13,11 +13,11 @@ const Container = styled.View<ContainerProps>`
   ${({ fullScreen }) => (fullScreen ? 'flex: 1;' : '')}
   align-items: center;
   justify-content: center;
-  padding: ${theme.spacing(6)};
+  padding: ${theme.spacing(3)};
 `;
 
 const MessageText = styled(Typography)`
-  margin-top: ${theme.spacing(3)};
+  margin-top: ${theme.spacing(1.5)};
 `;
 
 interface LoadingSpinnerProps {

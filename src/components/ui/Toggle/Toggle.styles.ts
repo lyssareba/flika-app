@@ -12,5 +12,5 @@ export const Label = styled.Text`
   color: ${theme.color('textPrimary')};
   font-size: ${theme.fontSize('base')};
   flex: 1;
-  margin-right: ${theme.spacing(3)};
+  margin-right: ${theme.spacing(1.5)};
 `;

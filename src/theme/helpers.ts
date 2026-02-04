@@ -2,9 +2,12 @@ import { Theme } from './theme';
 
 type ThemeGetter<T> = (props: { theme: Theme }) => T;
 
+const SPACING_BASE = 8;
+
 export const theme = {
-  spacing: (key: keyof Theme['spacing']): ThemeGetter<string> =>
-    ({ theme }) => `${theme.spacing[key]}px`,
+  // Multiplier-based spacing: theme.spacing(1) = 8px, theme.spacing(2) = 16px
+  spacing: (multiplier: number): ThemeGetter<string> =>
+    () => `${multiplier * SPACING_BASE}px`,
 
   color: (key: keyof Theme['colors']): ThemeGetter<string> =>
     ({ theme }) => theme.colors[key],

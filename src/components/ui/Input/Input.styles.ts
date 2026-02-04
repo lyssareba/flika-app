@@ -9,7 +9,7 @@ export const Label = styled.Text`
   color: ${theme.color('textSecondary')};
   font-size: ${theme.fontSize('sm')};
   font-weight: 500;
-  margin-bottom: ${theme.spacing(1)};
+  margin-bottom: ${theme.spacing(0.5)};
 `;
 
 interface StyledInputProps {
@@ -22,7 +22,7 @@ export const StyledInput = styled.TextInput<StyledInputProps>`
   border-color: ${({ theme: t, hasError }) =>
     hasError ? t.colors.error : t.colors.border};
   border-radius: ${theme.radius('md')};
-  padding: ${theme.spacing(3)};
+  padding: ${theme.spacing(1.5)};
   font-size: ${theme.fontSize('base')};
   color: ${theme.color('textPrimary')};
   min-height: 48px;
@@ -31,5 +31,5 @@ export const StyledInput = styled.TextInput<StyledInputProps>`
 export const ErrorText = styled.Text`
   color: ${theme.color('error')};
   font-size: ${theme.fontSize('xs')};
-  margin-top: ${theme.spacing(1)};
+  margin-top: ${theme.spacing(0.5)};
 `;

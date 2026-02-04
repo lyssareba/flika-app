@@ -8,8 +8,8 @@ const HeaderContainer = styled.View`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  padding: ${theme.spacing(4)};
-  padding-top: ${theme.spacing(6)};
+  padding: ${theme.spacing(2)};
+  padding-top: ${theme.spacing(3)};
   background-color: ${theme.color('background')};
 `;
 

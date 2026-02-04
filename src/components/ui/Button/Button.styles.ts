@@ -24,10 +24,11 @@ const textColors: Record<ButtonVariant, (theme: Theme) => string> = {
   ghost: (theme) => theme.colors.primary,
 };
 
-const paddings: Record<ButtonSize, (theme: Theme) => string> = {
-  sm: (theme) => `${theme.spacing[2]}px ${theme.spacing[3]}px`,
-  md: (theme) => `${theme.spacing[3]}px ${theme.spacing[4]}px`,
-  lg: (theme) => `${theme.spacing[4]}px ${theme.spacing[6]}px`,
+// Padding based on 8px grid: vertical horizontal
+const paddings: Record<ButtonSize, string> = {
+  sm: '8px 12px',   // 1 x 1.5
+  md: '12px 16px',  // 1.5 x 2
+  lg: '16px 24px',  // 2 x 3
 };
 
 const fontSizes: Record<ButtonSize, (theme: Theme) => number> = {
@@ -42,7 +43,7 @@ export const ButtonContainer = styled.TouchableOpacity<ButtonContainerProps>`
   justify-content: center;
   border-radius: ${theme.radius('lg')};
   background-color: ${({ variant, theme: t }) => backgroundColors[variant](t)};
-  padding: ${({ size, theme: t }) => paddings[size](t)};
+  padding: ${({ size }) => paddings[size]};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
   min-height: 44px;
   ${({ variant }) => (variant === 'outline' ? `border-width: 2px;` : '')}

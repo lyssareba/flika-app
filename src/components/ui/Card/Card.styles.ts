@@ -7,7 +7,7 @@ interface CardContainerProps {
 
 export const CardContainer = styled.View<CardContainerProps>`
   border-radius: ${theme.radius('lg')};
-  padding: ${theme.spacing(4)};
+  padding: ${theme.spacing(2)};
   border-width: 1px;
   border-color: ${theme.color('border')};
   background-color: ${({ theme: t, elevated }) =>
@@ -21,7 +21,7 @@ export const CardContainer = styled.View<CardContainerProps>`
 
 export const PressableCardContainer = styled.TouchableOpacity<CardContainerProps>`
   border-radius: ${theme.radius('lg')};
-  padding: ${theme.spacing(4)};
+  padding: ${theme.spacing(2)};
   border-width: 1px;
   border-color: ${theme.color('border')};
   background-color: ${({ theme: t, elevated }) =>
