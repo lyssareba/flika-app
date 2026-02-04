@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Specification Document
+
+**Before asking questions about design, features, or requirements**, read the specification file:
+
+```
+../flika-app-specification.md
+```
+
+This document contains all design requirements including colors, typography, spacing, component specs, and feature details. Only ask for clarification if the spec doesn't cover something.
+
 ## Build and Development Commands
 
 ```bash
