@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from '@emotion/native';
-import { useTheme } from '@/hooks';
 import { Typography, Button } from '@/components/ui';
 
 const Container = styled.View`
@@ -18,6 +17,10 @@ const MessageContainer = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing[4]}px;
 `;
 
+const MessageText = styled(Typography)`
+  margin-top: ${({ theme }) => theme.spacing[2]}px;
+`;
+
 interface EmptyStateProps {
   icon?: React.ReactNode;
   title: string;
@@ -33,8 +36,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   actionLabel,
   onAction,
 }) => {
-  const theme = useTheme();
-
   return (
     <Container>
       {icon && <IconContainer>{icon}</IconContainer>}
@@ -44,14 +45,9 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           {title}
         </Typography>
         {message && (
-          <Typography
-            variant="body"
-            color="secondary"
-            align="center"
-            style={{ marginTop: theme.spacing[2] }}
-          >
+          <MessageText variant="body" color="secondary" align="center">
             {message}
-          </Typography>
+          </MessageText>
         )}
       </MessageContainer>
 

@@ -11,6 +11,12 @@ export const CardContainer = styled.View<CardContainerProps>`
   border-color: ${({ theme }) => theme.colors.border};
   background-color: ${({ theme, elevated }) =>
     elevated ? theme.colors.backgroundElevated : theme.colors.backgroundCard};
+  shadow-color: ${({ theme }) => theme.shadows.sm.shadowColor};
+  shadow-offset: ${({ theme }) =>
+    `${theme.shadows.sm.shadowOffset.width}px ${theme.shadows.sm.shadowOffset.height}px`};
+  shadow-opacity: ${({ theme }) => theme.shadows.sm.shadowOpacity};
+  shadow-radius: ${({ theme }) => theme.shadows.sm.shadowRadius}px;
+  elevation: ${({ theme }) => theme.shadows.sm.elevation};
 `;
 
 export const PressableCardContainer = styled.TouchableOpacity<CardContainerProps>`
@@ -20,5 +26,11 @@ export const PressableCardContainer = styled.TouchableOpacity<CardContainerProps
   border-color: ${({ theme }) => theme.colors.border};
   background-color: ${({ theme, elevated }) =>
     elevated ? theme.colors.backgroundElevated : theme.colors.backgroundCard};
+  shadow-color: ${({ theme }) => theme.shadows.sm.shadowColor};
+  shadow-offset: ${({ theme }) =>
+    `${theme.shadows.sm.shadowOffset.width}px ${theme.shadows.sm.shadowOffset.height}px`};
+  shadow-opacity: ${({ theme }) => theme.shadows.sm.shadowOpacity};
+  shadow-radius: ${({ theme }) => theme.shadows.sm.shadowRadius}px;
+  elevation: ${({ theme }) => theme.shadows.sm.elevation};
   min-height: 44px;
 `;

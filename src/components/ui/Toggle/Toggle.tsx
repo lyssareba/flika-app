@@ -17,7 +17,7 @@ export const Toggle: React.FC<ToggleProps> = ({
   disabled = false,
   ...props
 }) => {
-  const theme = useTheme();
+  const { colors } = useTheme();
 
   return (
     <Container>
@@ -26,12 +26,9 @@ export const Toggle: React.FC<ToggleProps> = ({
         value={value}
         onValueChange={onValueChange}
         disabled={disabled}
-        trackColor={{
-          false: theme.colors.border,
-          true: theme.colors.primary,
-        }}
-        thumbColor={theme.colors.backgroundCard}
-        ios_backgroundColor={theme.colors.border}
+        trackColor={{ false: colors.border, true: colors.primary }}
+        thumbColor={colors.backgroundCard}
+        ios_backgroundColor={colors.border}
         accessibilityRole="switch"
         accessibilityLabel={label}
         accessibilityState={{ checked: value, disabled }}

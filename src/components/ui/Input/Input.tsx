@@ -15,7 +15,7 @@ export const Input: React.FC<InputProps> = ({
   placeholder,
   ...props
 }) => {
-  const theme = useTheme();
+  const { colors } = useTheme();
 
   return (
     <Container>
@@ -23,7 +23,7 @@ export const Input: React.FC<InputProps> = ({
       <StyledInput
         hasError={!!error}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.textMuted}
+        placeholderTextColor={colors.textMuted}
         accessibilityLabel={label || placeholder}
         accessibilityHint={error}
         {...props}

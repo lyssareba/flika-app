@@ -15,6 +15,10 @@ const Container = styled.View<ContainerProps>`
   padding: ${({ theme }) => theme.spacing[6]}px;
 `;
 
+const MessageText = styled(Typography)`
+  margin-top: ${({ theme }) => theme.spacing[3]}px;
+`;
+
 interface LoadingSpinnerProps {
   size?: 'small' | 'large';
   message?: string;
@@ -26,7 +30,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message,
   fullScreen = false,
 }) => {
-  const theme = useTheme();
+  const { colors } = useTheme();
 
   return (
     <Container
@@ -34,15 +38,11 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       accessibilityRole="progressbar"
       accessibilityLabel={message || 'Loading'}
     >
-      <ActivityIndicator size={size} color={theme.colors.primary} />
+      <ActivityIndicator size={size} color={colors.primary} />
       {message && (
-        <Typography
-          variant="bodySmall"
-          color="secondary"
-          style={{ marginTop: theme.spacing[3] }}
-        >
+        <MessageText variant="bodySmall" color="secondary">
           {message}
-        </Typography>
+        </MessageText>
       )}
     </Container>
   );

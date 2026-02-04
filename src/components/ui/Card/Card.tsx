@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTheme } from '@/hooks';
 import { CardContainer, PressableCardContainer } from './Card.styles';
 
 interface CardProps {
@@ -13,8 +12,6 @@ export const Card: React.FC<CardProps> = ({
   children,
   onPress,
 }) => {
-  const theme = useTheme();
-
   if (onPress) {
     return (
       <PressableCardContainer
@@ -22,16 +19,11 @@ export const Card: React.FC<CardProps> = ({
         onPress={onPress}
         activeOpacity={0.7}
         accessibilityRole="button"
-        style={theme.shadows.sm}
       >
         {children}
       </PressableCardContainer>
     );
   }
 
-  return (
-    <CardContainer elevated={elevated} style={theme.shadows.sm}>
-      {children}
-    </CardContainer>
-  );
+  return <CardContainer elevated={elevated}>{children}</CardContainer>;
 };
