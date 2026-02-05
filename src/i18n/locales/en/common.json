@@ -39,5 +39,11 @@
   "{{count}} weeks ago": "{{count}} weeks ago",
   "today": "today",
   "yesterday": "yesterday",
-  "Unknown": "Unknown"
+  "Unknown": "Unknown",
+  "Flika is locked": "Flika is locked",
+  "Enter your PIN to unlock": "Enter your PIN to unlock",
+  "Wrong PIN, try again": "Wrong PIN, try again",
+  "Unlock with biometrics": "Unlock with biometrics",
+  "Unlock Flika": "Unlock Flika",
+  "Use PIN": "Use PIN"
 }
