@@ -109,6 +109,7 @@ const AddProspectScreen = () => {
         name: name.trim(),
         photoUri,
         howWeMet,
+        notes: notes.trim() || undefined,
         hasMetInPerson: hasMetInPerson!,
       });
       router.back();
@@ -118,7 +119,7 @@ const AddProspectScreen = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [isValid, isSubmitting, addProspect, name, photoUri, howWeMet, hasMetInPerson, router, tc]);
+  }, [isValid, isSubmitting, addProspect, name, photoUri, howWeMet, notes, hasMetInPerson, router, tc]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
