@@ -233,6 +233,7 @@ export const getProspect = async (
     name: data.name,
     photoUri: data.photoUri || undefined,
     status: data.status,
+    previousStatus: data.previousStatus || undefined,
     howWeMet: data.howWeMet || undefined,
     notes: data.notes || undefined,
     traits,
@@ -267,6 +268,7 @@ export const getProspects = async (
       name: data.name,
       photoUri: data.photoUri || undefined,
       status: data.status,
+      previousStatus: data.previousStatus || undefined,
       howWeMet: data.howWeMet || undefined,
       notes: data.notes || undefined,
       traits,
@@ -354,6 +356,8 @@ export const deleteProspect = async (
   const datesSnapshot = await getDocs(datesColRef);
 
   // Use batch to delete everything atomically
+  // Note: Firestore batch limit is 500 operations. If a prospect has more than
+  // ~498 traits+dates combined, this will fail. Unlikely in practice.
   const batch = writeBatch(db);
 
   traitsSnapshot.docs.forEach((traitDoc) => {
