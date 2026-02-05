@@ -71,7 +71,7 @@ export const AppLockProvider = ({ children }: { children: React.ReactNode }) => 
 
   // Initialize on mount
   useEffect(() => {
-    async function init() {
+    const init = async () => {
       const { lockEnabled } = await loadConfig();
 
       // Lock on cold start if enabled
@@ -80,7 +80,7 @@ export const AppLockProvider = ({ children }: { children: React.ReactNode }) => 
       }
 
       setIsInitialized(true);
-    }
+    };
 
     init();
   }, [loadConfig]);
