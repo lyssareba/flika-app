@@ -1,1 +1,1 @@
-export {};
+export { AppLockProvider, useAppLockContext } from './AppLockContext';
