@@ -45,7 +45,7 @@ export const CompatibilityBadge = ({ score, size = 'medium' }: CompatibilityBadg
 
     if (score >= 25) {
       return {
-        color: '#FF9800', // Orange
+        color: theme.colors.warning,
         label: `${score}% ${t('compatible')}`,
       };
     }

@@ -13,7 +13,6 @@ interface EmptyStateProps {
  */
 export const EmptyState = ({ onAddPress }: EmptyStateProps) => {
   const { t } = useTranslation('prospect');
-  const { t: tc } = useTranslation('common');
   const { theme } = useThemeContext();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -22,9 +21,9 @@ export const EmptyState = ({ onAddPress }: EmptyStateProps) => {
       <View style={styles.iconContainer}>
         <Ionicons name="heart-outline" size={64} color={theme.colors.primary} />
       </View>
-      <Text style={styles.title}>No prospects yet</Text>
+      <Text style={styles.title}>{t('No prospects yet')}</Text>
       <Text style={styles.subtitle}>
-        Start tracking someone you&apos;re interested in
+        {t("Start tracking someone you're interested in")}
       </Text>
       <TouchableOpacity
         style={styles.button}

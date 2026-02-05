@@ -14,7 +14,6 @@ const HomeScreen = () => {
     activeProspects,
     isLoading,
     refreshProspects,
-    getProspectDetails,
   } = useProspects();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -67,7 +66,6 @@ const HomeScreen = () => {
           onProspectPress={handleProspectPress}
           onRefresh={refreshProspects}
           refreshing={isLoading}
-          getProspectDetails={getProspectDetails}
         />
       )}
     </SafeAreaView>

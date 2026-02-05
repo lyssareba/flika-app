@@ -3,17 +3,13 @@ import { View, Text, SectionList, StyleSheet, RefreshControl } from 'react-nativ
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
 import { ProspectCard } from './ProspectCard';
-import { useCompatibility } from '@/hooks';
 import type { ProspectListData } from '@/services/firebase/firestore';
-import type { Prospect } from '@/types';
 
 interface ProspectListProps {
   prospects: ProspectListData[];
   onProspectPress: (id: string) => void;
   onRefresh?: () => void;
   refreshing?: boolean;
-  /** Full prospect details for calculating scores (with traits) */
-  getProspectDetails: (id: string) => Promise<Prospect | null>;
 }
 
 interface Section {
@@ -30,11 +26,9 @@ export const ProspectList = ({
   onProspectPress,
   onRefresh,
   refreshing = false,
-  getProspectDetails,
 }: ProspectListProps) => {
   const { t } = useTranslation('prospect');
   const { theme } = useThemeContext();
-  const { calculateScore } = useCompatibility();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // Organize prospects into sections
