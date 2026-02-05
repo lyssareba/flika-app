@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 
-export default function DatesScreen() {
+const DatesScreen = () => {
   const { id } = useLocalSearchParams();
 
   return (
@@ -9,4 +9,6 @@ export default function DatesScreen() {
       <Text>Dates for Prospect {id}</Text>
     </View>
   );
-}
+};
+
+export default DatesScreen;

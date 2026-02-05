@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 
-export default function ProspectScreen() {
+const ProspectScreen = () => {
   const { id } = useLocalSearchParams();
 
   return (
@@ -9,4 +9,6 @@ export default function ProspectScreen() {
       <Text>Prospect {id}</Text>
     </View>
   );
-}
+};
+
+export default ProspectScreen;

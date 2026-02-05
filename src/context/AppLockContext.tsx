@@ -33,7 +33,7 @@ interface AppLockContextType {
 
 const AppLockContext = createContext<AppLockContextType | undefined>(undefined);
 
-export function AppLockProvider({ children }: { children: React.ReactNode }) {
+export const AppLockProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLocked, setIsLocked] = useState(false);
   const [isAppLockEnabled, setIsAppLockEnabled] = useState(false);
   const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
@@ -71,7 +71,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize on mount
   useEffect(() => {
-    async function init() {
+    const init = async () => {
       const { lockEnabled } = await loadConfig();
 
       // Lock on cold start if enabled
@@ -80,7 +80,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
       }
 
       setIsInitialized(true);
-    }
+    };
 
     init();
   }, [loadConfig]);
@@ -183,12 +183,12 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
       {children}
     </AppLockContext.Provider>
   );
-}
+};
 
-export function useAppLockContext() {
+export const useAppLockContext = () => {
   const context = useContext(AppLockContext);
   if (!context) {
     throw new Error('useAppLockContext must be used within AppLockProvider');
   }
   return context;
-}
+};

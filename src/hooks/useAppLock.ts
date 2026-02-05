@@ -14,7 +14,7 @@ import {
  * Hook for managing app lock settings and operations.
  * Wraps AppLockContext with setup/config methods.
  */
-export function useAppLock() {
+export const useAppLock = () => {
   const {
     isLocked,
     isAppLockEnabled,
@@ -89,4 +89,4 @@ export function useAppLock() {
     updateTimeout,
     getLockTimeout,
   };
-}
+};

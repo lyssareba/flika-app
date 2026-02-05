@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 
-export default function TraitsScreen() {
+const TraitsScreen = () => {
   const { id } = useLocalSearchParams();
 
   return (
@@ -9,4 +9,6 @@ export default function TraitsScreen() {
       <Text>Traits for Prospect {id}</Text>
     </View>
   );
-}
+};
+
+export default TraitsScreen;

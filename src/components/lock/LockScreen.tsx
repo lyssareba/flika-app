@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 
 const PIN_LENGTH = 4;
 
-export function LockScreen() {
+export const LockScreen = () => {
   const { t } = useTranslation('common');
   const { theme } = useThemeContext();
   const { unlockWithPin, unlockWithBiometric, isBiometricEnabled, isBiometricAvailable } =
@@ -174,9 +174,9 @@ export function LockScreen() {
       </View>
     </View>
   );
-}
+};
 
-function createStyles(theme: Theme, hasError: boolean) {
+const createStyles = (theme: Theme, hasError: boolean) => {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -247,4 +247,4 @@ function createStyles(theme: Theme, hasError: boolean) {
       color: theme.colors.textPrimary,
     },
   });
-}
+};
