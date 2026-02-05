@@ -66,6 +66,7 @@ export const createUserProfile = async (
     email: data.email,
     createdAt: Timestamp.now(),
     settings: defaultSettings,
+    onboardingCompleted: false,
   };
 
   await setDoc(doc(db, 'users', userId, 'profile', 'main'), profile);
@@ -86,6 +87,7 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
     email: data.email,
     createdAt: toDate(data.createdAt),
     settings: data.settings,
+    onboardingCompleted: data.onboardingCompleted ?? false,
   };
 };
 
@@ -102,6 +104,11 @@ export const updateUserSettings = async (
   }
 
   await updateDoc(docRef, updateFields);
+};
+
+export const completeOnboarding = async (userId: string): Promise<void> => {
+  const docRef = doc(db, 'users', userId, 'profile', 'main');
+  await updateDoc(docRef, { onboardingCompleted: true });
 };
 
 // ============================================================================

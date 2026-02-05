@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { ThemeProvider, useThemeContext } from '@/theme';
 import { AppLockProvider, AttributesProvider, AuthProvider } from '@/context';
 import { LockScreen } from '@/components/lock';
+import { OnboardingFlow } from '@/components/onboarding';
 import { useAppLock } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthScreen } from '@/components/auth';
@@ -12,9 +13,14 @@ import '@/i18n';
 
 const AppContent = () => {
   const { isLocked } = useAppLock();
+  const { userProfile, refreshProfile } = useAuth();
 
   if (isLocked) {
     return <LockScreen />;
+  }
+
+  if (!userProfile?.onboardingCompleted) {
+    return <OnboardingFlow onComplete={refreshProfile} />;
   }
 
   return (
