@@ -19,7 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 type AuthView = 'welcome' | 'signIn' | 'signUp' | 'forgotPassword';
 
-export function AuthScreen() {
+export const AuthScreen = () => {
   const { t } = useTranslation('onboarding');
   const { t: tc } = useTranslation('common');
   const { theme } = useThemeContext();
@@ -348,9 +348,9 @@ export function AuthScreen() {
       </SafeAreaView>
     </KeyboardAvoidingView>
   );
-}
+};
 
-function getAuthErrorMessage(err: unknown, t: (key: string) => string): string {
+const getAuthErrorMessage = (err: unknown, t: (key: string) => string): string => {
   const code = (err as { code?: string })?.code;
   switch (code) {
     case 'auth/email-already-in-use':
@@ -372,9 +372,9 @@ function getAuthErrorMessage(err: unknown, t: (key: string) => string): string {
     default:
       return t('Something went wrong. Please try again.');
   }
-}
+};
 
-function createStyles(theme: Theme) {
+const createStyles = (theme: Theme) => {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -522,4 +522,4 @@ function createStyles(theme: Theme) {
       color: theme.colors.textPrimary,
     },
   });
-}
+};

@@ -10,7 +10,7 @@ import { AuthScreen } from '@/components/auth';
 // Initialize i18n - import triggers initialization
 import '@/i18n';
 
-function AppContent() {
+const AppContent = () => {
   const { isLocked } = useAppLock();
 
   if (isLocked) {
@@ -24,9 +24,9 @@ function AppContent() {
       }}
     />
   );
-}
+};
 
-function AuthGate() {
+const AuthGate = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
   // While checking auth state, render nothing (splash screen covers this)
@@ -44,9 +44,9 @@ function AuthGate() {
       <AppContent />
     </AppLockProvider>
   );
-}
+};
 
-function RootLayoutNav() {
+const RootLayoutNav = () => {
   const { effectiveMode } = useThemeContext();
 
   return (
@@ -57,12 +57,14 @@ function RootLayoutNav() {
       </AuthProvider>
     </>
   );
-}
+};
 
-export default function RootLayout() {
+const RootLayout = () => {
   return (
     <ThemeProvider>
       <RootLayoutNav />
     </ThemeProvider>
   );
-}
+};
+
+export default RootLayout;
