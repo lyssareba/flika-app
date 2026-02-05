@@ -40,5 +40,6 @@ export interface ProspectInput {
   name: string;
   photoUri?: string;
   howWeMet?: string;
+  notes?: string;
   hasMetInPerson: boolean; // Determines initial status
 }

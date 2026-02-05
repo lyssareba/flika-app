@@ -188,7 +188,7 @@ export const createProspect = async (
     photoUri: input.photoUri || null,
     status: input.hasMetInPerson ? 'dating' : 'talking',
     howWeMet: input.howWeMet || null,
-    notes: null,
+    notes: input.notes || null,
     createdAt: now,
     updatedAt: now,
   };
