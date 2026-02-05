@@ -2,6 +2,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ThemeProvider, useThemeContext } from '@/theme';
 
+// Initialize i18n - import triggers initialization
+import '@/i18n';
+
 function RootLayoutNav() {
   const { effectiveMode } = useThemeContext();
 
