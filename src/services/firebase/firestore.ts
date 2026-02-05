@@ -146,7 +146,7 @@ export const getAttributes = async (userId: string): Promise<Attribute[]> => {
 export const updateAttribute = async (
   userId: string,
   attributeId: string,
-  updates: Partial<AttributeInput>
+  updates: Partial<AttributeInput> & { order?: number }
 ): Promise<void> => {
   const docRef = getUserDoc(userId, 'attributes', attributeId);
   await updateDoc(docRef, updates);

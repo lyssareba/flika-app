@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ThemeProvider, useThemeContext } from '@/theme';
-import { AppLockProvider, AuthProvider } from '@/context';
+import { AppLockProvider, AttributesProvider, AuthProvider } from '@/context';
 import { LockScreen } from '@/components/lock';
 import { useAppLock } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,10 +38,12 @@ const AuthGate = () => {
     return <AuthScreen />;
   }
 
-  // Authenticated → app lock check → main app
+  // Authenticated → app lock check → attributes → main app
   return (
     <AppLockProvider>
-      <AppContent />
+      <AttributesProvider>
+        <AppContent />
+      </AttributesProvider>
     </AppLockProvider>
   );
 };
