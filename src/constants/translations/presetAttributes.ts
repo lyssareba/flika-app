@@ -61,7 +61,10 @@ export type PresetAttribute = (typeof PRESET_ATTRIBUTES)[number];
  * Get a random subset of preset attributes for suggestions
  */
 export const getRandomPresets = (count: number = 5, exclude: string[] = []): string[] => {
-  const available = PRESET_ATTRIBUTES.filter((attr) => !exclude.includes(attr));
+  const excludeLower = exclude.map((e) => e.toLowerCase());
+  const available = PRESET_ATTRIBUTES.filter(
+    (attr) => !excludeLower.includes(attr.toLowerCase())
+  );
   const shuffled = [...available].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 };

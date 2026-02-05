@@ -25,10 +25,8 @@ interface AttributesContextType {
   toggleCategory: (attributeId: string) => Promise<void>;
   reorderAttribute: (attributeId: string, newOrder: number) => Promise<void>;
   refreshAttributes: () => Promise<void>;
-  // Preset suggestions
   suggestions: string[];
   refreshSuggestions: () => void;
-  // Validation
   hasMinimumAttributes: boolean;
 }
 
@@ -43,13 +41,14 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const shownPresets = useRef<Set<string>>(new Set());
+  const addingNames = useRef<Set<string>>(new Set());
 
   const hasMinimumAttributes = attributes.length >= MIN_ATTRIBUTES;
 
   // Generate suggestions excluding already-added attributes and previously shown
   const refreshSuggestions = useCallback(() => {
-    const addedNames = attributes.map((a) => a.name);
-    const exclude = [...addedNames, ...shownPresets.current];
+    const addedNames = attributes.map((a) => a.name.toLowerCase());
+    const exclude = [...addedNames, ...Array.from(shownPresets.current)];
     let newSuggestions = getRandomPresets(SUGGESTION_COUNT, exclude);
 
     // If we've exhausted all presets, reset shown tracking (but still exclude added)
@@ -58,7 +57,6 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
       newSuggestions = getRandomPresets(SUGGESTION_COUNT, addedNames);
     }
 
-    // Track these as shown
     newSuggestions.forEach((s) => shownPresets.current.add(s));
     setSuggestions(newSuggestions);
   }, [attributes]);
@@ -87,12 +85,13 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
     fetchAttributes();
   }, [fetchAttributes]);
 
-  // Initialize suggestions when attributes load
+  // Initialize suggestions once after initial load
   useEffect(() => {
     if (!isLoading) {
       refreshSuggestions();
     }
-  }, [isLoading, refreshSuggestions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
 
   const addAttribute = useCallback(
     async (name: string, category: AttributeCategory) => {
@@ -101,38 +100,66 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
       const trimmedName = name.trim();
       if (!trimmedName) return;
 
-      // Prevent duplicates (case-insensitive)
-      const isDuplicate = attributes.some(
-        (a) => a.name.toLowerCase() === trimmedName.toLowerCase()
-      );
+      const lowerName = trimmedName.toLowerCase();
+
+      // Guard against concurrent duplicate adds using ref
+      if (addingNames.current.has(lowerName)) return;
+
+      // Check existing attributes for duplicates (case-insensitive)
+      let isDuplicate = false;
+      setAttributes((prev) => {
+        isDuplicate = prev.some((a) => a.name.toLowerCase() === lowerName);
+        return prev;
+      });
       if (isDuplicate) return;
 
-      const input: AttributeInput = {
-        name: trimmedName,
-        category,
-      };
+      addingNames.current.add(lowerName);
 
-      const id = await createAttribute(user.uid, input);
+      try {
+        const order = Date.now();
+        const input: AttributeInput = { name: trimmedName, category };
+        const id = await createAttribute(user.uid, input);
 
-      // Optimistic update
-      const newAttribute: Attribute = {
-        id,
-        name: trimmedName,
-        category,
-        createdAt: new Date(),
-        order: Date.now(),
-      };
-      setAttributes((prev) => [...prev, newAttribute]);
+        setAttributes((prev) => {
+          // Final duplicate check against latest state
+          if (prev.some((a) => a.name.toLowerCase() === lowerName)) {
+            return prev;
+          }
+          return [...prev, {
+            id,
+            name: trimmedName,
+            category,
+            createdAt: new Date(),
+            order,
+          }];
+        });
+      } finally {
+        addingNames.current.delete(lowerName);
+      }
     },
-    [user, attributes]
+    [user]
   );
 
   const removeAttribute = useCallback(
     async (attributeId: string) => {
       if (!user) return;
 
-      await deleteAttribute(user.uid, attributeId);
-      setAttributes((prev) => prev.filter((a) => a.id !== attributeId));
+      // Optimistic update
+      let removed: Attribute | undefined;
+      setAttributes((prev) => {
+        removed = prev.find((a) => a.id === attributeId);
+        return prev.filter((a) => a.id !== attributeId);
+      });
+
+      try {
+        await deleteAttribute(user.uid, attributeId);
+      } catch (error) {
+        // Rollback on failure
+        if (removed) {
+          setAttributes((prev) => [...prev, removed!].sort((a, b) => a.order - b.order));
+        }
+        throw error;
+      }
     },
     [user]
   );
@@ -141,36 +168,67 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
     async (attributeId: string) => {
       if (!user) return;
 
-      const attr = attributes.find((a) => a.id === attributeId);
-      if (!attr) return;
-
-      const newCategory: AttributeCategory =
-        attr.category === 'dealbreaker' ? 'desired' : 'dealbreaker';
-
-      await updateAttribute(user.uid, attributeId, { category: newCategory });
-
-      // Optimistic update
+      // Optimistic update using functional updater to avoid stale closures
+      let newCategory: AttributeCategory | undefined;
       setAttributes((prev) =>
-        prev.map((a) =>
-          a.id === attributeId ? { ...a, category: newCategory } : a
-        )
+        prev.map((a) => {
+          if (a.id === attributeId) {
+            newCategory = a.category === 'dealbreaker' ? 'desired' : 'dealbreaker';
+            return { ...a, category: newCategory };
+          }
+          return a;
+        })
       );
+
+      if (!newCategory) return;
+
+      try {
+        await updateAttribute(user.uid, attributeId, { category: newCategory });
+      } catch (error) {
+        // Rollback: toggle back
+        setAttributes((prev) =>
+          prev.map((a) => {
+            if (a.id === attributeId) {
+              const rollbackCategory: AttributeCategory =
+                a.category === 'dealbreaker' ? 'desired' : 'dealbreaker';
+              return { ...a, category: rollbackCategory };
+            }
+            return a;
+          })
+        );
+        throw error;
+      }
     },
-    [user, attributes]
+    [user]
   );
 
   const reorderAttribute = useCallback(
     async (attributeId: string, newOrder: number) => {
       if (!user) return;
 
-      await updateAttribute(user.uid, attributeId, { order: newOrder });
-
       // Optimistic update
-      setAttributes((prev) =>
-        [...prev.map((a) =>
+      let previousOrder: number | undefined;
+      setAttributes((prev) => {
+        const attr = prev.find((a) => a.id === attributeId);
+        previousOrder = attr?.order;
+        return [...prev.map((a) =>
           a.id === attributeId ? { ...a, order: newOrder } : a
-        )].sort((a, b) => a.order - b.order)
-      );
+        )].sort((a, b) => a.order - b.order);
+      });
+
+      try {
+        await updateAttribute(user.uid, attributeId, { order: newOrder });
+      } catch (error) {
+        // Rollback
+        if (previousOrder !== undefined) {
+          setAttributes((prev) =>
+            [...prev.map((a) =>
+              a.id === attributeId ? { ...a, order: previousOrder! } : a
+            )].sort((a, b) => a.order - b.order)
+          );
+        }
+        throw error;
+      }
     },
     [user]
   );
