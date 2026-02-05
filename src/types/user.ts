@@ -15,4 +15,5 @@ export interface UserProfile {
   email: string;
   createdAt: Date;
   settings: UserSettings;
+  onboardingCompleted: boolean;
 }

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   Vibration,
   Animated,
@@ -11,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useAppLock } from '@/hooks/useAppLock';
 import { useTranslation } from 'react-i18next';
+import { PinKeypad } from './PinKeypad';
 
 const PIN_LENGTH = 4;
 
@@ -108,70 +108,13 @@ export const LockScreen = () => {
         ))}
       </Animated.View>
 
-      <View style={styles.keypad}>
-        {[
-          ['1', '2', '3'],
-          ['4', '5', '6'],
-          ['7', '8', '9'],
-          [canUseBiometric ? 'biometric' : '', '0', 'delete'],
-        ].map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.keypadRow}>
-            {row.map((key) => {
-              if (key === '') {
-                return <View key="empty" style={styles.keyEmpty} />;
-              }
-
-              if (key === 'biometric') {
-                return (
-                  <TouchableOpacity
-                    key={key}
-                    style={styles.key}
-                    onPress={unlockWithBiometric}
-                    disabled={verifying}
-                    accessibilityLabel={t('Unlock with biometrics')}
-                  >
-                    <Ionicons
-                      name="finger-print"
-                      size={28}
-                      color={theme.colors.primary}
-                    />
-                  </TouchableOpacity>
-                );
-              }
-
-              if (key === 'delete') {
-                return (
-                  <TouchableOpacity
-                    key={key}
-                    style={styles.key}
-                    onPress={handleDelete}
-                    disabled={pin.length === 0 || verifying}
-                    accessibilityLabel={t('Delete')}
-                  >
-                    <Ionicons
-                      name="backspace-outline"
-                      size={28}
-                      color={pin.length === 0 ? theme.colors.textMuted : theme.colors.textPrimary}
-                    />
-                  </TouchableOpacity>
-                );
-              }
-
-              return (
-                <TouchableOpacity
-                  key={key}
-                  style={styles.key}
-                  onPress={() => handleDigit(key)}
-                  disabled={verifying}
-                  accessibilityLabel={key}
-                >
-                  <Text style={styles.keyText}>{key}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        ))}
-      </View>
+      <PinKeypad
+        onDigit={handleDigit}
+        onDelete={handleDelete}
+        onBiometric={canUseBiometric ? unlockWithBiometric : undefined}
+        disabled={verifying}
+        deleteDisabled={pin.length === 0}
+      />
     </View>
   );
 };
@@ -220,31 +163,6 @@ const createStyles = (theme: Theme, hasError: boolean) => {
     dotError: {
       backgroundColor: theme.colors.error,
       borderColor: theme.colors.error,
-    },
-    keypad: {
-      gap: 12,
-    },
-    keypadRow: {
-      flexDirection: 'row',
-      gap: 24,
-    },
-    key: {
-      width: 72,
-      height: 72,
-      borderRadius: 36,
-      backgroundColor: theme.colors.backgroundCard,
-      justifyContent: 'center',
-      alignItems: 'center',
-      ...theme.shadows.sm,
-    },
-    keyEmpty: {
-      width: 72,
-      height: 72,
-    },
-    keyText: {
-      fontSize: theme.typography.fontSize['2xl'],
-      fontWeight: '500',
-      color: theme.colors.textPrimary,
     },
   });
 };
