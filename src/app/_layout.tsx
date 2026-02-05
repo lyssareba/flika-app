@@ -33,20 +33,20 @@ const AppContent = () => {
 };
 
 const AuthGate = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   // While checking auth state, render nothing (splash screen covers this)
   if (isLoading) {
     return null;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <AuthScreen />;
   }
 
   // Authenticated → app lock check → attributes → main app
   return (
-    <AppLockProvider>
+    <AppLockProvider userId={user.uid}>
       <AttributesProvider>
         <AppContent />
       </AttributesProvider>
