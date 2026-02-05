@@ -67,5 +67,14 @@
   "Back to Sign In": "Back to Sign In",
   "Finish": "Finish",
   "Show password": "Show password",
-  "Hide password": "Hide password"
+  "Hide password": "Hide password",
+  "Permission needed": "Permission needed",
+  "Please allow access to your photo library to add a photo.": "Please allow access to your photo library to add a photo.",
+  "Please allow access to your camera to take a photo.": "Please allow access to your camera to take a photo.",
+  "Camera": "Camera",
+  "Photo Library": "Photo Library",
+  "Go back": "Go back",
+  "Enter name": "Enter name",
+  "Failed to add prospect. Please try again.": "Failed to add prospect. Please try again.",
+  "Add any notes...": "Add any notes..."
 }
