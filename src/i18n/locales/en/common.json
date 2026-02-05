@@ -45,5 +45,22 @@
   "Wrong PIN, try again": "Wrong PIN, try again",
   "Unlock with biometrics": "Unlock with biometrics",
   "Unlock Flika": "Unlock Flika",
-  "Use PIN": "Use PIN"
+  "Use PIN": "Use PIN",
+  "Already have an account?": "Already have an account?",
+  "Don't have an account?": "Don't have an account?",
+  "Reset Password": "Reset Password",
+  "Enter your email and we'll send you a reset link": "Enter your email and we'll send you a reset link",
+  "Send Reset Link": "Send Reset Link",
+  "Password reset email sent. Check your inbox.": "Password reset email sent. Check your inbox.",
+  "Forgot password?": "Forgot password?",
+  "Please fill in all fields": "Please fill in all fields",
+  "Please enter your email": "Please enter your email",
+  "Passwords do not match": "Passwords do not match",
+  "Password must be at least 6 characters": "Password must be at least 6 characters",
+  "This email is already registered": "This email is already registered",
+  "Invalid email address": "Invalid email address",
+  "Invalid email or password": "Invalid email or password",
+  "Too many attempts. Please try again later.": "Too many attempts. Please try again later.",
+  "Network error. Check your connection.": "Network error. Check your connection.",
+  "Something went wrong. Please try again.": "Something went wrong. Please try again."
 }
