@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeContext } from '@/theme';
+import { useThemeContext, type Theme } from '@/theme';
 import { useAppLock } from '@/hooks/useAppLock';
 import { useTranslation } from 'react-i18next';
 
@@ -22,7 +22,8 @@ export function LockScreen() {
 
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
-  const [shakeAnim] = useState(() => new Animated.Value(0));
+  const [verifying, setVerifying] = useState(false);
+  const shakeAnim = useRef(new Animated.Value(0)).current;
 
   const canUseBiometric = isBiometricEnabled && isBiometricAvailable;
 
@@ -45,32 +46,42 @@ export function LockScreen() {
 
   const handleDigit = useCallback(
     async (digit: string) => {
-      if (pin.length >= PIN_LENGTH) return;
+      if (verifying) return;
 
-      const newPin = pin + digit;
-      setPin(newPin);
+      setPin((prev) => {
+        if (prev.length >= PIN_LENGTH) return prev;
+        return prev + digit;
+      });
       setError(false);
-
-      if (newPin.length === PIN_LENGTH) {
-        const success = await unlockWithPin(newPin);
-        if (!success) {
-          setError(true);
-          Vibration.vibrate(200);
-          shake();
-          // Clear after a short delay so user sees all dots filled
-          setTimeout(() => setPin(''), 300);
-        }
-      }
     },
-    [pin, unlockWithPin, shake]
+    [verifying]
   );
 
+  // Verify PIN when it reaches full length
+  useEffect(() => {
+    if (pin.length !== PIN_LENGTH || verifying) return;
+
+    setVerifying(true);
+    unlockWithPin(pin).then((success) => {
+      if (!success) {
+        setError(true);
+        Vibration.vibrate(200);
+        shake();
+        setTimeout(() => {
+          setPin('');
+          setVerifying(false);
+        }, 300);
+      }
+    });
+  }, [pin, verifying, unlockWithPin, shake]);
+
   const handleDelete = useCallback(() => {
+    if (verifying) return;
     setPin((prev) => prev.slice(0, -1));
     setError(false);
-  }, []);
+  }, [verifying]);
 
-  const styles = createStyles(theme, error);
+  const styles = useMemo(() => createStyles(theme, error), [theme, error]);
 
   return (
     <View style={styles.container}>
@@ -116,6 +127,7 @@ export function LockScreen() {
                     key={key}
                     style={styles.key}
                     onPress={unlockWithBiometric}
+                    disabled={verifying}
                     accessibilityLabel={t('Unlock with biometrics')}
                   >
                     <Ionicons
@@ -133,7 +145,7 @@ export function LockScreen() {
                     key={key}
                     style={styles.key}
                     onPress={handleDelete}
-                    disabled={pin.length === 0}
+                    disabled={pin.length === 0 || verifying}
                     accessibilityLabel={t('Delete')}
                   >
                     <Ionicons
@@ -150,6 +162,7 @@ export function LockScreen() {
                   key={key}
                   style={styles.key}
                   onPress={() => handleDigit(key)}
+                  disabled={verifying}
                   accessibilityLabel={key}
                 >
                   <Text style={styles.keyText}>{key}</Text>
@@ -163,7 +176,7 @@ export function LockScreen() {
   );
 }
 
-function createStyles(theme: ReturnType<typeof import('@/theme').createTheme>, hasError: boolean) {
+function createStyles(theme: Theme, hasError: boolean) {
   return StyleSheet.create({
     container: {
       flex: 1,

@@ -7,6 +7,7 @@ import {
   setBiometricEnabled,
   setLockTimeout,
   getLockTimeout,
+  clearLastActiveTimestamp,
 } from '@/services/storage';
 
 /**
@@ -14,37 +15,53 @@ import {
  * Wraps AppLockContext with setup/config methods.
  */
 export function useAppLock() {
-  const context = useAppLockContext();
+  const {
+    isLocked,
+    isAppLockEnabled,
+    isBiometricEnabled,
+    isBiometricAvailable,
+    hasPinSet,
+    lock,
+    unlockWithPin,
+    unlockWithBiometric,
+    refreshConfig,
+  } = useAppLockContext();
 
   const setupPin = useCallback(
     async (pin: string) => {
       await storePinHash(pin);
-      await context.refreshConfig();
+      await refreshConfig();
     },
-    [context]
+    [refreshConfig]
   );
 
   const removePin = useCallback(async () => {
-    await clearPinHash();
-    await setAppLockEnabled(false);
-    await setBiometricEnabled(false);
-    await context.refreshConfig();
-  }, [context]);
+    await Promise.all([
+      clearPinHash(),
+      setAppLockEnabled(false),
+      setBiometricEnabled(false),
+      clearLastActiveTimestamp(),
+    ]);
+    await refreshConfig();
+  }, [refreshConfig]);
 
   const enableAppLock = useCallback(
     async (enabled: boolean) => {
+      if (enabled && !hasPinSet) {
+        throw new Error('Cannot enable app lock without a PIN set');
+      }
       await setAppLockEnabled(enabled);
-      await context.refreshConfig();
+      await refreshConfig();
     },
-    [context]
+    [refreshConfig, hasPinSet]
   );
 
   const enableBiometric = useCallback(
     async (enabled: boolean) => {
       await setBiometricEnabled(enabled);
-      await context.refreshConfig();
+      await refreshConfig();
     },
-    [context]
+    [refreshConfig]
   );
 
   const updateTimeout = useCallback(async (minutes: number) => {
@@ -52,17 +69,17 @@ export function useAppLock() {
   }, []);
 
   return {
-    // State from context
-    isLocked: context.isLocked,
-    isAppLockEnabled: context.isAppLockEnabled,
-    isBiometricEnabled: context.isBiometricEnabled,
-    isBiometricAvailable: context.isBiometricAvailable,
-    hasPinSet: context.hasPinSet,
+    // State
+    isLocked,
+    isAppLockEnabled,
+    isBiometricEnabled,
+    isBiometricAvailable,
+    hasPinSet,
 
     // Unlock actions
-    lock: context.lock,
-    unlockWithPin: context.unlockWithPin,
-    unlockWithBiometric: context.unlockWithBiometric,
+    lock,
+    unlockWithPin,
+    unlockWithBiometric,
 
     // Setup actions
     setupPin,

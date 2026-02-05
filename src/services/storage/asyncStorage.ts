@@ -36,11 +36,23 @@ export async function getLastActiveTimestamp(): Promise<number | null> {
 /**
  * Check if the lock timeout has elapsed since last active
  */
+/**
+ * Clear the last active timestamp
+ */
+export async function clearLastActiveTimestamp(): Promise<void> {
+  await AsyncStorage.removeItem(LAST_ACTIVE_KEY);
+}
+
+/**
+ * Check if the lock timeout has elapsed since last active
+ */
 export async function hasLockTimeoutElapsed(): Promise<boolean> {
-  const lastActive = await getLastActiveTimestamp();
+  const [lastActive, timeout] = await Promise.all([
+    getLastActiveTimestamp(),
+    getLockTimeout(),
+  ]);
   if (!lastActive) return true;
 
-  const timeout = await getLockTimeout();
   const timeoutMs = timeout * 60 * 1000;
   const elapsed = Date.now() - lastActive;
 

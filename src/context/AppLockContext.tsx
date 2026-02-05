@@ -1,6 +1,15 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import * as LocalAuthentication from 'expo-local-authentication';
+import i18n from 'i18next';
 import {
   getAppLockEnabled,
   getBiometricEnabled,
@@ -32,6 +41,12 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
   const [hasPinSet, setHasPinSet] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const appState = useRef(AppState.currentState);
+  const isAppLockEnabledRef = useRef(isAppLockEnabled);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    isAppLockEnabledRef.current = isAppLockEnabled;
+  }, [isAppLockEnabled]);
 
   // Load configuration from storage
   const loadConfig = useCallback(async () => {
@@ -82,7 +97,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
 
         // App coming to foreground → check if should lock
         if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-          if (isAppLockEnabled) {
+          if (isAppLockEnabledRef.current) {
             const shouldLock = await hasLockTimeoutElapsed();
             if (shouldLock) {
               setIsLocked(true);
@@ -97,7 +112,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.remove();
     };
-  }, [isAppLockEnabled]);
+  }, []);
 
   const lock = useCallback(() => {
     setIsLocked(true);
@@ -116,18 +131,47 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
       return false;
     }
 
-    const result = await LocalAuthentication.authenticateAsync({
-      promptMessage: 'Unlock Flika',
-      fallbackLabel: 'Use PIN',
-      disableDeviceFallback: true,
-    });
+    try {
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: i18n.t('common:Unlock Flika'),
+        fallbackLabel: i18n.t('common:Use PIN'),
+        disableDeviceFallback: true,
+      });
 
-    if (result.success) {
-      setIsLocked(false);
+      if (result.success) {
+        setIsLocked(false);
+      }
+
+      return result.success;
+    } catch {
+      return false;
     }
-
-    return result.success;
   }, [isBiometricEnabled, isBiometricAvailable]);
+
+  const value = useMemo(
+    () => ({
+      isLocked,
+      isAppLockEnabled,
+      isBiometricEnabled,
+      isBiometricAvailable,
+      hasPinSet,
+      lock,
+      unlockWithPin,
+      unlockWithBiometric,
+      refreshConfig,
+    }),
+    [
+      isLocked,
+      isAppLockEnabled,
+      isBiometricEnabled,
+      isBiometricAvailable,
+      hasPinSet,
+      lock,
+      unlockWithPin,
+      unlockWithBiometric,
+      refreshConfig,
+    ]
+  );
 
   // Don't render children until config is loaded
   if (!isInitialized) {
@@ -135,19 +179,7 @@ export function AppLockProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AppLockContext.Provider
-      value={{
-        isLocked,
-        isAppLockEnabled,
-        isBiometricEnabled,
-        isBiometricAvailable,
-        hasPinSet,
-        lock,
-        unlockWithPin,
-        unlockWithBiometric,
-        refreshConfig,
-      }}
-    >
+    <AppLockContext.Provider value={value}>
       {children}
     </AppLockContext.Provider>
   );

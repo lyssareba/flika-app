@@ -1,5 +1,4 @@
 export {
-  hashPin,
   storePinHash,
   getPinHash,
   verifyPin,
@@ -15,5 +14,6 @@ export {
   getLockTimeout,
   setLastActiveTimestamp,
   getLastActiveTimestamp,
+  clearLastActiveTimestamp,
   hasLockTimeoutElapsed,
 } from './asyncStorage';
