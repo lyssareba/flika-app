@@ -21,6 +21,7 @@ interface AttributesContextType {
   attributes: Attribute[];
   isLoading: boolean;
   addAttribute: (name: string, category: AttributeCategory) => Promise<void>;
+  addAttributeFromSuggestion: (name: string, category: AttributeCategory) => Promise<void>;
   removeAttribute: (attributeId: string) => Promise<void>;
   toggleCategory: (attributeId: string) => Promise<void>;
   reorderAttribute: (attributeId: string, newOrder: number) => Promise<void>;
@@ -60,6 +61,38 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
     newSuggestions.forEach((s) => shownPresets.current.add(s));
     setSuggestions(newSuggestions);
   }, [attributes]);
+
+  // Replace a single used suggestion with a new one
+  const replaceSuggestion = useCallback(
+    (usedSuggestion: string) => {
+      setSuggestions((prev) => {
+        const index = prev.indexOf(usedSuggestion);
+        if (index === -1) return prev;
+
+        // Build exclusion list: added attributes + shown presets + current suggestions
+        const addedNames = attributes.map((a) => a.name.toLowerCase());
+        const currentSuggestions = prev.map((s) => s.toLowerCase());
+        const exclude = [
+          ...addedNames,
+          ...Array.from(shownPresets.current),
+          ...currentSuggestions,
+        ];
+
+        const [replacement] = getRandomPresets(1, exclude);
+
+        if (replacement) {
+          shownPresets.current.add(replacement);
+          const updated = [...prev];
+          updated[index] = replacement;
+          return updated;
+        }
+
+        // No replacement available — just remove the used suggestion
+        return prev.filter((_, i) => i !== index);
+      });
+    },
+    [attributes]
+  );
 
   // Fetch attributes from Firestore
   const fetchAttributes = useCallback(async () => {
@@ -138,6 +171,15 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
       }
     },
     [user]
+  );
+
+  // Add attribute from suggestion and replace the used suggestion with a new one
+  const addAttributeFromSuggestion = useCallback(
+    async (name: string, category: AttributeCategory) => {
+      await addAttribute(name, category);
+      replaceSuggestion(name);
+    },
+    [addAttribute, replaceSuggestion]
   );
 
   const removeAttribute = useCallback(
@@ -238,6 +280,7 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
       attributes,
       isLoading,
       addAttribute,
+      addAttributeFromSuggestion,
       removeAttribute,
       toggleCategory,
       reorderAttribute,
@@ -250,6 +293,7 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
       attributes,
       isLoading,
       addAttribute,
+      addAttributeFromSuggestion,
       removeAttribute,
       toggleCategory,
       reorderAttribute,
