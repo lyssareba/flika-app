@@ -33,8 +33,18 @@ export const AuthScreen = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const isSignUpFormValid =
+    displayName.trim() &&
+    email.trim() &&
+    password &&
+    confirmPassword &&
+    password === confirmPassword &&
+    password.length >= 6;
 
   const clearForm = () => {
     setPassword('');
@@ -42,6 +52,8 @@ export const AuthScreen = () => {
     setDisplayName('');
     setError(null);
     setResetSent(false);
+    setShowPassword(false);
+    setShowConfirmPassword(false);
   };
 
   const handleSignIn = async () => {
@@ -274,38 +286,73 @@ export const AuthScreen = () => {
             returnKeyType="next"
           />
 
-          <TextInput
-            style={styles.input}
-            placeholder={t('Password')}
-            placeholderTextColor={theme.colors.textMuted}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoComplete={isSignUp ? 'new-password' : 'current-password'}
-            returnKeyType={isSignUp ? 'next' : 'go'}
-            onSubmitEditing={isSignUp ? undefined : handleSignIn}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder={t('Password')}
+              placeholderTextColor={theme.colors.textMuted}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoComplete={isSignUp ? 'new-password' : 'current-password'}
+              returnKeyType={isSignUp ? 'next' : 'go'}
+              onSubmitEditing={isSignUp ? undefined : handleSignIn}
+            />
+            <TouchableOpacity
+              style={styles.passwordToggle}
+              onPress={() => setShowPassword(!showPassword)}
+              accessibilityLabel={showPassword ? tc('Hide password') : tc('Show password')}
+              accessibilityRole="button"
+            >
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={22}
+                color={theme.colors.textMuted}
+              />
+            </TouchableOpacity>
+          </View>
 
           {isSignUp && (
-            <TextInput
-              style={styles.input}
-              placeholder={t('Confirm Password')}
-              placeholderTextColor={theme.colors.textMuted}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              autoComplete="new-password"
-              returnKeyType="go"
-              onSubmitEditing={handleSignUp}
-            />
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder={t('Confirm Password')}
+                placeholderTextColor={theme.colors.textMuted}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+                autoComplete="new-password"
+                returnKeyType="go"
+                onSubmitEditing={handleSignUp}
+              />
+              <TouchableOpacity
+                style={styles.passwordToggle}
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                accessibilityLabel={showConfirmPassword ? tc('Hide password') : tc('Show password')}
+                accessibilityRole="button"
+              >
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={22}
+                  color={theme.colors.textMuted}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {isSignUp && confirmPassword && password !== confirmPassword && (
+            <Text style={styles.errorText}>{tc('Passwords do not match')}</Text>
           )}
 
           {error && <Text style={styles.errorText}>{error}</Text>}
 
           <TouchableOpacity
-            style={[styles.primaryButton, loading && styles.buttonDisabled]}
+            style={[
+              styles.primaryButton,
+              (loading || (isSignUp && !isSignUpFormValid)) && styles.buttonDisabled,
+            ]}
             onPress={isSignUp ? handleSignUp : handleSignIn}
-            disabled={loading}
+            disabled={loading || (isSignUp && !isSignUpFormValid)}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
@@ -468,6 +515,26 @@ const createStyles = (theme: Theme) => {
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.textPrimary,
       marginBottom: 12,
+    },
+    passwordContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.backgroundCard,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 12,
+    },
+    passwordInput: {
+      flex: 1,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.textPrimary,
+    },
+    passwordToggle: {
+      paddingHorizontal: 12,
+      paddingVertical: 14,
     },
     errorText: {
       color: theme.colors.error,
