@@ -27,6 +27,7 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
     suggestions,
     hasMinimumAttributes,
     addAttribute,
+    addAttributeFromSuggestion,
     removeAttribute,
     refreshSuggestions,
   } = useAttributes();
@@ -41,7 +42,7 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
   };
 
   const handleSuggestionPress = async (name: string) => {
-    await addAttribute(name, 'desired');
+    await addAttributeFromSuggestion(name, 'desired');
   };
 
   return (

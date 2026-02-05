@@ -15,6 +15,7 @@ jest.mock('react-native-safe-area-context', () => ({
 }));
 
 const mockAddAttribute = jest.fn();
+const mockAddAttributeFromSuggestion = jest.fn();
 const mockRemoveAttribute = jest.fn();
 const mockRefreshSuggestions = jest.fn();
 
@@ -28,6 +29,7 @@ jest.mock('@/hooks', () => ({
     suggestions: ['Ambitious', 'Loyal', 'Patient'],
     hasMinimumAttributes: true,
     addAttribute: mockAddAttribute,
+    addAttributeFromSuggestion: mockAddAttributeFromSuggestion,
     removeAttribute: mockRemoveAttribute,
     refreshSuggestions: mockRefreshSuggestions,
     toggleCategory: jest.fn(),
@@ -67,12 +69,12 @@ describe('AttributesStep', () => {
     expect(getByText('Patient')).toBeTruthy();
   });
 
-  it('calls addAttribute when suggestion chip is pressed', () => {
+  it('calls addAttributeFromSuggestion when suggestion chip is pressed', () => {
     const { getByText } = render(
       <AttributesStep onNext={jest.fn()} onBack={jest.fn()} />
     );
     fireEvent.press(getByText('Ambitious'));
-    expect(mockAddAttribute).toHaveBeenCalledWith('Ambitious', 'desired');
+    expect(mockAddAttributeFromSuggestion).toHaveBeenCalledWith('Ambitious', 'desired');
   });
 
   it('calls onNext when Next is pressed', () => {
