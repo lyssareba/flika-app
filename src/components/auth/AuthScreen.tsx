@@ -38,6 +38,14 @@ export const AuthScreen = () => {
 
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  const isSignUpFormValid =
+    displayName.trim() &&
+    email.trim() &&
+    password &&
+    confirmPassword &&
+    password === confirmPassword &&
+    password.length >= 6;
+
   const clearForm = () => {
     setPassword('');
     setConfirmPassword('');
@@ -332,12 +340,19 @@ export const AuthScreen = () => {
             </View>
           )}
 
+          {isSignUp && confirmPassword && password !== confirmPassword && (
+            <Text style={styles.errorText}>{tc('Passwords do not match')}</Text>
+          )}
+
           {error && <Text style={styles.errorText}>{error}</Text>}
 
           <TouchableOpacity
-            style={[styles.primaryButton, loading && styles.buttonDisabled]}
+            style={[
+              styles.primaryButton,
+              (loading || (isSignUp && !isSignUpFormValid)) && styles.buttonDisabled,
+            ]}
             onPress={isSignUp ? handleSignUp : handleSignIn}
-            disabled={loading}
+            disabled={loading || (isSignUp && !isSignUpFormValid)}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
