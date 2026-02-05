@@ -13,6 +13,9 @@ import {
   DocumentReference,
   CollectionReference,
   QueryConstraint,
+  onSnapshot,
+  Unsubscribe,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from './config';
 import {
@@ -308,9 +311,30 @@ export const archiveProspect = async (
   prospectId: string
 ): Promise<void> => {
   const docRef = getUserDoc(userId, 'prospects', prospectId);
+  const docSnap = await getDoc(docRef);
+  const currentStatus = docSnap.data()?.status;
+
   await updateDoc(docRef, {
     status: 'archived',
+    previousStatus: currentStatus !== 'archived' ? currentStatus : null,
     archivedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  });
+};
+
+export const restoreProspect = async (
+  userId: string,
+  prospectId: string
+): Promise<void> => {
+  const docRef = getUserDoc(userId, 'prospects', prospectId);
+  const docSnap = await getDoc(docRef);
+  const data = docSnap.data();
+  const restoredStatus = data?.previousStatus || 'dating';
+
+  await updateDoc(docRef, {
+    status: restoredStatus,
+    previousStatus: null,
+    archivedAt: null,
     updatedAt: Timestamp.now(),
   });
 };
@@ -319,10 +343,68 @@ export const deleteProspect = async (
   userId: string,
   prospectId: string
 ): Promise<void> => {
-  // Note: In production, you'd want to delete subcollections (traits, dates) too
-  // This requires either Cloud Functions or batch deletes
-  const docRef = getUserDoc(userId, 'prospects', prospectId);
-  await deleteDoc(docRef);
+  const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
+
+  // Delete all traits in subcollection
+  const traitsColRef = collection(prospectDocRef, 'traits');
+  const traitsSnapshot = await getDocs(traitsColRef);
+
+  // Delete all dates in subcollection
+  const datesColRef = collection(prospectDocRef, 'dates');
+  const datesSnapshot = await getDocs(datesColRef);
+
+  // Use batch to delete everything atomically
+  const batch = writeBatch(db);
+
+  traitsSnapshot.docs.forEach((traitDoc) => {
+    batch.delete(traitDoc.ref);
+  });
+
+  datesSnapshot.docs.forEach((dateDoc) => {
+    batch.delete(dateDoc.ref);
+  });
+
+  batch.delete(prospectDocRef);
+
+  await batch.commit();
+};
+
+// ============================================================================
+// Real-time Listeners
+// ============================================================================
+
+export type ProspectListData = Omit<Prospect, 'traits' | 'dates'>;
+
+export const subscribeToProspects = (
+  userId: string,
+  onData: (prospects: ProspectListData[]) => void,
+  onError: (error: Error) => void
+): Unsubscribe => {
+  const colRef = getUserCollection(userId, 'prospects');
+  const q = query(colRef, orderBy('updatedAt', 'desc'));
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const prospects: ProspectListData[] = snapshot.docs.map((docSnap) => {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          name: data.name,
+          photoUri: data.photoUri || undefined,
+          status: data.status,
+          previousStatus: data.previousStatus || undefined,
+          howWeMet: data.howWeMet || undefined,
+          notes: data.notes || undefined,
+          createdAt: toDate(data.createdAt),
+          updatedAt: toDate(data.updatedAt),
+          archivedAt: data.archivedAt ? toDate(data.archivedAt) : undefined,
+        };
+      });
+      onData(prospects);
+    },
+    onError
+  );
 };
 
 // ============================================================================

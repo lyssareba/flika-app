@@ -26,6 +26,7 @@ export interface Prospect {
   name: string;
   photoUri?: string;
   status: ProspectStatus;
+  previousStatus?: ProspectStatus; // Stored when archived for restore
   howWeMet?: string;
   notes?: string;
   traits: Trait[];
