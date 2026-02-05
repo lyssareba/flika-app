@@ -28,8 +28,7 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
   const { t } = useTranslation('onboarding');
   const { t: tc } = useTranslation('common');
   const { theme } = useThemeContext();
-  const { setupPin, enableAppLock, enableBiometric, isBiometricAvailable, hasPinSet } =
-    useAppLock();
+  const { setupPin, enableAppLock, enableBiometric, isBiometricAvailable } = useAppLock();
 
   const [pinState, setPinState] = useState<PinState>('idle');
   const [pin, setPin] = useState('');
@@ -125,7 +124,9 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
     });
   };
 
-  const pinDone = pinState === 'done' || hasPinSet;
+  // During onboarding, only use local pinState — ignore hasPinSet from SecureStore
+  // to avoid showing success from stale data from previous sessions
+  const pinDone = pinState === 'done';
 
   const getPromptText = () => {
     switch (pinState) {

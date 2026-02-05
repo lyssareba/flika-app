@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useAppLockContext } from '@/context/AppLockContext';
 import {
   storePinHash,
+  getPinHash,
   clearPinHash,
   setAppLockEnabled,
   setBiometricEnabled,
@@ -47,13 +48,20 @@ export const useAppLock = () => {
 
   const enableAppLock = useCallback(
     async (enabled: boolean) => {
-      if (enabled && !hasPinSet) {
-        throw new Error('Cannot enable app lock without a PIN set');
+      if (enabled) {
+        // Read directly from storage to avoid stale closure issues.
+        // When setupPin() is called followed by enableAppLock(true),
+        // the hasPinSet state from the closure may still be false
+        // even though the PIN was just stored.
+        const pinHash = await getPinHash();
+        if (!pinHash) {
+          throw new Error('Cannot enable app lock without a PIN set');
+        }
       }
       await setAppLockEnabled(enabled);
       await refreshConfig();
     },
-    [refreshConfig, hasPinSet]
+    [refreshConfig]
   );
 
   const enableBiometric = useCallback(
