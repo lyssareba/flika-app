@@ -226,7 +226,7 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
           <View style={styles.optionCard}>
             <View style={styles.optionRow}>
               <Ionicons name="finger-print" size={24} color={theme.colors.primary} />
-              <View>
+              <View style={styles.optionTextContainer}>
                 <Text style={styles.optionLabel}>{t('Enable Biometrics')}</Text>
                 <Text style={styles.optionHint}>
                   {t('Use fingerprint or face recognition to unlock')}
@@ -308,6 +308,10 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
       gap: 12,
       flex: 1,
+    },
+    optionTextContainer: {
+      flex: 1,
+      flexShrink: 1,
     },
     optionLabel: {
       fontSize: theme.typography.fontSize.base,
