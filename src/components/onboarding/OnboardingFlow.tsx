@@ -17,9 +17,10 @@ export const OnboardingFlow = ({ onComplete }: OnboardingFlowProps) => {
   const { user } = useAuth();
 
   const handleComplete = async () => {
-    if (user) {
-      await completeOnboarding(user.uid);
+    if (!user) {
+      throw new Error('Cannot complete onboarding: user is not authenticated');
     }
+    await completeOnboarding(user.uid);
     await onComplete();
   };
 

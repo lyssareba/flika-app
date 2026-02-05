@@ -1,20 +1,11 @@
 /* eslint-disable no-undef */
 
 // Mock expo-secure-store
-jest.mock('expo-secure-store', () => {
-  const store = {};
-  return {
-    getItemAsync: jest.fn((key) => Promise.resolve(store[key] ?? null)),
-    setItemAsync: jest.fn((key, value) => {
-      store[key] = value;
-      return Promise.resolve();
-    }),
-    deleteItemAsync: jest.fn((key) => {
-      delete store[key];
-      return Promise.resolve();
-    }),
-  };
-});
+jest.mock('expo-secure-store', () => ({
+  getItemAsync: jest.fn(() => Promise.resolve(null)),
+  setItemAsync: jest.fn(() => Promise.resolve()),
+  deleteItemAsync: jest.fn(() => Promise.resolve()),
+}));
 
 // Mock expo-local-authentication
 jest.mock('expo-local-authentication', () => ({
@@ -50,27 +41,15 @@ jest.mock('expo-crypto', () => ({
 }));
 
 // Mock @react-native-async-storage/async-storage
-jest.mock('@react-native-async-storage/async-storage', () => {
-  const store = {};
-  return {
-    __esModule: true,
-    default: {
-      getItem: jest.fn((key) => Promise.resolve(store[key] ?? null)),
-      setItem: jest.fn((key, value) => {
-        store[key] = value;
-        return Promise.resolve();
-      }),
-      removeItem: jest.fn((key) => {
-        delete store[key];
-        return Promise.resolve();
-      }),
-      clear: jest.fn(() => {
-        Object.keys(store).forEach((key) => delete store[key]);
-        return Promise.resolve();
-      }),
-    },
-  };
-});
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(() => Promise.resolve(null)),
+    setItem: jest.fn(() => Promise.resolve()),
+    removeItem: jest.fn(() => Promise.resolve()),
+    clear: jest.fn(() => Promise.resolve()),
+  },
+}));
 
 // Mock Firebase modules
 jest.mock('firebase/app', () => ({

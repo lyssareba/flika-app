@@ -57,10 +57,10 @@ describe('DealbreakersStep', () => {
   });
 
   it('calls toggleCategory when an attribute card is pressed', () => {
-    const { getByText } = render(
+    const { getByLabelText } = render(
       <DealbreakersStep onNext={jest.fn()} onBack={jest.fn()} />
     );
-    fireEvent.press(getByText('Kind'));
+    fireEvent.press(getByLabelText('Kind, tap to mark as dealbreaker'));
     expect(mockToggleCategory).toHaveBeenCalledWith('1');
   });
 

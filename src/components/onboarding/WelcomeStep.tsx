@@ -72,7 +72,7 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
     },
     primaryButtonText: {
-      color: '#FFFFFF',
+      color: theme.colors.textOnPrimary,
       fontSize: theme.typography.fontSize.lg,
       fontWeight: '600',
     },

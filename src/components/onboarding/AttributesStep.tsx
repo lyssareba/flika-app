@@ -72,7 +72,7 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
           disabled={!inputValue.trim()}
           accessibilityLabel={tc('Add')}
         >
-          <Ionicons name="add" size={24} color="#FFFFFF" />
+          <Ionicons name="add" size={24} color={theme.colors.textOnPrimary} />
         </TouchableOpacity>
       </View>
 
@@ -260,7 +260,7 @@ const createStyles = (theme: Theme) =>
       opacity: 0.5,
     },
     primaryButtonText: {
-      color: '#FFFFFF',
+      color: theme.colors.textOnPrimary,
       fontSize: theme.typography.fontSize.lg,
       fontWeight: '600',
     },

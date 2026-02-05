@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -36,8 +36,18 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
   const [firstPin, setFirstPin] = useState('');
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const completingRef = useRef(false);
+  const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  // Clean up error timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const shake = useCallback(() => {
     Animated.sequence([
@@ -56,6 +66,7 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
         setPin('');
         setPinState('confirming');
       } else if (pinState === 'confirming') {
+        setPin('');
         if (fullPin === firstPin) {
           await setupPin(fullPin);
           await enableAppLock(true);
@@ -64,8 +75,7 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
           setPinState('error');
           Vibration.vibrate(200);
           shake();
-          setTimeout(() => {
-            setPin('');
+          errorTimeoutRef.current = setTimeout(() => {
             setFirstPin('');
             setPinState('entering');
           }, 300);
@@ -75,20 +85,21 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
     [pinState, firstPin, setupPin, enableAppLock, shake]
   );
 
+  // Trigger processFullPin when PIN reaches full length
+  useEffect(() => {
+    if (pin.length === PIN_LENGTH) {
+      processFullPin(pin);
+    }
+  }, [pin, processFullPin]);
+
   const handleDigit = useCallback(
     (digit: string) => {
       setPin((prev) => {
         if (prev.length >= PIN_LENGTH) return prev;
-        const newPin = prev + digit;
-
-        if (newPin.length === PIN_LENGTH) {
-          setTimeout(() => processFullPin(newPin), 0);
-        }
-
-        return newPin;
+        return prev + digit;
       });
     },
-    [processFullPin]
+    []
   );
 
   const handleDelete = useCallback(() => {
@@ -324,7 +335,7 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
     },
     primaryButtonText: {
-      color: '#FFFFFF',
+      color: theme.colors.textOnPrimary,
       fontSize: theme.typography.fontSize.lg,
       fontWeight: '600',
     },

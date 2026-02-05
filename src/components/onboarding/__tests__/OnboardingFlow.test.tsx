@@ -127,6 +127,29 @@ describe('OnboardingFlow', () => {
     expect(getByText('Welcome')).toBeTruthy();
   });
 
+  it('can navigate back from Dealbreakers to Attributes', () => {
+    const { getByText, getByLabelText } = render(
+      <OnboardingFlow onComplete={jest.fn()} />
+    );
+    fireEvent.press(getByText("Let's get started"));
+    fireEvent.press(getByText('Next'));
+    expect(getByText('Which are dealbreakers?')).toBeTruthy();
+    fireEvent.press(getByLabelText('Back'));
+    expect(getByText('What matters to you?')).toBeTruthy();
+  });
+
+  it('can navigate back from Security to Dealbreakers', () => {
+    const { getByText, getByLabelText } = render(
+      <OnboardingFlow onComplete={jest.fn()} />
+    );
+    fireEvent.press(getByText("Let's get started"));
+    fireEvent.press(getByText('Next'));
+    fireEvent.press(getByText('Next'));
+    expect(getByText('Protect Your Data')).toBeTruthy();
+    fireEvent.press(getByLabelText('Back'));
+    expect(getByText('Which are dealbreakers?')).toBeTruthy();
+  });
+
   it('calls completeOnboarding and onComplete on Finish', () => {
     const { completeOnboarding } = require('@/services/firebase/firestore');
     const onComplete = jest.fn(() => Promise.resolve());

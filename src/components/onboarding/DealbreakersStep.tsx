@@ -32,7 +32,7 @@ export const DealbreakersStep = ({ onNext, onBack }: DealbreakersStepProps) => {
       <TouchableOpacity
         style={[styles.card, isDealbreaker && styles.cardDealbreaker]}
         onPress={() => toggleCategory(item.id)}
-        accessibilityLabel={`${item.name}${isDealbreaker ? ' dealbreaker' : ''}`}
+        accessibilityLabel={`${item.name}, ${isDealbreaker ? 'dealbreaker, tap to remove' : 'tap to mark as dealbreaker'}`}
         accessibilityRole="button"
       >
         <Text style={[styles.cardText, isDealbreaker && styles.cardTextDealbreaker]}>
@@ -150,7 +150,7 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
     },
     primaryButtonText: {
-      color: '#FFFFFF',
+      color: theme.colors.textOnPrimary,
       fontSize: theme.typography.fontSize.lg,
       fontWeight: '600',
     },

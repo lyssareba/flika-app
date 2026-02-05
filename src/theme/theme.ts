@@ -51,6 +51,7 @@ export const createTheme = (mode: ThemeMode) => ({
     traitNo: colors.trait.no.background[mode],
     traitNoText: colors.trait.no.text[mode],
     peach: colors.peach,
+    textOnPrimary: '#FFFFFF',
     border: mode === 'light' ? '#E0E0E0' : '#3A3A50',
   },
   typography,
