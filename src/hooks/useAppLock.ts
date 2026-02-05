@@ -22,6 +22,7 @@ export const useAppLock = () => {
     isBiometricEnabled,
     isBiometricAvailable,
     hasPinSet,
+    userId,
     lock,
     unlockWithPin,
     unlockWithBiometric,
@@ -30,21 +31,21 @@ export const useAppLock = () => {
 
   const setupPin = useCallback(
     async (pin: string) => {
-      await storePinHash(pin);
+      await storePinHash(userId, pin);
       await refreshConfig();
     },
-    [refreshConfig]
+    [userId, refreshConfig]
   );
 
   const removePin = useCallback(async () => {
     await Promise.all([
-      clearPinHash(),
-      setAppLockEnabled(false),
-      setBiometricEnabled(false),
-      clearLastActiveTimestamp(),
+      clearPinHash(userId),
+      setAppLockEnabled(userId, false),
+      setBiometricEnabled(userId, false),
+      clearLastActiveTimestamp(userId),
     ]);
     await refreshConfig();
-  }, [refreshConfig]);
+  }, [userId, refreshConfig]);
 
   const enableAppLock = useCallback(
     async (enabled: boolean) => {
@@ -53,28 +54,32 @@ export const useAppLock = () => {
         // When setupPin() is called followed by enableAppLock(true),
         // the hasPinSet state from the closure may still be false
         // even though the PIN was just stored.
-        const pinHash = await getPinHash();
+        const pinHash = await getPinHash(userId);
         if (!pinHash) {
           throw new Error('Cannot enable app lock without a PIN set');
         }
       }
-      await setAppLockEnabled(enabled);
+      await setAppLockEnabled(userId, enabled);
       await refreshConfig();
     },
-    [refreshConfig]
+    [userId, refreshConfig]
   );
 
   const enableBiometric = useCallback(
     async (enabled: boolean) => {
-      await setBiometricEnabled(enabled);
+      await setBiometricEnabled(userId, enabled);
       await refreshConfig();
     },
-    [refreshConfig]
+    [userId, refreshConfig]
   );
 
   const updateTimeout = useCallback(async (minutes: number) => {
-    await setLockTimeout(minutes);
-  }, []);
+    await setLockTimeout(userId, minutes);
+  }, [userId]);
+
+  const getTimeout = useCallback(async () => {
+    return getLockTimeout(userId);
+  }, [userId]);
 
   return {
     // State
@@ -95,6 +100,6 @@ export const useAppLock = () => {
     enableAppLock,
     enableBiometric,
     updateTimeout,
-    getLockTimeout,
+    getLockTimeout: getTimeout,
   };
 };

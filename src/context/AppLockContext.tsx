@@ -25,15 +25,21 @@ interface AppLockContextType {
   isBiometricEnabled: boolean;
   isBiometricAvailable: boolean;
   hasPinSet: boolean;
+  userId: string;
   lock: () => void;
   unlockWithPin: (pin: string) => Promise<boolean>;
   unlockWithBiometric: () => Promise<boolean>;
   refreshConfig: () => Promise<void>;
 }
 
+interface AppLockProviderProps {
+  children: React.ReactNode;
+  userId: string;
+}
+
 const AppLockContext = createContext<AppLockContextType | undefined>(undefined);
 
-export const AppLockProvider = ({ children }: { children: React.ReactNode }) => {
+export const AppLockProvider = ({ children, userId }: AppLockProviderProps) => {
   const [isLocked, setIsLocked] = useState(false);
   const [isAppLockEnabled, setIsAppLockEnabled] = useState(false);
   const [isBiometricEnabled, setIsBiometricEnabled] = useState(false);
@@ -51,9 +57,9 @@ export const AppLockProvider = ({ children }: { children: React.ReactNode }) => 
   // Load configuration from storage
   const loadConfig = useCallback(async () => {
     const [lockEnabled, bioEnabled, pinHash, bioAvailable] = await Promise.all([
-      getAppLockEnabled(),
-      getBiometricEnabled(),
-      getPinHash(),
+      getAppLockEnabled(userId),
+      getBiometricEnabled(userId),
+      getPinHash(userId),
       LocalAuthentication.hasHardwareAsync(),
     ]);
 
@@ -63,7 +69,7 @@ export const AppLockProvider = ({ children }: { children: React.ReactNode }) => 
     setIsBiometricAvailable(bioAvailable);
 
     return { lockEnabled };
-  }, []);
+  }, [userId]);
 
   const refreshConfig = useCallback(async () => {
     await loadConfig();
@@ -92,13 +98,13 @@ export const AppLockProvider = ({ children }: { children: React.ReactNode }) => 
       async (nextAppState: AppStateStatus) => {
         // App going to background → record timestamp
         if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
-          await setLastActiveTimestamp();
+          await setLastActiveTimestamp(userId);
         }
 
         // App coming to foreground → check if should lock
         if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
           if (isAppLockEnabledRef.current) {
-            const shouldLock = await hasLockTimeoutElapsed();
+            const shouldLock = await hasLockTimeoutElapsed(userId);
             if (shouldLock) {
               setIsLocked(true);
             }
@@ -112,19 +118,19 @@ export const AppLockProvider = ({ children }: { children: React.ReactNode }) => 
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [userId]);
 
   const lock = useCallback(() => {
     setIsLocked(true);
   }, []);
 
   const unlockWithPin = useCallback(async (pin: string): Promise<boolean> => {
-    const isValid = await verifyPin(pin);
+    const isValid = await verifyPin(userId, pin);
     if (isValid) {
       setIsLocked(false);
     }
     return isValid;
-  }, []);
+  }, [userId]);
 
   const unlockWithBiometric = useCallback(async (): Promise<boolean> => {
     if (!isBiometricEnabled || !isBiometricAvailable) {
@@ -155,6 +161,7 @@ export const AppLockProvider = ({ children }: { children: React.ReactNode }) => 
       isBiometricEnabled,
       isBiometricAvailable,
       hasPinSet,
+      userId,
       lock,
       unlockWithPin,
       unlockWithBiometric,
@@ -166,6 +173,7 @@ export const AppLockProvider = ({ children }: { children: React.ReactNode }) => 
       isBiometricEnabled,
       isBiometricAvailable,
       hasPinSet,
+      userId,
       lock,
       unlockWithPin,
       unlockWithBiometric,

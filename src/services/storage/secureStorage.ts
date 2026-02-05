@@ -1,9 +1,10 @@
 import * as SecureStore from 'expo-secure-store';
 import * as Crypto from 'expo-crypto';
 
-const PIN_HASH_KEY = 'pinHash';
-const APP_LOCK_ENABLED_KEY = 'appLockEnabled';
-const BIOMETRIC_ENABLED_KEY = 'biometricEnabled';
+// Key generators - scope all lock settings to user ID
+const getPinHashKey = (userId: string) => `${userId}_pinHash`;
+const getAppLockEnabledKey = (userId: string) => `${userId}_appLockEnabled`;
+const getBiometricEnabledKey = (userId: string) => `${userId}_biometricEnabled`;
 
 /**
  * Hash a PIN using SHA-256
@@ -17,23 +18,23 @@ export const hashPin = async (pin: string): Promise<string> => {
 /**
  * Store hashed PIN in device SecureStore (never sent to cloud)
  */
-export const storePinHash = async (pin: string): Promise<void> => {
+export const storePinHash = async (userId: string, pin: string): Promise<void> => {
   const hash = await hashPin(pin);
-  await SecureStore.setItemAsync(PIN_HASH_KEY, hash);
+  await SecureStore.setItemAsync(getPinHashKey(userId), hash);
 };
 
 /**
- * Get stored PIN hash
+ * Get stored PIN hash for a user
  */
-export const getPinHash = async (): Promise<string | null> => {
-  return SecureStore.getItemAsync(PIN_HASH_KEY);
+export const getPinHash = async (userId: string): Promise<string | null> => {
+  return SecureStore.getItemAsync(getPinHashKey(userId));
 };
 
 /**
  * Verify a PIN against the stored hash
  */
-export const verifyPin = async (pin: string): Promise<boolean> => {
-  const storedHash = await getPinHash();
+export const verifyPin = async (userId: string, pin: string): Promise<boolean> => {
+  const storedHash = await getPinHash(userId);
   if (!storedHash) return false;
 
   const inputHash = await hashPin(pin);
@@ -41,38 +42,38 @@ export const verifyPin = async (pin: string): Promise<boolean> => {
 };
 
 /**
- * Clear stored PIN hash
+ * Clear stored PIN hash for a user
  */
-export const clearPinHash = async (): Promise<void> => {
-  await SecureStore.deleteItemAsync(PIN_HASH_KEY);
+export const clearPinHash = async (userId: string): Promise<void> => {
+  await SecureStore.deleteItemAsync(getPinHashKey(userId));
 };
 
 /**
  * Store app lock enabled preference in SecureStore
  */
-export const setAppLockEnabled = async (enabled: boolean): Promise<void> => {
-  await SecureStore.setItemAsync(APP_LOCK_ENABLED_KEY, JSON.stringify(enabled));
+export const setAppLockEnabled = async (userId: string, enabled: boolean): Promise<void> => {
+  await SecureStore.setItemAsync(getAppLockEnabledKey(userId), JSON.stringify(enabled));
 };
 
 /**
  * Get app lock enabled preference
  */
-export const getAppLockEnabled = async (): Promise<boolean> => {
-  const value = await SecureStore.getItemAsync(APP_LOCK_ENABLED_KEY);
+export const getAppLockEnabled = async (userId: string): Promise<boolean> => {
+  const value = await SecureStore.getItemAsync(getAppLockEnabledKey(userId));
   return value ? JSON.parse(value) : false;
 };
 
 /**
  * Store biometric enabled preference in SecureStore
  */
-export const setBiometricEnabled = async (enabled: boolean): Promise<void> => {
-  await SecureStore.setItemAsync(BIOMETRIC_ENABLED_KEY, JSON.stringify(enabled));
+export const setBiometricEnabled = async (userId: string, enabled: boolean): Promise<void> => {
+  await SecureStore.setItemAsync(getBiometricEnabledKey(userId), JSON.stringify(enabled));
 };
 
 /**
  * Get biometric enabled preference
  */
-export const getBiometricEnabled = async (): Promise<boolean> => {
-  const value = await SecureStore.getItemAsync(BIOMETRIC_ENABLED_KEY);
+export const getBiometricEnabled = async (userId: string): Promise<boolean> => {
+  const value = await SecureStore.getItemAsync(getBiometricEnabledKey(userId));
   return value ? JSON.parse(value) : false;
 };
