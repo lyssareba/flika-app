@@ -5,7 +5,7 @@ import { AppLockProvider, AuthProvider } from '@/context';
 import { LockScreen } from '@/components/lock';
 import { useAppLock } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
-import AuthScreen from './auth';
+import { AuthScreen } from '@/components/auth';
 
 // Initialize i18n - import triggers initialization
 import '@/i18n';

@@ -9,7 +9,9 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useThemeContext, type Theme } from '@/theme';
@@ -17,7 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 type AuthView = 'welcome' | 'signIn' | 'signUp' | 'forgotPassword';
 
-export default function AuthScreen() {
+export function AuthScreen() {
   const { t } = useTranslation('onboarding');
   const { t: tc } = useTranslation('common');
   const { theme } = useThemeContext();
@@ -34,16 +36,27 @@ export default function AuthScreen() {
 
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  const clearForm = () => {
+    setPassword('');
+    setConfirmPassword('');
+    setDisplayName('');
+    setError(null);
+    setResetSent(false);
+  };
+
   const handleSignIn = async () => {
     if (!email.trim() || !password) {
       setError(tc('Please fill in all fields'));
       return;
     }
 
+    Keyboard.dismiss();
     setLoading(true);
     setError(null);
     try {
       await signIn(email.trim(), password);
+      clearForm();
+      setEmail('');
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, tc));
     } finally {
@@ -65,10 +78,13 @@ export default function AuthScreen() {
       return;
     }
 
+    Keyboard.dismiss();
     setLoading(true);
     setError(null);
     try {
       await signUp(email.trim(), password, displayName.trim());
+      clearForm();
+      setEmail('');
     } catch (err: unknown) {
       setError(getAuthErrorMessage(err, tc));
     } finally {
@@ -82,6 +98,7 @@ export default function AuthScreen() {
       return;
     }
 
+    Keyboard.dismiss();
     setLoading(true);
     setError(null);
     try {
@@ -96,13 +113,12 @@ export default function AuthScreen() {
 
   const switchView = (newView: AuthView) => {
     setView(newView);
-    setError(null);
-    setResetSent(false);
+    clearForm();
   };
 
   if (view === 'welcome') {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         <View style={styles.welcomeContent}>
           <Ionicons name="flame" size={64} color={theme.colors.primary} />
           <Text style={styles.appTitle}>Flika</Text>
@@ -127,7 +143,7 @@ export default function AuthScreen() {
             <Text style={styles.linkAction}>{tc('Sign In')}</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -135,60 +151,74 @@ export default function AuthScreen() {
     return (
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView
-          contentContainerStyle={styles.formContainer}
-          keyboardShouldPersistTaps="handled"
-        >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => switchView('signIn')}
+        <SafeAreaView style={styles.safeArea}>
+          <ScrollView
+            contentContainerStyle={styles.formContainer}
+            keyboardShouldPersistTaps="handled"
           >
-            <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => switchView('signIn')}
+              accessibilityLabel={tc('Back')}
+              accessibilityRole="button"
+            >
+              <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+            </TouchableOpacity>
 
-          <Text style={styles.formTitle}>{tc('Reset Password')}</Text>
-          <Text style={styles.formSubtitle}>
-            {tc("Enter your email and we'll send you a reset link")}
-          </Text>
+            <Text style={styles.formTitle}>{tc('Reset Password')}</Text>
+            <Text style={styles.formSubtitle}>
+              {tc("Enter your email and we'll send you a reset link")}
+            </Text>
 
-          {resetSent ? (
-            <View style={styles.successBox}>
-              <Ionicons name="checkmark-circle" size={24} color={theme.colors.success} />
-              <Text style={styles.successText}>
-                {tc('Password reset email sent. Check your inbox.')}
-              </Text>
-            </View>
-          ) : (
-            <>
-              <TextInput
-                style={styles.input}
-                placeholder={t('Email')}
-                placeholderTextColor={theme.colors.textMuted}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-              />
+            {resetSent ? (
+              <>
+                <View style={styles.successBox}>
+                  <Ionicons name="checkmark-circle" size={24} color={theme.colors.success} />
+                  <Text style={styles.successText}>
+                    {tc('Password reset email sent. Check your inbox.')}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.primaryButton}
+                  onPress={() => switchView('signIn')}
+                >
+                  <Text style={styles.primaryButtonText}>{tc('Back to Sign In')}</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <TextInput
+                  style={styles.input}
+                  placeholder={t('Email')}
+                  placeholderTextColor={theme.colors.textMuted}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  returnKeyType="go"
+                  onSubmitEditing={handleResetPassword}
+                />
 
-              {error && <Text style={styles.errorText}>{error}</Text>}
+                {error && <Text style={styles.errorText}>{error}</Text>}
 
-              <TouchableOpacity
-                style={[styles.primaryButton, loading && styles.buttonDisabled]}
-                onPress={handleResetPassword}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.primaryButtonText}>{tc('Send Reset Link')}</Text>
-                )}
-              </TouchableOpacity>
-            </>
-          )}
-        </ScrollView>
+                <TouchableOpacity
+                  style={[styles.primaryButton, loading && styles.buttonDisabled]}
+                  onPress={handleResetPassword}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.primaryButtonText}>{tc('Send Reset Link')}</Text>
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
+          </ScrollView>
+        </SafeAreaView>
       </KeyboardAvoidingView>
     );
   }
@@ -199,113 +229,123 @@ export default function AuthScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
-        contentContainerStyle={styles.formContainer}
-        keyboardShouldPersistTaps="handled"
-      >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => switchView('welcome')}
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView
+          contentContainerStyle={styles.formContainer}
+          keyboardShouldPersistTaps="handled"
         >
-          <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => switchView('welcome')}
+            accessibilityLabel={tc('Back')}
+            accessibilityRole="button"
+          >
+            <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+          </TouchableOpacity>
 
-        <Text style={styles.formTitle}>
-          {isSignUp ? t('Create Account') : tc('Sign In')}
-        </Text>
+          <Text style={styles.formTitle}>
+            {isSignUp ? t('Create Account') : tc('Sign In')}
+          </Text>
 
-        {isSignUp && (
+          {isSignUp && (
+            <TextInput
+              style={styles.input}
+              placeholder={t('Full Name')}
+              placeholderTextColor={theme.colors.textMuted}
+              value={displayName}
+              onChangeText={setDisplayName}
+              autoCapitalize="words"
+              autoComplete="name"
+              returnKeyType="next"
+            />
+          )}
+
           <TextInput
             style={styles.input}
-            placeholder={t('Full Name')}
+            placeholder={t('Email')}
             placeholderTextColor={theme.colors.textMuted}
-            value={displayName}
-            onChangeText={setDisplayName}
-            autoCapitalize="words"
-            autoComplete="name"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            returnKeyType="next"
           />
-        )}
 
-        <TextInput
-          style={styles.input}
-          placeholder={t('Email')}
-          placeholderTextColor={theme.colors.textMuted}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoComplete="email"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder={t('Password')}
-          placeholderTextColor={theme.colors.textMuted}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoComplete={isSignUp ? 'new-password' : 'current-password'}
-        />
-
-        {isSignUp && (
           <TextInput
             style={styles.input}
-            placeholder={t('Confirm Password')}
+            placeholder={t('Password')}
             placeholderTextColor={theme.colors.textMuted}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
+            value={password}
+            onChangeText={setPassword}
             secureTextEntry
-            autoComplete="new-password"
+            autoComplete={isSignUp ? 'new-password' : 'current-password'}
+            returnKeyType={isSignUp ? 'next' : 'go'}
+            onSubmitEditing={isSignUp ? undefined : handleSignIn}
           />
-        )}
 
-        {error && <Text style={styles.errorText}>{error}</Text>}
+          {isSignUp && (
+            <TextInput
+              style={styles.input}
+              placeholder={t('Confirm Password')}
+              placeholderTextColor={theme.colors.textMuted}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry
+              autoComplete="new-password"
+              returnKeyType="go"
+              onSubmitEditing={handleSignUp}
+            />
+          )}
 
-        <TouchableOpacity
-          style={[styles.primaryButton, loading && styles.buttonDisabled]}
-          onPress={isSignUp ? handleSignUp : handleSignIn}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.primaryButtonText}>
-              {isSignUp ? t('Create Account') : tc('Sign In')}
+          {error && <Text style={styles.errorText}>{error}</Text>}
+
+          <TouchableOpacity
+            style={[styles.primaryButton, loading && styles.buttonDisabled]}
+            onPress={isSignUp ? handleSignUp : handleSignIn}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.primaryButtonText}>
+                {isSignUp ? t('Create Account') : tc('Sign In')}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          {!isSignUp && (
+            <TouchableOpacity
+              style={styles.forgotPassword}
+              onPress={() => switchView('forgotPassword')}
+            >
+              <Text style={styles.forgotPasswordText}>{tc('Forgot password?')}</Text>
+            </TouchableOpacity>
+          )}
+
+          <View style={styles.switchContainer}>
+            <Text style={styles.switchText}>
+              {isSignUp ? tc('Already have an account?') : tc("Don't have an account?")}
+            </Text>
+            <TouchableOpacity onPress={() => switchView(isSignUp ? 'signIn' : 'signUp')}>
+              <Text style={styles.switchAction}>
+                {isSignUp ? tc('Sign In') : tc('Sign Up')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {isSignUp && (
+            <Text style={styles.termsText}>
+              {t('By continuing, you agree to our')}{' '}
+              <Text style={styles.termsLink}>{tc('Terms of Service')}</Text>
+              {' '}{t('and')}{' '}
+              <Text style={styles.termsLink}>{tc('Privacy Policy')}</Text>
             </Text>
           )}
-        </TouchableOpacity>
-
-        {!isSignUp && (
-          <TouchableOpacity
-            style={styles.forgotPassword}
-            onPress={() => switchView('forgotPassword')}
-          >
-            <Text style={styles.forgotPasswordText}>{tc('Forgot password?')}</Text>
-          </TouchableOpacity>
-        )}
-
-        <View style={styles.switchContainer}>
-          <Text style={styles.switchText}>
-            {isSignUp ? tc('Already have an account?') : tc("Don't have an account?")}
-          </Text>
-          <TouchableOpacity onPress={() => switchView(isSignUp ? 'signIn' : 'signUp')}>
-            <Text style={styles.switchAction}>
-              {isSignUp ? tc('Sign In') : tc('Sign Up')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {isSignUp && (
-          <Text style={styles.termsText}>
-            {t('By continuing, you agree to our')}{' '}
-            <Text style={styles.termsLink}>{tc('Terms of Service')}</Text>
-            {' '}{t('and')}{' '}
-            <Text style={styles.termsLink}>{tc('Privacy Policy')}</Text>
-          </Text>
-        )}
-      </ScrollView>
+        </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
@@ -323,6 +363,8 @@ function getAuthErrorMessage(err: unknown, t: (key: string) => string): string {
     case 'auth/wrong-password':
     case 'auth/invalid-credential':
       return t('Invalid email or password');
+    case 'auth/user-disabled':
+      return t('This account has been disabled');
     case 'auth/too-many-requests':
       return t('Too many attempts. Please try again later.');
     case 'auth/network-request-failed':
@@ -337,6 +379,9 @@ function createStyles(theme: Theme) {
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
+    },
+    safeArea: {
+      flex: 1,
     },
     welcomeContent: {
       flex: 1,
@@ -359,7 +404,7 @@ function createStyles(theme: Theme) {
     },
     welcomeActions: {
       paddingHorizontal: 32,
-      paddingBottom: 48,
+      paddingBottom: 24,
       gap: 16,
     },
     primaryButton: {
@@ -392,7 +437,7 @@ function createStyles(theme: Theme) {
     formContainer: {
       flexGrow: 1,
       paddingHorizontal: 32,
-      paddingTop: 60,
+      paddingTop: 16,
       paddingBottom: 32,
     },
     backButton: {

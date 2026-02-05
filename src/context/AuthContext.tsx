@@ -5,8 +5,9 @@ import React, {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
 } from 'react';
-import { User } from 'firebase/auth';
+import { User, deleteUser } from 'firebase/auth';
 import {
   signUp as firebaseSignUp,
   signIn as firebaseSignIn,
@@ -35,6 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Flag to skip profile fetch in onAuthStateChanged during signup
+  const isSigningUp = useRef(false);
 
   // Listen to Firebase auth state
   useEffect(() => {
@@ -42,11 +45,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(firebaseUser);
 
       if (firebaseUser) {
-        try {
-          const profile = await getUserProfile(firebaseUser.uid);
-          setUserProfile(profile);
-        } catch {
-          setUserProfile(null);
+        // Skip profile fetch if signup is handling it
+        if (!isSigningUp.current) {
+          try {
+            const profile = await getUserProfile(firebaseUser.uid);
+            setUserProfile(profile);
+          } catch {
+            setUserProfile(null);
+          }
         }
       } else {
         setUserProfile(null);
@@ -70,16 +76,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = useCallback(
     async (email: string, password: string, displayName: string) => {
-      const credential = await firebaseSignUp(email, password, displayName);
+      isSigningUp.current = true;
+      let credential;
 
-      // Create user profile document in Firestore with default settings
-      await createUserProfile(credential.user.uid, {
-        displayName,
-        email,
-      });
+      try {
+        credential = await firebaseSignUp(email, password, displayName);
 
-      const profile = await getUserProfile(credential.user.uid);
-      setUserProfile(profile);
+        // Create user profile document in Firestore with default settings
+        await createUserProfile(credential.user.uid, {
+          displayName,
+          email,
+        });
+
+        const profile = await getUserProfile(credential.user.uid);
+        setUserProfile(profile);
+      } catch (error) {
+        // If auth succeeded but profile creation failed, clean up the auth user
+        if (credential?.user) {
+          try {
+            await deleteUser(credential.user);
+          } catch {
+            // Best-effort cleanup
+          }
+        }
+        throw error;
+      } finally {
+        isSigningUp.current = false;
+      }
     },
     []
   );
