@@ -28,28 +28,28 @@ import {
 } from '@/types';
 
 // Helper to convert Firestore Timestamps to Dates
-function toDate(timestamp: Timestamp | Date): Date {
+const toDate = (timestamp: Timestamp | Date): Date => {
   return timestamp instanceof Timestamp ? timestamp.toDate() : timestamp;
-}
+};
 
 // Helper to get user-scoped collection reference
-function getUserCollection(userId: string, collectionName: string): CollectionReference {
+const getUserCollection = (userId: string, collectionName: string): CollectionReference => {
   return collection(db, 'users', userId, collectionName);
-}
+};
 
 // Helper to get user-scoped document reference
-function getUserDoc(userId: string, collectionName: string, docId: string): DocumentReference {
+const getUserDoc = (userId: string, collectionName: string, docId: string): DocumentReference => {
   return doc(db, 'users', userId, collectionName, docId);
-}
+};
 
 // ============================================================================
 // User Profile Operations
 // ============================================================================
 
-export async function createUserProfile(
+export const createUserProfile = async (
   userId: string,
   data: { displayName: string; email: string }
-): Promise<void> {
+): Promise<void> => {
   const defaultSettings: UserSettings = {
     scoringStrictness: 'normal',
     notificationsEnabled: true,
@@ -69,9 +69,9 @@ export async function createUserProfile(
   };
 
   await setDoc(doc(db, 'users', userId, 'profile', 'main'), profile);
-}
+};
 
-export async function getUserProfile(userId: string): Promise<UserProfile | null> {
+export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
   const docRef = doc(db, 'users', userId, 'profile', 'main');
   const docSnap = await getDoc(docRef);
 
@@ -87,12 +87,12 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
     createdAt: toDate(data.createdAt),
     settings: data.settings,
   };
-}
+};
 
-export async function updateUserSettings(
+export const updateUserSettings = async (
   userId: string,
   settings: Partial<UserSettings>
-): Promise<void> {
+): Promise<void> => {
   const docRef = doc(db, 'users', userId, 'profile', 'main');
 
   // Use dot notation to merge settings instead of replacing the entire object
@@ -102,16 +102,16 @@ export async function updateUserSettings(
   }
 
   await updateDoc(docRef, updateFields);
-}
+};
 
 // ============================================================================
 // Attributes Operations
 // ============================================================================
 
-export async function createAttribute(
+export const createAttribute = async (
   userId: string,
   input: AttributeInput
-): Promise<string> {
+): Promise<string> => {
   const colRef = getUserCollection(userId, 'attributes');
   const newDocRef = doc(colRef);
 
@@ -124,9 +124,9 @@ export async function createAttribute(
 
   await setDoc(newDocRef, attribute);
   return newDocRef.id;
-}
+};
 
-export async function getAttributes(userId: string): Promise<Attribute[]> {
+export const getAttributes = async (userId: string): Promise<Attribute[]> => {
   const colRef = getUserCollection(userId, 'attributes');
   const q = query(colRef, orderBy('order', 'asc'));
   const snapshot = await getDocs(q);
@@ -141,34 +141,34 @@ export async function getAttributes(userId: string): Promise<Attribute[]> {
       order: data.order,
     };
   });
-}
+};
 
-export async function updateAttribute(
+export const updateAttribute = async (
   userId: string,
   attributeId: string,
   updates: Partial<AttributeInput>
-): Promise<void> {
+): Promise<void> => {
   const docRef = getUserDoc(userId, 'attributes', attributeId);
   await updateDoc(docRef, updates);
-}
+};
 
-export async function deleteAttribute(
+export const deleteAttribute = async (
   userId: string,
   attributeId: string
-): Promise<void> {
+): Promise<void> => {
   const docRef = getUserDoc(userId, 'attributes', attributeId);
   await deleteDoc(docRef);
-}
+};
 
 // ============================================================================
 // Prospects Operations
 // ============================================================================
 
-export async function createProspect(
+export const createProspect = async (
   userId: string,
   input: ProspectInput,
   attributes: Attribute[]
-): Promise<string> {
+): Promise<string> => {
   const colRef = getUserCollection(userId, 'prospects');
   const newDocRef = doc(colRef);
   const now = Timestamp.now();
@@ -197,12 +197,12 @@ export async function createProspect(
   }
 
   return newDocRef.id;
-}
+};
 
-export async function getProspect(
+export const getProspect = async (
   userId: string,
   prospectId: string
-): Promise<Prospect | null> {
+): Promise<Prospect | null> => {
   const docRef = getUserDoc(userId, 'prospects', prospectId);
   const docSnap = await getDoc(docRef);
 
@@ -231,12 +231,12 @@ export async function getProspect(
     updatedAt: toDate(data.updatedAt),
     archivedAt: data.archivedAt ? toDate(data.archivedAt) : undefined,
   };
-}
+};
 
-export async function getProspects(
+export const getProspects = async (
   userId: string,
   constraints: QueryConstraint[] = []
-): Promise<Prospect[]> {
+): Promise<Prospect[]> => {
   const colRef = getUserCollection(userId, 'prospects');
   const q = query(colRef, ...constraints);
   const snapshot = await getDocs(q);
@@ -268,65 +268,65 @@ export async function getProspects(
   }
 
   return prospects;
-}
+};
 
-export async function getActiveProspects(userId: string): Promise<Prospect[]> {
+export const getActiveProspects = async (userId: string): Promise<Prospect[]> => {
   return getProspects(userId, [
     where('status', 'in', ['talking', 'dating', 'relationship']),
     orderBy('updatedAt', 'desc'),
   ]);
-}
+};
 
-export async function getArchivedProspects(userId: string): Promise<Prospect[]> {
+export const getArchivedProspects = async (userId: string): Promise<Prospect[]> => {
   return getProspects(userId, [
     where('status', '==', 'archived'),
     orderBy('archivedAt', 'desc'),
   ]);
-}
+};
 
-export async function updateProspect(
+export const updateProspect = async (
   userId: string,
   prospectId: string,
   updates: Partial<Omit<Prospect, 'id' | 'traits' | 'dates' | 'createdAt'>>
-): Promise<void> {
+): Promise<void> => {
   const docRef = getUserDoc(userId, 'prospects', prospectId);
   await updateDoc(docRef, {
     ...updates,
     updatedAt: Timestamp.now(),
   });
-}
+};
 
-export async function archiveProspect(
+export const archiveProspect = async (
   userId: string,
   prospectId: string
-): Promise<void> {
+): Promise<void> => {
   const docRef = getUserDoc(userId, 'prospects', prospectId);
   await updateDoc(docRef, {
     status: 'archived',
     archivedAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   });
-}
+};
 
-export async function deleteProspect(
+export const deleteProspect = async (
   userId: string,
   prospectId: string
-): Promise<void> {
+): Promise<void> => {
   // Note: In production, you'd want to delete subcollections (traits, dates) too
   // This requires either Cloud Functions or batch deletes
   const docRef = getUserDoc(userId, 'prospects', prospectId);
   await deleteDoc(docRef);
-}
+};
 
 // ============================================================================
 // Traits Operations
 // ============================================================================
 
-async function getProspectTraits(
+const getProspectTraits = async (
   userId: string,
   prospectId: string,
   attributesMap?: Map<string, Attribute>
-): Promise<Trait[]> {
+): Promise<Trait[]> => {
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
   const traitsColRef = collection(prospectDocRef, 'traits');
   const snapshot = await getDocs(traitsColRef);
@@ -348,14 +348,14 @@ async function getProspectTraits(
       updatedAt: toDate(data.updatedAt),
     };
   });
-}
+};
 
-export async function updateTrait(
+export const updateTrait = async (
   userId: string,
   prospectId: string,
   traitId: string,
   state: TraitState
-): Promise<void> {
+): Promise<void> => {
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
   const traitDocRef = doc(prospectDocRef, 'traits', traitId);
 
@@ -368,16 +368,16 @@ export async function updateTrait(
   await updateDoc(prospectDocRef, {
     updatedAt: Timestamp.now(),
   });
-}
+};
 
 // ============================================================================
 // Date Entries Operations
 // ============================================================================
 
-async function getProspectDates(
+const getProspectDates = async (
   userId: string,
   prospectId: string
-): Promise<DateEntry[]> {
+): Promise<DateEntry[]> => {
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
   const datesColRef = collection(prospectDocRef, 'dates');
   const q = query(datesColRef, orderBy('date', 'desc'));
@@ -394,13 +394,13 @@ async function getProspectDates(
       createdAt: toDate(data.createdAt),
     };
   });
-}
+};
 
-export async function addDateEntry(
+export const addDateEntry = async (
   userId: string,
   prospectId: string,
   entry: Omit<DateEntry, 'id' | 'createdAt'>
-): Promise<string> {
+): Promise<string> => {
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
   const datesColRef = collection(prospectDocRef, 'dates');
   const newDocRef = doc(datesColRef);
@@ -429,14 +429,14 @@ export async function addDateEntry(
   await updateDoc(prospectDocRef, updates);
 
   return newDocRef.id;
-}
+};
 
-export async function updateDateEntry(
+export const updateDateEntry = async (
   userId: string,
   prospectId: string,
   dateId: string,
   updates: Partial<Omit<DateEntry, 'id' | 'createdAt'>>
-): Promise<void> {
+): Promise<void> => {
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
   const dateDocRef = doc(prospectDocRef, 'dates', dateId);
 
@@ -447,14 +447,14 @@ export async function updateDateEntry(
   if (updates.rating !== undefined) updateData.rating = updates.rating || null;
 
   await updateDoc(dateDocRef, updateData);
-}
+};
 
-export async function deleteDateEntry(
+export const deleteDateEntry = async (
   userId: string,
   prospectId: string,
   dateId: string
-): Promise<void> {
+): Promise<void> => {
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
   const dateDocRef = doc(prospectDocRef, 'dates', dateId);
   await deleteDoc(dateDocRef);
-}
+};

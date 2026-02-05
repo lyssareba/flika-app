@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import { useTheme } from '@/hooks';
 
-export default function HomeScreen() {
+const HomeScreen = () => {
   const theme = useTheme();
 
   return (
@@ -21,4 +21,6 @@ export default function HomeScreen() {
       </Text>
     </View>
   );
-}
+};
+
+export default HomeScreen;
