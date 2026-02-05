@@ -94,9 +94,14 @@ export async function updateUserSettings(
   settings: Partial<UserSettings>
 ): Promise<void> {
   const docRef = doc(db, 'users', userId, 'profile', 'main');
-  await updateDoc(docRef, {
-    settings: settings,
-  });
+
+  // Use dot notation to merge settings instead of replacing the entire object
+  const updateFields: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(settings)) {
+    updateFields[`settings.${key}`] = value;
+  }
+
+  await updateDoc(docRef, updateFields);
 }
 
 // ============================================================================
@@ -236,11 +241,15 @@ export async function getProspects(
   const q = query(colRef, ...constraints);
   const snapshot = await getDocs(q);
 
+  // Fetch attributes once to avoid N+1 queries
+  const attributes = await getAttributes(userId);
+  const attributesMap = new Map(attributes.map((a) => [a.id, a]));
+
   const prospects: Prospect[] = [];
 
   for (const docSnap of snapshot.docs) {
     const data = docSnap.data();
-    const traits = await getProspectTraits(userId, docSnap.id);
+    const traits = await getProspectTraits(userId, docSnap.id, attributesMap);
     const dates = await getProspectDates(userId, docSnap.id);
 
     prospects.push({
@@ -315,15 +324,16 @@ export async function deleteProspect(
 
 async function getProspectTraits(
   userId: string,
-  prospectId: string
+  prospectId: string,
+  attributesMap?: Map<string, Attribute>
 ): Promise<Trait[]> {
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
   const traitsColRef = collection(prospectDocRef, 'traits');
   const snapshot = await getDocs(traitsColRef);
 
-  // We need to fetch attribute names for denormalization
-  const attributes = await getAttributes(userId);
-  const attrMap = new Map(attributes.map((a) => [a.id, a]));
+  // Use provided map or fetch attributes if not provided
+  const attrMap =
+    attributesMap ?? new Map((await getAttributes(userId)).map((a) => [a.id, a]));
 
   return snapshot.docs.map((doc) => {
     const data = doc.data();
