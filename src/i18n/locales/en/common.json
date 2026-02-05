@@ -33,9 +33,10 @@
   "Sign Out": "Sign Out",
   "Sign In": "Sign In",
   "Sign Up": "Sign Up",
-  "days ago": "days ago",
-  "week ago": "week ago",
-  "weeks ago": "weeks ago",
+  "{{count}} day ago": "{{count}} day ago",
+  "{{count}} days ago": "{{count}} days ago",
+  "{{count}} week ago": "{{count}} week ago",
+  "{{count}} weeks ago": "{{count}} weeks ago",
   "today": "today",
   "yesterday": "yesterday",
   "Unknown": "Unknown"
