@@ -73,3 +73,9 @@ src/
 - **Platform-specific files**: Use `.ios.tsx`, `.android.tsx`, `.web.ts` suffixes for platform variants
 - **Typed routes**: Expo Router generates type-safe route names
 - **Barrel exports**: Each directory has an `index.ts` for clean imports
+
+## Workflow Rules
+
+- **Never merge PRs without explicit permission** - Always wait for the user to say "merge it" or similar before merging
+- **Don't ask for confirmation to create issues** - Just create them when needed
+- **Run agents one at a time** - Don't run multiple agents in parallel to avoid branch conflicts
