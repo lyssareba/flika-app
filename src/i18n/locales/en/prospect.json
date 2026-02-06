@@ -54,6 +54,7 @@
   "Based on behavioral research (loss aversion)": "Based on behavioral research (loss aversion)",
   "Scoring mode": "Scoring mode",
   "Adjust in Settings": "Adjust in Settings",
+  "strictness_noEffect": "No Effect",
   "strictness_gentle": "Gentle",
   "strictness_normal": "Normal",
   "strictness_strict": "Strict"
