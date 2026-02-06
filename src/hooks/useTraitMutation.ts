@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import { updateTrait } from '@/services/firebase/firestore';
 import { useAuth } from './useAuth';
-import { prospectKeys } from './useProspectQuery';
+import { queryKeys } from './queryKeys';
 import type { Prospect, TraitState } from '@/types';
 
 /**
@@ -27,27 +27,22 @@ export const useTraitMutation = (prospectId: string | undefined) => {
     },
     // Optimistic update
     onMutate: async ({ traitId, state }) => {
+      const queryKey = queryKeys.prospects.detail(prospectId ?? '');
+
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({
-        queryKey: prospectKeys.detail(prospectId ?? ''),
-      });
+      await queryClient.cancelQueries({ queryKey });
 
       // Snapshot the previous value
-      const previousProspect = queryClient.getQueryData<Prospect>(
-        prospectKeys.detail(prospectId ?? '')
-      );
+      const previousProspect = queryClient.getQueryData<Prospect>(queryKey);
 
       // Optimistically update
       if (previousProspect) {
-        queryClient.setQueryData<Prospect>(
-          prospectKeys.detail(prospectId ?? ''),
-          {
-            ...previousProspect,
-            traits: previousProspect.traits.map((trait) =>
-              trait.id === traitId ? { ...trait, state, updatedAt: new Date() } : trait
-            ),
-          }
-        );
+        queryClient.setQueryData<Prospect>(queryKey, {
+          ...previousProspect,
+          traits: previousProspect.traits.map((trait) =>
+            trait.id === traitId ? { ...trait, state, updatedAt: new Date() } : trait
+          ),
+        });
       }
 
       return { previousProspect };
@@ -57,7 +52,7 @@ export const useTraitMutation = (prospectId: string | undefined) => {
       // Rollback to previous state
       if (context?.previousProspect) {
         queryClient.setQueryData(
-          prospectKeys.detail(prospectId ?? ''),
+          queryKeys.prospects.detail(prospectId ?? ''),
           context.previousProspect
         );
       }
@@ -75,7 +70,11 @@ export const useTraitMutation = (prospectId: string | undefined) => {
     // Invalidate after success to ensure consistency
     onSettled: () => {
       queryClient.invalidateQueries({
-        queryKey: prospectKeys.detail(prospectId ?? ''),
+        queryKey: queryKeys.prospects.detail(prospectId ?? ''),
+      });
+      // Also invalidate prospects list since updatedAt changes
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.prospects.list(),
       });
     },
   });

@@ -1,8 +1,29 @@
+// Theme
 export { useTheme, useThemeContext } from './useTheme';
+
+// App Lock
 export { useAppLock } from './useAppLock';
-export { useAttributes } from './useAttributes';
+
+// Auth
 export { useAuth } from './useAuth';
+
+// Compatibility
 export { useCompatibility } from './useCompatibility';
-export { useProspects } from './useProspects';
-export { useProspectQuery, prospectKeys } from './useProspectQuery';
+
+// Query Keys (centralized)
+export { queryKeys } from './queryKeys';
+
+// Queries
+export { useProspectQuery } from './useProspectQuery';
+export { useProspectsListQuery } from './useProspectsListQuery';
+export { useAttributesQuery } from './useAttributesQuery';
+export { useUserProfileQuery } from './useUserProfileQuery';
+
+// Mutations
 export { useTraitMutation } from './useTraitMutation';
+export { useProspectMutations } from './useProspectMutations';
+export { useAttributeMutations } from './useAttributeMutations';
+
+// Context-based hooks (will be refactored to use queries)
+export { useAttributes } from './useAttributes';
+export { useProspects } from './useProspects';
