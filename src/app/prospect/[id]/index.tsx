@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,8 @@ import {
   Alert,
   ActivityIndicator,
   TextInput,
-  Keyboard,
+  Modal,
+  KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -75,10 +76,9 @@ const ProspectScreen = () => {
   const [prospect, setProspect] = useState<Prospect | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
-  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [showNotesModal, setShowNotesModal] = useState(false);
   const [notesText, setNotesText] = useState('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
-  const scrollViewRef = useRef<ScrollView>(null);
 
   // Load prospect details
   useEffect(() => {
@@ -181,13 +181,18 @@ const ProspectScreen = () => {
     Alert.alert(tc('Coming soon'), 'Score breakdown will be available soon.');
   }, [tc]);
 
+  const handleOpenNotesModal = useCallback(() => {
+    setNotesText(prospect?.notes || '');
+    setShowNotesModal(true);
+  }, [prospect?.notes]);
+
   const handleSaveNotes = useCallback(async () => {
     if (!prospect) return;
     setIsSavingNotes(true);
     try {
       await updateProspectInfo(prospect.id, { notes: notesText.trim() || undefined });
       setProspect((prev) => (prev ? { ...prev, notes: notesText.trim() || undefined } : null));
-      setIsEditingNotes(false);
+      setShowNotesModal(false);
     } catch (error) {
       console.error('Error saving notes:', error);
       Alert.alert(tc('Error'), tc('Failed to save notes.'));
@@ -198,16 +203,8 @@ const ProspectScreen = () => {
 
   const handleCancelNotes = useCallback(() => {
     setNotesText(prospect?.notes || '');
-    setIsEditingNotes(false);
-    Keyboard.dismiss();
+    setShowNotesModal(false);
   }, [prospect?.notes]);
-
-  const handleNotesInputFocus = useCallback(() => {
-    // Delay to allow keyboard to appear, then scroll to bottom
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, Platform.OS === 'ios' ? 300 : 100);
-  }, []);
 
   if (isLoading) {
     return (
@@ -283,12 +280,7 @@ const ProspectScreen = () => {
         </View>
       )}
 
-      <ScrollView
-        ref={scrollViewRef}
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         {/* Photo */}
         <View style={styles.photoSection}>
           {prospect.photoUri ? (
@@ -356,55 +348,15 @@ const ProspectScreen = () => {
         </View>
 
         {/* Notes Section */}
-        <View style={styles.notesSection}>
+        <TouchableOpacity style={styles.notesSection} onPress={handleOpenNotesModal}>
           <View style={styles.notesSectionHeader}>
             <Text style={styles.sectionTitle}>{t('Notes')}</Text>
-            {!isEditingNotes && (
-              <TouchableOpacity onPress={() => setIsEditingNotes(true)}>
-                <Ionicons name="pencil" size={18} color={theme.colors.primary} />
-              </TouchableOpacity>
-            )}
+            <Ionicons name="pencil" size={18} color={theme.colors.primary} />
           </View>
-          {isEditingNotes ? (
-            <View style={styles.notesEditContainer}>
-              <TextInput
-                style={styles.notesInput}
-                value={notesText}
-                onChangeText={setNotesText}
-                placeholder={tc('Add any notes...')}
-                placeholderTextColor={theme.colors.textMuted}
-                multiline
-                textAlignVertical="top"
-                onFocus={handleNotesInputFocus}
-                autoFocus
-              />
-              <View style={styles.notesEditActions}>
-                <TouchableOpacity
-                  style={styles.notesEditButton}
-                  onPress={handleCancelNotes}
-                  disabled={isSavingNotes}
-                >
-                  <Text style={styles.notesEditButtonTextCancel}>{tc('Cancel')}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.notesEditButton, styles.notesEditButtonSave]}
-                  onPress={handleSaveNotes}
-                  disabled={isSavingNotes}
-                >
-                  {isSavingNotes ? (
-                    <ActivityIndicator size="small" color={theme.colors.textOnPrimary} />
-                  ) : (
-                    <Text style={styles.notesEditButtonTextSave}>{tc('Save')}</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <Text style={styles.notesText}>
-              {prospect.notes || tc('No notes yet. Tap the pencil to add some.')}
-            </Text>
-          )}
-        </View>
+          <Text style={styles.notesText} numberOfLines={3}>
+            {prospect.notes || tc('No notes yet. Tap to add some.')}
+          </Text>
+        </TouchableOpacity>
 
         {/* Status Section */}
         <View style={styles.statusSection}>
@@ -434,6 +386,45 @@ const ProspectScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Notes Modal */}
+      <Modal
+        visible={showNotesModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={handleCancelNotes}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.modalKeyboardView}
+          >
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={handleCancelNotes} disabled={isSavingNotes}>
+                <Text style={styles.modalCancelText}>{tc('Cancel')}</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>{t('Notes')}</Text>
+              <TouchableOpacity onPress={handleSaveNotes} disabled={isSavingNotes}>
+                {isSavingNotes ? (
+                  <ActivityIndicator size="small" color={theme.colors.primary} />
+                ) : (
+                  <Text style={styles.modalSaveText}>{tc('Save')}</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.modalNotesInput}
+              value={notesText}
+              onChangeText={setNotesText}
+              placeholder={tc('Add any notes...')}
+              placeholderTextColor={theme.colors.textMuted}
+              multiline
+              textAlignVertical="top"
+              autoFocus
+            />
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -636,39 +627,42 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.textPrimary,
       lineHeight: 22,
     },
-    notesEditContainer: {
-      gap: 12,
-    },
-    notesInput: {
+    modalContainer: {
+      flex: 1,
       backgroundColor: theme.colors.background,
-      borderRadius: 8,
-      padding: 12,
+    },
+    modalKeyboardView: {
+      flex: 1,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.backgroundCard,
+    },
+    modalTitle: {
+      fontSize: theme.typography.fontSize.lg,
+      fontWeight: '600',
+      color: theme.colors.textPrimary,
+    },
+    modalCancelText: {
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.textSecondary,
+    },
+    modalSaveText: {
+      fontSize: theme.typography.fontSize.base,
+      fontWeight: '600',
+      color: theme.colors.primary,
+    },
+    modalNotesInput: {
+      flex: 1,
+      padding: 16,
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.textPrimary,
-      minHeight: 100,
-    },
-    notesEditActions: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      gap: 12,
-    },
-    notesEditButton: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 8,
-    },
-    notesEditButtonSave: {
-      backgroundColor: theme.colors.primary,
-    },
-    notesEditButtonTextCancel: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.textSecondary,
-      fontWeight: '500',
-    },
-    notesEditButtonTextSave: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.textOnPrimary,
-      fontWeight: '500',
+      textAlignVertical: 'top',
     },
     statusSection: {
       gap: 12,
