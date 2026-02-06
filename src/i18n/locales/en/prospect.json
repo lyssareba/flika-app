@@ -44,5 +44,17 @@
   "Congratulations!": "Congratulations!",
   "Would you like to archive your other prospects?": "Would you like to archive your other prospects?",
   "Archive others": "Archive others",
-  "Keep them for now": "Keep them for now"
+  "Keep them for now": "Keep them for now",
+  "Dealbreakers": "Dealbreakers",
+  "Desired Traits": "Desired Traits",
+  "{{confirmed}} of {{total}} confirmed": "{{confirmed}} of {{total}} confirmed",
+  "Category score": "Category score",
+  "How scoring works": "How scoring works",
+  "\"No\" responses have {{multiplier}}x impact because losing something we want feels stronger than gaining it.": "\"No\" responses have {{multiplier}}x impact because losing something we want feels stronger than gaining it.",
+  "Based on behavioral research (loss aversion)": "Based on behavioral research (loss aversion)",
+  "Scoring mode": "Scoring mode",
+  "Adjust in Settings": "Adjust in Settings",
+  "strictness_gentle": "Gentle",
+  "strictness_normal": "Normal",
+  "strictness_strict": "Strict"
 }
