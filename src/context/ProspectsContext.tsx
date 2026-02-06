@@ -1,23 +1,6 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from 'react';
-import { useAuthContext } from './AuthContext';
-import { useAttributesContext } from './AttributesContext';
-import {
-  subscribeToProspects,
-  createProspect,
-  updateProspect,
-  archiveProspect,
-  restoreProspect,
-  deleteProspect,
-  getProspect,
-  type ProspectListData,
-} from '@/services/firebase/firestore';
+import React, { createContext, useContext, useMemo, useCallback } from 'react';
+import { useProspectsListQuery, useProspectMutations, useAuth } from '@/hooks';
+import { type ProspectListData, getProspect } from '@/services/firebase/firestore';
 import type { Prospect, ProspectInput, ProspectStatus } from '@/types';
 
 interface ProspectsContextType {
@@ -31,122 +14,79 @@ interface ProspectsContextType {
   updateProspectInfo: (
     prospectId: string,
     updates: Partial<Pick<Prospect, 'name' | 'photoUri' | 'howWeMet' | 'notes'>>
-  ) => Promise<void>;
+  ) => void;
   /** Update a prospect's status */
-  updateProspectStatus: (prospectId: string, status: ProspectStatus) => Promise<void>;
+  updateProspectStatus: (prospectId: string, status: ProspectStatus) => void;
   /** Archive a prospect */
-  archive: (prospectId: string) => Promise<void>;
+  archive: (prospectId: string) => void;
   /** Restore an archived prospect */
-  restore: (prospectId: string) => Promise<void>;
+  restore: (prospectId: string) => void;
   /** Permanently delete a prospect */
-  remove: (prospectId: string) => Promise<void>;
-  /** Get a single prospect with full details (traits, dates) */
+  remove: (prospectId: string) => void;
+  /** Get a single prospect with full details (traits, dates) - deprecated, use useProspectQuery */
   getProspectDetails: (prospectId: string) => Promise<Prospect | null>;
-  /** Refresh prospects list */
+  /** Refresh prospects list - now handled automatically by TanStack Query */
   refreshProspects: () => void;
 }
 
 const ProspectsContext = createContext<ProspectsContextType | undefined>(undefined);
 
 export const ProspectsProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuthContext();
-  const { attributes } = useAttributesContext();
-  const [prospects, setProspects] = useState<ProspectListData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const { user } = useAuth();
 
-  // Subscribe to real-time updates
-  useEffect(() => {
-    if (!user) {
-      setProspects([]);
-      setIsLoading(false);
-      return;
-    }
+  // Use TanStack Query for data fetching
+  const { data: prospects = [], isLoading } = useProspectsListQuery();
 
-    setIsLoading(true);
+  // Use TanStack Query mutations
+  const {
+    createProspect,
+    updateProspectInfo: updateInfo,
+    updateProspectStatus: updateStatus,
+    archive: archiveProspect,
+    restore: restoreProspect,
+    remove: removeProspect,
+  } = useProspectMutations();
 
-    const unsubscribe = subscribeToProspects(
-      user.uid,
-      (data) => {
-        setProspects(data);
-        setIsLoading(false);
-      },
-      (error) => {
-        console.error('Error subscribing to prospects:', error);
-        setIsLoading(false);
-      }
-    );
-
-    return () => {
-      unsubscribe();
-    };
-  }, [user, refreshKey]);
-
+  // Wrapper for addProspect that matches the old interface
   const addProspect = useCallback(
     async (input: ProspectInput): Promise<string> => {
-      if (!user) throw new Error('User not authenticated');
-      return createProspect(user.uid, input, attributes);
+      return createProspect(input);
     },
-    [user, attributes]
+    [createProspect]
   );
 
+  // Wrapper for updateProspectInfo
   const updateProspectInfo = useCallback(
-    async (
+    (
       prospectId: string,
       updates: Partial<Pick<Prospect, 'name' | 'photoUri' | 'howWeMet' | 'notes'>>
-    ): Promise<void> => {
-      if (!user) throw new Error('User not authenticated');
-      await updateProspect(user.uid, prospectId, updates);
+    ) => {
+      updateInfo({ prospectId, updates });
     },
-    [user]
+    [updateInfo]
   );
 
+  // Wrapper for updateProspectStatus
   const updateProspectStatus = useCallback(
-    async (prospectId: string, status: ProspectStatus): Promise<void> => {
-      if (!user) throw new Error('User not authenticated');
-      if (status === 'archived') {
-        await archiveProspect(user.uid, prospectId);
-      } else {
-        await updateProspect(user.uid, prospectId, { status });
-      }
+    (prospectId: string, status: ProspectStatus) => {
+      updateStatus({ prospectId, status });
     },
-    [user]
+    [updateStatus]
   );
 
-  const archive = useCallback(
-    async (prospectId: string): Promise<void> => {
-      if (!user) throw new Error('User not authenticated');
-      await archiveProspect(user.uid, prospectId);
-    },
-    [user]
-  );
-
-  const restore = useCallback(
-    async (prospectId: string): Promise<void> => {
-      if (!user) throw new Error('User not authenticated');
-      await restoreProspect(user.uid, prospectId);
-    },
-    [user]
-  );
-
-  const remove = useCallback(
-    async (prospectId: string): Promise<void> => {
-      if (!user) throw new Error('User not authenticated');
-      await deleteProspect(user.uid, prospectId);
-    },
-    [user]
-  );
-
+  // Deprecated: Use useProspectQuery instead
   const getProspectDetails = useCallback(
     async (prospectId: string): Promise<Prospect | null> => {
+      console.warn('getProspectDetails is deprecated. Use useProspectQuery hook instead.');
       if (!user) return null;
       return getProspect(user.uid, prospectId);
     },
     [user]
   );
 
+  // No-op: TanStack Query handles refetching automatically via real-time subscription
   const refreshProspects = useCallback(() => {
-    setRefreshKey((prev) => prev + 1);
+    // Real-time subscription handles updates automatically
   }, []);
 
   const value = useMemo(
@@ -156,9 +96,9 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
       addProspect,
       updateProspectInfo,
       updateProspectStatus,
-      archive,
-      restore,
-      remove,
+      archive: archiveProspect,
+      restore: restoreProspect,
+      remove: removeProspect,
       getProspectDetails,
       refreshProspects,
     }),
@@ -168,9 +108,9 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
       addProspect,
       updateProspectInfo,
       updateProspectStatus,
-      archive,
-      restore,
-      remove,
+      archiveProspect,
+      restoreProspect,
+      removeProspect,
       getProspectDetails,
       refreshProspects,
     ]

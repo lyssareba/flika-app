@@ -8,6 +8,7 @@ import React, {
   useRef,
 } from 'react';
 import { User, deleteUser } from 'firebase/auth';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   signUp as firebaseSignUp,
   signIn as firebaseSignIn,
@@ -16,6 +17,7 @@ import {
   resetPassword as firebaseResetPassword,
 } from '@/services/firebase/auth';
 import { createUserProfile, getUserProfile } from '@/services/firebase/firestore';
+import { queryKeys } from '@/hooks/queryKeys';
 import type { UserProfile } from '@/types';
 
 interface AuthContextType {
@@ -36,6 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   // Flag to skip profile fetch in onAuthStateChanged during signup
   const isSigningUp = useRef(false);
 
@@ -50,29 +53,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           try {
             const profile = await getUserProfile(firebaseUser.uid);
             setUserProfile(profile);
+            // Also update the query cache
+            if (profile) {
+              queryClient.setQueryData(
+                queryKeys.user.profile(firebaseUser.uid),
+                profile
+              );
+            }
           } catch {
             setUserProfile(null);
           }
         }
       } else {
         setUserProfile(null);
+        // Clear all query caches on sign out
+        queryClient.clear();
       }
 
       setIsLoading(false);
     });
 
     return unsubscribe;
-  }, []);
+  }, [queryClient]);
 
   const refreshProfile = useCallback(async () => {
     if (!user) return;
     try {
       const profile = await getUserProfile(user.uid);
       setUserProfile(profile);
+      // Also update the query cache
+      if (profile) {
+        queryClient.setQueryData(queryKeys.user.profile(user.uid), profile);
+      }
     } catch {
       // Profile fetch failed, keep existing
     }
-  }, [user]);
+  }, [user, queryClient]);
 
   const signUp = useCallback(
     async (email: string, password: string, displayName: string) => {
@@ -90,6 +106,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         const profile = await getUserProfile(credential.user.uid);
         setUserProfile(profile);
+        // Update query cache
+        if (profile) {
+          queryClient.setQueryData(
+            queryKeys.user.profile(credential.user.uid),
+            profile
+          );
+        }
       } catch (error) {
         // If auth succeeded but profile creation failed, clean up the auth user
         if (credential?.user) {
@@ -104,7 +127,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isSigningUp.current = false;
       }
     },
-    []
+    [queryClient]
   );
 
   const signIn = useCallback(async (email: string, password: string) => {
@@ -114,7 +137,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = useCallback(async () => {
     await firebaseSignOut();
     setUserProfile(null);
-  }, []);
+    // Clear all query caches
+    queryClient.clear();
+  }, [queryClient]);
 
   const resetPassword = useCallback(async (email: string) => {
     await firebaseResetPassword(email);

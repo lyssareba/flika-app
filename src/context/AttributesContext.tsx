@@ -7,14 +7,10 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuthContext } from './AuthContext';
-import {
-  getAttributes,
-  createAttribute,
-  updateAttribute,
-  deleteAttribute,
-} from '@/services/firebase/firestore';
-import type { Attribute, AttributeCategory, AttributeInput } from '@/types';
+import { useAttributesQuery, useAttributeMutations, queryKeys } from '@/hooks';
+import type { Attribute, AttributeCategory } from '@/types';
 import { getRandomPresets } from '@/constants/translations/presetAttributes';
 
 interface AttributesContextType {
@@ -38,8 +34,20 @@ const AttributesContext = createContext<AttributesContextType | undefined>(undef
 
 export const AttributesProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuthContext();
-  const [attributes, setAttributes] = useState<Attribute[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  // Use TanStack Query for attributes data
+  const { data: attributes = [], isLoading } = useAttributesQuery();
+
+  // Use TanStack Query mutations
+  const {
+    addAttribute: addAttributeMutation,
+    toggleCategory: toggleCategoryMutation,
+    reorderAttribute: reorderMutation,
+    removeAttribute: removeMutation,
+  } = useAttributeMutations();
+
+  // Suggestions state (not stored in query cache - local UI state)
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const shownPresets = useRef<Set<string>>(new Set());
   const addingNames = useRef<Set<string>>(new Set());
@@ -94,33 +102,9 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
     [attributes]
   );
 
-  // Fetch attributes from Firestore
-  const fetchAttributes = useCallback(async () => {
-    if (!user) {
-      setAttributes([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const attrs = await getAttributes(user.uid);
-      setAttributes(attrs);
-    } catch {
-      // Keep existing state on error
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
-
-  // Load on mount and when user changes
-  useEffect(() => {
-    setIsLoading(true);
-    fetchAttributes();
-  }, [fetchAttributes]);
-
   // Initialize suggestions once after initial load
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoading && attributes.length >= 0) {
       refreshSuggestions();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -135,45 +119,23 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
 
       const lowerName = trimmedName.toLowerCase();
 
-      // Guard against concurrent duplicate adds using ref
+      // Guard against concurrent duplicate adds
       if (addingNames.current.has(lowerName)) return;
 
-      // Check existing attributes for duplicates (case-insensitive)
-      let isDuplicate = false;
-      setAttributes((prev) => {
-        isDuplicate = prev.some((a) => a.name.toLowerCase() === lowerName);
-        return prev;
-      });
-      if (isDuplicate) return;
+      // Check existing attributes for duplicates
+      if (attributes.some((a) => a.name.toLowerCase() === lowerName)) return;
 
       addingNames.current.add(lowerName);
 
       try {
-        const order = Date.now();
-        const input: AttributeInput = { name: trimmedName, category };
-        const id = await createAttribute(user.uid, input);
-
-        setAttributes((prev) => {
-          // Final duplicate check against latest state
-          if (prev.some((a) => a.name.toLowerCase() === lowerName)) {
-            return prev;
-          }
-          return [...prev, {
-            id,
-            name: trimmedName,
-            category,
-            createdAt: new Date(),
-            order,
-          }];
-        });
+        addAttributeMutation({ name: trimmedName, category });
       } finally {
         addingNames.current.delete(lowerName);
       }
     },
-    [user]
+    [user, attributes, addAttributeMutation]
   );
 
-  // Add attribute from suggestion and replace the used suggestion with a new one
   const addAttributeFromSuggestion = useCallback(
     async (name: string, category: AttributeCategory) => {
       await addAttribute(name, category);
@@ -184,96 +146,28 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
 
   const removeAttribute = useCallback(
     async (attributeId: string) => {
-      if (!user) return;
-
-      // Optimistic update
-      let removed: Attribute | undefined;
-      setAttributes((prev) => {
-        removed = prev.find((a) => a.id === attributeId);
-        return prev.filter((a) => a.id !== attributeId);
-      });
-
-      try {
-        await deleteAttribute(user.uid, attributeId);
-      } catch (error) {
-        // Rollback on failure
-        if (removed) {
-          setAttributes((prev) => [...prev, removed!].sort((a, b) => a.order - b.order));
-        }
-        throw error;
-      }
+      removeMutation(attributeId);
     },
-    [user]
+    [removeMutation]
   );
 
   const toggleCategory = useCallback(
     async (attributeId: string) => {
-      if (!user) return;
-
-      // Optimistic update using functional updater to avoid stale closures
-      let newCategory: AttributeCategory | undefined;
-      setAttributes((prev) =>
-        prev.map((a) => {
-          if (a.id === attributeId) {
-            newCategory = a.category === 'dealbreaker' ? 'desired' : 'dealbreaker';
-            return { ...a, category: newCategory };
-          }
-          return a;
-        })
-      );
-
-      if (!newCategory) return;
-
-      try {
-        await updateAttribute(user.uid, attributeId, { category: newCategory });
-      } catch (error) {
-        // Rollback: toggle back
-        setAttributes((prev) =>
-          prev.map((a) => {
-            if (a.id === attributeId) {
-              const rollbackCategory: AttributeCategory =
-                a.category === 'dealbreaker' ? 'desired' : 'dealbreaker';
-              return { ...a, category: rollbackCategory };
-            }
-            return a;
-          })
-        );
-        throw error;
-      }
+      toggleCategoryMutation(attributeId);
     },
-    [user]
+    [toggleCategoryMutation]
   );
 
   const reorderAttribute = useCallback(
     async (attributeId: string, newOrder: number) => {
-      if (!user) return;
-
-      // Optimistic update
-      let previousOrder: number | undefined;
-      setAttributes((prev) => {
-        const attr = prev.find((a) => a.id === attributeId);
-        previousOrder = attr?.order;
-        return [...prev.map((a) =>
-          a.id === attributeId ? { ...a, order: newOrder } : a
-        )].sort((a, b) => a.order - b.order);
-      });
-
-      try {
-        await updateAttribute(user.uid, attributeId, { order: newOrder });
-      } catch (error) {
-        // Rollback
-        if (previousOrder !== undefined) {
-          setAttributes((prev) =>
-            [...prev.map((a) =>
-              a.id === attributeId ? { ...a, order: previousOrder! } : a
-            )].sort((a, b) => a.order - b.order)
-          );
-        }
-        throw error;
-      }
+      reorderMutation({ attributeId, newOrder });
     },
-    [user]
+    [reorderMutation]
   );
+
+  const refreshAttributes = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: queryKeys.attributes.list() });
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({
@@ -284,7 +178,7 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
       removeAttribute,
       toggleCategory,
       reorderAttribute,
-      refreshAttributes: fetchAttributes,
+      refreshAttributes,
       suggestions,
       refreshSuggestions,
       hasMinimumAttributes,
@@ -297,7 +191,7 @@ export const AttributesProvider = ({ children }: { children: React.ReactNode }) 
       removeAttribute,
       toggleCategory,
       reorderAttribute,
-      fetchAttributes,
+      refreshAttributes,
       suggestions,
       refreshSuggestions,
       hasMinimumAttributes,
