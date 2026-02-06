@@ -22,6 +22,7 @@ export { useAttributesQuery } from './useAttributesQuery';
 export { useTraitMutation } from './useTraitMutation';
 export { useProspectMutations } from './useProspectMutations';
 export { useAttributeMutations } from './useAttributeMutations';
+export { useDateMutations } from './useDateMutations';
 
 // Context-based hooks (will be refactored to use queries)
 export { useAttributes } from './useAttributes';

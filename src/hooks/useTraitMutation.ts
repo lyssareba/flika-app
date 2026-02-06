@@ -38,10 +38,18 @@ export const useTraitMutation = (prospectId: string | undefined) => {
 
       // Optimistically update
       if (previousProspect) {
+        const now = new Date();
         queryClient.setQueryData<Prospect>(queryKey, {
           ...previousProspect,
           traits: previousProspect.traits.map((trait) =>
-            trait.id === traitId ? { ...trait, state, updatedAt: new Date() } : trait
+            trait.id === traitId
+              ? {
+                  ...trait,
+                  state,
+                  updatedAt: now,
+                  confirmedAt: state === 'yes' ? now : undefined,
+                }
+              : trait
           ),
         });
       }
