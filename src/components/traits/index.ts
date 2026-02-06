@@ -1,4 +1,3 @@
-export { TraitTabs } from './TraitTabs';
-export { TraitSwipeCard } from './TraitSwipeCard';
-export { TraitList } from './TraitList';
+export { TraitFilterBar } from './TraitFilterBar';
+export { TraitSwipeRow } from './TraitSwipeRow';
 export { SwipeTutorial } from './SwipeTutorial';

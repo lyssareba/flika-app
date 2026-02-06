@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -14,18 +15,17 @@ import { useThemeContext, type Theme } from '@/theme';
 import { useProspects, useTraits, useAuth } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import {
-  TraitTabs,
-  TraitSwipeCard,
-  TraitList,
+  TraitFilterBar,
+  TraitSwipeRow,
   SwipeTutorial,
 } from '@/components/traits';
 import {
   isSwipeTutorialDismissed,
   setSwipeTutorialDismissed,
 } from '@/services/storage/asyncStorage';
-import type { Prospect, TraitState } from '@/types';
+import type { Prospect, Trait, TraitState } from '@/types';
 
-type TabType = 'toEvaluate' | 'evaluated';
+type FilterOption = 'all' | TraitState;
 
 const TraitsScreen = () => {
   const router = useRouter();
@@ -40,9 +40,9 @@ const TraitsScreen = () => {
 
   const [prospect, setProspect] = useState<Prospect | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('toEvaluate');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<FilterOption>('all');
   const [showTutorial, setShowTutorial] = useState(false);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
   // Load prospect details
   useEffect(() => {
@@ -66,41 +66,49 @@ const TraitsScreen = () => {
     checkTutorial();
   }, [user]);
 
-  // Group traits
-  const unknownTraits = useMemo(
-    () => prospect?.traits.filter((t) => t.state === 'unknown') ?? [],
-    [prospect?.traits]
-  );
+  // Count traits by state
+  const counts = useMemo(() => {
+    const traits = prospect?.traits ?? [];
+    return {
+      all: traits.length,
+      yes: traits.filter((t) => t.state === 'yes').length,
+      no: traits.filter((t) => t.state === 'no').length,
+      unknown: traits.filter((t) => t.state === 'unknown').length,
+    };
+  }, [prospect?.traits]);
 
-  const evaluatedTraits = useMemo(
-    () => prospect?.traits.filter((t) => t.state !== 'unknown') ?? [],
-    [prospect?.traits]
-  );
+  // Filter and search traits
+  const filteredTraits = useMemo(() => {
+    let traits = prospect?.traits ?? [];
 
-  // Group unknown traits by category
-  const dealbreakers = useMemo(
-    () => unknownTraits.filter((t) => t.attributeCategory === 'dealbreaker'),
-    [unknownTraits]
-  );
+    // Filter by state
+    if (activeFilter !== 'all') {
+      traits = traits.filter((t) => t.state === activeFilter);
+    }
 
-  const desired = useMemo(
-    () => unknownTraits.filter((t) => t.attributeCategory === 'desired'),
-    [unknownTraits]
-  );
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      traits = traits.filter((t) =>
+        t.attributeName.toLowerCase().includes(query)
+      );
+    }
 
-  // Combine dealbreakers first, then desired for swipe order
-  const orderedUnknownTraits = useMemo(
-    () => [...dealbreakers, ...desired],
-    [dealbreakers, desired]
-  );
+    // Sort: dealbreakers first, then by name
+    return [...traits].sort((a, b) => {
+      if (a.attributeCategory === 'dealbreaker' && b.attributeCategory !== 'dealbreaker') {
+        return -1;
+      }
+      if (a.attributeCategory !== 'dealbreaker' && b.attributeCategory === 'dealbreaker') {
+        return 1;
+      }
+      return a.attributeName.localeCompare(b.attributeName);
+    });
+  }, [prospect?.traits, activeFilter, searchQuery]);
 
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
-
-  const handleTabChange = useCallback((tab: TabType) => {
-    setActiveTab(tab);
-  }, []);
 
   const handleTutorialDismiss = useCallback(async () => {
     if (!user) return;
@@ -125,32 +133,21 @@ const TraitsScreen = () => {
             ),
           };
         });
-
-        // Move to next card if evaluating and trait was marked
-        if (newState !== 'unknown' && activeTab === 'toEvaluate') {
-          const currentTraitIndex = orderedUnknownTraits.findIndex(
-            (t) => t.id === traitId
-          );
-          if (
-            currentTraitIndex !== -1 &&
-            currentTraitIndex < orderedUnknownTraits.length - 1
-          ) {
-            setCurrentCardIndex(currentTraitIndex + 1);
-          }
-        }
       } catch (error) {
         console.error('Error updating trait:', error);
       }
     },
-    [id, prospect, updateTraitState, activeTab, orderedUnknownTraits]
+    [id, prospect, updateTraitState]
   );
 
-  const handleTraitReset = useCallback(
-    async (traitId: string) => {
-      await handleTraitStateChange(traitId, 'unknown');
-    },
+  const renderTrait = useCallback(
+    ({ item }: { item: Trait }) => (
+      <TraitSwipeRow trait={item} onStateChange={handleTraitStateChange} />
+    ),
     [handleTraitStateChange]
   );
+
+  const keyExtractor = useCallback((item: Trait) => item.id, []);
 
   if (isLoading) {
     return (
@@ -175,8 +172,6 @@ const TraitsScreen = () => {
     );
   }
 
-  const currentTrait = orderedUnknownTraits[currentCardIndex];
-
   return (
     <GestureHandlerRootView style={styles.flex}>
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -196,115 +191,45 @@ const TraitsScreen = () => {
           <View style={styles.headerButton} />
         </View>
 
-        {/* Tabs */}
-        <View style={styles.tabsContainer}>
-          <TraitTabs
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            toEvaluateCount={unknownTraits.length}
-            evaluatedCount={evaluatedTraits.length}
-          />
-        </View>
+        {/* Filter Bar */}
+        <TraitFilterBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+          counts={counts}
+        />
 
-        {/* Content */}
-        {activeTab === 'toEvaluate' ? (
-          <View style={styles.evaluateContainer}>
-            {/* Tutorial */}
-            <SwipeTutorial visible={showTutorial} onDismiss={handleTutorialDismiss} />
+        {/* Tutorial */}
+        {showTutorial && (
+          <SwipeTutorial visible={showTutorial} onDismiss={handleTutorialDismiss} />
+        )}
 
-            {orderedUnknownTraits.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <Ionicons
-                  name="checkmark-circle"
-                  size={64}
-                  color={theme.colors.traitYesText}
-                />
-                <Text style={styles.emptyTitle}>{t('All traits evaluated!')}</Text>
-                <Text style={styles.emptySubtitle}>
-                  {t('Tap any trait to reset to unknown')}
-                </Text>
-                <TouchableOpacity
-                  style={styles.viewEvaluatedButton}
-                  onPress={() => setActiveTab('evaluated')}
-                >
-                  <Text style={styles.viewEvaluatedText}>{t('Evaluated')}</Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={theme.colors.primary}
-                  />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <>
-                {/* Progress indicator */}
-                <View style={styles.progressContainer}>
-                  <Text style={styles.progressText}>
-                    {currentCardIndex + 1} / {orderedUnknownTraits.length}
-                  </Text>
-                  {currentTrait?.attributeCategory === 'dealbreaker' && (
-                    <View style={styles.categoryBadge}>
-                      <Text style={styles.categoryText}>{t('Dealbreakers')}</Text>
-                    </View>
-                  )}
-                </View>
-
-                {/* Swipe Card */}
-                {currentTrait && (
-                  <TraitSwipeCard
-                    key={currentTrait.id}
-                    trait={currentTrait}
-                    onStateChange={handleTraitStateChange}
-                  />
-                )}
-
-                {/* Navigation dots */}
-                <View style={styles.dotsContainer}>
-                  {orderedUnknownTraits.slice(0, 10).map((trait, index) => (
-                    <TouchableOpacity
-                      key={trait.id}
-                      style={[
-                        styles.dot,
-                        index === currentCardIndex && styles.dotActive,
-                      ]}
-                      onPress={() => setCurrentCardIndex(index)}
-                    />
-                  ))}
-                  {orderedUnknownTraits.length > 10 && (
-                    <Text style={styles.moreDotsText}>
-                      +{orderedUnknownTraits.length - 10}
-                    </Text>
-                  )}
-                </View>
-              </>
+        {/* Traits List */}
+        {filteredTraits.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons
+              name="search"
+              size={48}
+              color={theme.colors.textMuted}
+            />
+            <Text style={styles.emptyTitle}>
+              {searchQuery ? t('No matching traits') : t('No traits')}
+            </Text>
+            {searchQuery && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Text style={styles.clearSearchText}>{tc('Clear search')}</Text>
+              </TouchableOpacity>
             )}
           </View>
         ) : (
-          <View style={styles.evaluatedContainer}>
-            {evaluatedTraits.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <Ionicons
-                  name="help-circle"
-                  size={64}
-                  color={theme.colors.textMuted}
-                />
-                <Text style={styles.emptyTitle}>{t('No traits to evaluate')}</Text>
-                <TouchableOpacity
-                  style={styles.viewEvaluatedButton}
-                  onPress={() => setActiveTab('toEvaluate')}
-                >
-                  <Text style={styles.viewEvaluatedText}>{t('To Evaluate')}</Text>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={18}
-                    color={theme.colors.primary}
-                  />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <TraitList traits={evaluatedTraits} onTraitPress={handleTraitReset} />
-            )}
-          </View>
+          <FlatList
+            data={filteredTraits}
+            renderItem={renderTrait}
+            keyExtractor={keyExtractor}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
         )}
       </SafeAreaView>
     </GestureHandlerRootView>
@@ -357,15 +282,8 @@ const createStyles = (theme: Theme) =>
       textAlign: 'center',
       marginHorizontal: 8,
     },
-    tabsContainer: {
-      padding: 16,
-      paddingBottom: 8,
-    },
-    evaluateContainer: {
-      flex: 1,
-    },
-    evaluatedContainer: {
-      flex: 1,
+    listContent: {
+      paddingVertical: 8,
     },
     emptyContainer: {
       flex: 1,
@@ -375,73 +293,15 @@ const createStyles = (theme: Theme) =>
       gap: 12,
     },
     emptyTitle: {
-      fontSize: theme.typography.fontSize.xl,
-      fontWeight: '600',
-      color: theme.colors.textPrimary,
+      fontSize: theme.typography.fontSize.lg,
+      color: theme.colors.textSecondary,
       textAlign: 'center',
       marginTop: 8,
     },
-    emptySubtitle: {
-      fontSize: theme.typography.fontSize.base,
-      color: theme.colors.textSecondary,
-      textAlign: 'center',
-    },
-    viewEvaluatedButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: 16,
-      gap: 4,
-    },
-    viewEvaluatedText: {
+    clearSearchText: {
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.primary,
-      fontWeight: '500',
-    },
-    progressContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 8,
-      gap: 12,
-    },
-    progressText: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.textMuted,
-    },
-    categoryBadge: {
-      backgroundColor: theme.colors.warning + '20',
-      paddingHorizontal: 10,
-      paddingVertical: 4,
-      borderRadius: 12,
-    },
-    categoryText: {
-      fontSize: theme.typography.fontSize.xs,
-      fontWeight: '600',
-      color: theme.colors.warning,
-    },
-    dotsContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 16,
-      gap: 8,
-    },
-    dot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: theme.colors.backgroundCard,
-    },
-    dotActive: {
-      backgroundColor: theme.colors.primary,
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-    },
-    moreDotsText: {
-      fontSize: theme.typography.fontSize.xs,
-      color: theme.colors.textMuted,
-      marginLeft: 4,
+      marginTop: 8,
     },
   });
 
