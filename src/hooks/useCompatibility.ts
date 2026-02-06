@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
 import { useAuth } from './useAuth';
-import { calculateCompatibility, getScoreBreakdown } from '@/utils/compatibility';
-import type { Trait , CompatibilityScore, ScoreBreakdown } from '@/types';
+import {
+  calculateCompatibility,
+  getScoreBreakdown,
+  type StrictnessLevel,
+} from '@/utils/compatibility';
+import type { Trait, CompatibilityScore, ScoreBreakdown } from '@/types';
 
 interface UseCompatibilityReturn {
   /** Calculate compatibility score for given traits */
@@ -9,7 +13,7 @@ interface UseCompatibilityReturn {
   /** Get detailed breakdown by category */
   getBreakdown: (traits: Trait[]) => ScoreBreakdown[];
   /** Current strictness setting from user profile */
-  strictness: 'gentle' | 'normal' | 'strict';
+  strictness: StrictnessLevel;
 }
 
 /**

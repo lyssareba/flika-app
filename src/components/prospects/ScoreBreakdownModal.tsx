@@ -14,20 +14,15 @@ import { useRouter } from 'expo-router';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
 import type { ScoreBreakdown } from '@/types';
+import { STRICTNESS_SETTINGS, type StrictnessLevel } from '@/utils/compatibility';
 
 interface ScoreBreakdownModalProps {
   visible: boolean;
   onClose: () => void;
   breakdown: ScoreBreakdown[];
   overallScore: number;
-  strictness: 'gentle' | 'normal' | 'strict';
+  strictness: StrictnessLevel;
 }
-
-const STRICTNESS_MULTIPLIERS: Record<string, string> = {
-  gentle: '1.5',
-  normal: '2',
-  strict: '2.5',
-};
 
 /**
  * Modal explaining how the compatibility score is calculated.
@@ -45,7 +40,7 @@ export const ScoreBreakdownModal = ({
   const { t: tc } = useTranslation('common');
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const multiplier = STRICTNESS_MULTIPLIERS[strictness];
+  const multiplier = String(STRICTNESS_SETTINGS[strictness]);
   const strictnessLabel = t(`strictness_${strictness}`);
 
   const dealbreakersBreakdown = breakdown.find((b) => b.category === 'dealbreaker');

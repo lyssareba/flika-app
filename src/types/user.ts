@@ -1,5 +1,7 @@
+import type { StrictnessLevel } from '@/utils/compatibility';
+
 export interface UserSettings {
-  scoringStrictness: 'gentle' | 'normal' | 'strict';
+  scoringStrictness: StrictnessLevel;
   notificationsEnabled: boolean;
   quietHoursStart: string;
   quietHoursEnd: string;
