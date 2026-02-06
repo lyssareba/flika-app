@@ -4,5 +4,5 @@ export { useAttributes } from './useAttributes';
 export { useAuth } from './useAuth';
 export { useCompatibility } from './useCompatibility';
 export { useProspects } from './useProspects';
-export { useTraits } from './useTraits';
-export { useProspectQuery, useTraitMutation, prospectKeys } from './useProspectQuery';
+export { useProspectQuery, prospectKeys } from './useProspectQuery';
+export { useTraitMutation } from './useTraitMutation';

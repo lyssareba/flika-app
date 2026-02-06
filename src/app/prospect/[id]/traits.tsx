@@ -12,8 +12,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
-import { useAuth } from '@/hooks';
-import { useProspectQuery, useTraitMutation } from '@/hooks/useProspectQuery';
+import { useAuth, useProspectQuery, useTraitMutation } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import {
   TraitFilterBar,
@@ -60,9 +59,9 @@ const TraitsScreen = () => {
     const traits = prospect?.traits ?? [];
     return {
       all: traits.length,
-      yes: traits.filter((t) => t.state === 'yes').length,
-      no: traits.filter((t) => t.state === 'no').length,
-      unknown: traits.filter((t) => t.state === 'unknown').length,
+      yes: traits.filter((trait) => trait.state === 'yes').length,
+      no: traits.filter((trait) => trait.state === 'no').length,
+      unknown: traits.filter((trait) => trait.state === 'unknown').length,
     };
   }, [prospect?.traits]);
 
@@ -72,14 +71,14 @@ const TraitsScreen = () => {
 
     // Filter by state
     if (activeFilter !== 'all') {
-      traits = traits.filter((t) => t.state === activeFilter);
+      traits = traits.filter((trait) => trait.state === activeFilter);
     }
 
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
-      traits = traits.filter((t) =>
-        t.attributeName.toLowerCase().includes(query)
+      traits = traits.filter((trait) =>
+        trait.attributeName.toLowerCase().includes(query)
       );
     }
 
