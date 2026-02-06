@@ -74,6 +74,10 @@ src/
 - **Typed routes**: Expo Router generates type-safe route names
 - **Barrel exports**: Each directory has an `index.ts` for clean imports
 
+## Coding Standards
+
+- **All UI text must use i18n translations** - Never hardcode user-facing strings. Use `useTranslation` hook with appropriate namespace (`common`, `prospect`, `onboarding`, etc.) and add keys to the corresponding locale files in `src/i18n/locales/`
+
 ## Workflow Rules
 
 - **Never merge PRs without explicit permission** - Always wait for the user to say "merge it" or similar before merging
