@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
 import type { ScoreBreakdown } from '@/types';
@@ -22,7 +21,10 @@ interface ScoreBreakdownModalProps {
   breakdown: ScoreBreakdown[];
   overallScore: number;
   strictness: StrictnessLevel;
+  onStrictnessChange?: (level: StrictnessLevel) => void;
 }
+
+const STRICTNESS_OPTIONS: StrictnessLevel[] = ['noEffect', 'gentle', 'normal', 'strict'];
 
 /**
  * Modal explaining how the compatibility score is calculated.
@@ -33,23 +35,17 @@ export const ScoreBreakdownModal = ({
   breakdown,
   overallScore,
   strictness,
+  onStrictnessChange,
 }: ScoreBreakdownModalProps) => {
-  const router = useRouter();
   const { theme } = useThemeContext();
   const { t } = useTranslation('prospect');
   const { t: tc } = useTranslation('common');
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const multiplier = String(STRICTNESS_SETTINGS[strictness]);
-  const strictnessLabel = t(`strictness_${strictness}`);
 
   const dealbreakersBreakdown = breakdown.find((b) => b.category === 'dealbreaker');
   const desiredBreakdown = breakdown.find((b) => b.category === 'desired');
-
-  const handleGoToSettings = () => {
-    onClose();
-    router.push('/settings');
-  };
 
   return (
     <Modal
@@ -167,17 +163,47 @@ export const ScoreBreakdownModal = ({
                 </Text>
               </View>
 
-              {/* Strictness Setting */}
-              <View style={styles.settingsSection}>
-                <View style={styles.settingsRow}>
-                  <Text style={styles.settingsLabel}>{t('Scoring mode')}:</Text>
-                  <Text style={styles.settingsValue}>{strictnessLabel}</Text>
+              {/* Strictness Selector */}
+              {onStrictnessChange && (
+                <View style={styles.strictnessSection}>
+                  <Text style={styles.strictnessSectionTitle}>{t('Scoring mode')}</Text>
+                  <View style={styles.strictnessOptions}>
+                    {STRICTNESS_OPTIONS.map((level) => {
+                      const isSelected = level === strictness;
+                      const levelMultiplier = STRICTNESS_SETTINGS[level];
+                      return (
+                        <TouchableOpacity
+                          key={level}
+                          style={[
+                            styles.strictnessOption,
+                            isSelected && styles.strictnessOptionSelected,
+                          ]}
+                          onPress={() => onStrictnessChange(level)}
+                          accessibilityRole="radio"
+                          accessibilityState={{ checked: isSelected }}
+                        >
+                          <Text
+                            style={[
+                              styles.strictnessOptionLabel,
+                              isSelected && styles.strictnessOptionLabelSelected,
+                            ]}
+                          >
+                            {t(`strictness_${level}`)}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.strictnessOptionMultiplier,
+                              isSelected && styles.strictnessOptionMultiplierSelected,
+                            ]}
+                          >
+                            {levelMultiplier}x
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
                 </View>
-                <TouchableOpacity onPress={handleGoToSettings} style={styles.settingsLink}>
-                  <Text style={styles.settingsLinkText}>{t('Adjust in Settings')}</Text>
-                  <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
-                </TouchableOpacity>
-              </View>
+              )}
             </ScrollView>
           </SafeAreaView>
         </Pressable>
@@ -338,29 +364,48 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.textMuted,
       fontStyle: 'italic',
     },
-    settingsSection: {
-      gap: 8,
+    strictnessSection: {
+      gap: 12,
     },
-    settingsRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    settingsLabel: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.textSecondary,
-    },
-    settingsValue: {
+    strictnessSectionTitle: {
       fontSize: theme.typography.fontSize.sm,
       fontWeight: '600',
       color: theme.colors.textPrimary,
     },
-    settingsLink: {
+    strictnessOptions: {
       flexDirection: 'row',
-      alignItems: 'center',
+      gap: 8,
     },
-    settingsLinkText: {
+    strictnessOption: {
+      flex: 1,
+      paddingVertical: 10,
+      paddingHorizontal: 8,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.backgroundCard,
+      backgroundColor: theme.colors.backgroundCard,
+      alignItems: 'center',
+      gap: 2,
+    },
+    strictnessOptionSelected: {
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.colors.primary + '15',
+    },
+    strictnessOptionLabel: {
+      fontSize: theme.typography.fontSize.xs,
+      fontWeight: '500',
+      color: theme.colors.textSecondary,
+    },
+    strictnessOptionLabelSelected: {
+      color: theme.colors.primary,
+      fontWeight: '600',
+    },
+    strictnessOptionMultiplier: {
       fontSize: theme.typography.fontSize.sm,
+      fontWeight: '600',
+      color: theme.colors.textMuted,
+    },
+    strictnessOptionMultiplierSelected: {
       color: theme.colors.primary,
     },
   });

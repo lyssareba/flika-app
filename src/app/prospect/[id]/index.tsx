@@ -17,9 +17,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
-import { useProspects, useCompatibility } from '@/hooks';
+import { useProspects, useCompatibility, useAuth } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { ScoreBreakdownModal } from '@/components/prospects';
+import { updateUserSettings } from '@/services/firebase';
+import { type StrictnessLevel } from '@/utils/compatibility';
 import type { Prospect, ProspectStatus } from '@/types';
 
 type ScoreMessage = {
@@ -72,6 +74,7 @@ const ProspectScreen = () => {
   const { getProspectDetails, updateProspectInfo, updateProspectStatus, archive, remove } =
     useProspects();
   const { calculateScore, getBreakdown, strictness } = useCompatibility();
+  const { user, refreshProfile } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [prospect, setProspect] = useState<Prospect | null>(null);
@@ -212,6 +215,20 @@ const ProspectScreen = () => {
     setNotesText(prospect?.notes || '');
     setShowNotesModal(false);
   }, [prospect?.notes]);
+
+  const handleStrictnessChange = useCallback(
+    async (level: StrictnessLevel) => {
+      if (!user) return;
+      try {
+        await updateUserSettings(user.uid, { scoringStrictness: level });
+        await refreshProfile();
+      } catch (error) {
+        console.error('Error updating strictness:', error);
+        Alert.alert(tc('Error'), tc('Failed to update setting.'));
+      }
+    },
+    [user, refreshProfile, tc]
+  );
 
   if (isLoading) {
     return (
@@ -440,6 +457,7 @@ const ProspectScreen = () => {
         breakdown={scoreBreakdown}
         overallScore={compatibility?.overall ?? 0}
         strictness={strictness}
+        onStrictnessChange={handleStrictnessChange}
       />
     </SafeAreaView>
   );
