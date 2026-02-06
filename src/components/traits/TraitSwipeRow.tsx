@@ -46,6 +46,17 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
     [trait.id, onStateChange]
   );
 
+  const handleResetToUnknown = useCallback(() => {
+    if (trait.state !== 'unknown') {
+      triggerHaptic();
+      onStateChange(trait.id, 'unknown');
+    }
+  }, [trait.id, trait.state, onStateChange, triggerHaptic]);
+
+  const tapGesture = Gesture.Tap().onEnd(() => {
+    runOnJS(handleResetToUnknown)();
+  });
+
   const panGesture = Gesture.Pan()
     .activeOffsetX([-10, 10])
     .onUpdate((event) => {
@@ -77,6 +88,8 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
       });
       hasTriggeredHaptic.value = false;
     });
+
+  const composedGesture = Gesture.Race(panGesture, tapGesture);
 
   const rowStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -165,7 +178,7 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
       </View>
 
       {/* Swipeable row */}
-      <GestureDetector gesture={panGesture}>
+      <GestureDetector gesture={composedGesture}>
         <Animated.View style={[styles.row, rowStyle]}>
           <View style={styles.rowContent}>
             <Text style={styles.traitName}>
