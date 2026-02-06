@@ -24,9 +24,9 @@ interface ScoreBreakdownModalProps {
 }
 
 const STRICTNESS_MULTIPLIERS: Record<string, string> = {
-  gentle: '1.5',
-  normal: '2',
-  strict: '2.5',
+  gentle: '1',
+  normal: '1.5',
+  strict: '2',
 };
 
 /**

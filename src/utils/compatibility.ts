@@ -9,9 +9,9 @@ interface ScoringConfig {
 export type StrictnessLevel = 'gentle' | 'normal' | 'strict';
 
 const STRICTNESS_SETTINGS: Record<StrictnessLevel, number> = {
-  gentle: 1.5, // "No" has 1.5x impact
-  normal: 2.0, // "No" has 2x impact (default)
-  strict: 2.5, // "No" has 2.5x impact
+  gentle: 1.0, // "No" has 1x impact (same as "Yes")
+  normal: 1.5, // "No" has 1.5x impact (default)
+  strict: 2.0, // "No" has 2x impact
 };
 
 const DEALBREAKERS_WEIGHT = 0.6;
