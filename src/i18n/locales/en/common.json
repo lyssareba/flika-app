@@ -82,5 +82,17 @@
   "No notes yet. Tap to add some.": "No notes yet. Tap to add some.",
   "Failed to save notes.": "Failed to save notes.",
   "Failed to update setting.": "Failed to update setting.",
-  "Clear search": "Clear search"
+  "Clear search": "Clear search",
+  "Could not create prospect. Please try again.": "Could not create prospect. Please try again.",
+  "Could not update prospect. Please try again.": "Could not update prospect. Please try again.",
+  "Could not update status. Please try again.": "Could not update status. Please try again.",
+  "Could not archive prospect. Please try again.": "Could not archive prospect. Please try again.",
+  "Could not restore prospect. Please try again.": "Could not restore prospect. Please try again.",
+  "Could not delete prospect. Please try again.": "Could not delete prospect. Please try again.",
+  "Could not add attribute. Please try again.": "Could not add attribute. Please try again.",
+  "Could not update attribute. Please try again.": "Could not update attribute. Please try again.",
+  "Could not reorder attribute. Please try again.": "Could not reorder attribute. Please try again.",
+  "Could not delete attribute. Please try again.": "Could not delete attribute. Please try again.",
+  "Could not save trait change. Please try again.": "Could not save trait change. Please try again.",
+  "Update Failed": "Update Failed"
 }

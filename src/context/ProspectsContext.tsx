@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useCallback } from 'react';
-import { useProspectsListQuery, useProspectMutations } from '@/hooks';
-import { type ProspectListData } from '@/services/firebase/firestore';
+import { useProspectsListQuery, useProspectMutations, useAuth } from '@/hooks';
+import { type ProspectListData, getProspect } from '@/services/firebase/firestore';
 import type { Prospect, ProspectInput, ProspectStatus } from '@/types';
 
 interface ProspectsContextType {
@@ -32,6 +32,8 @@ interface ProspectsContextType {
 const ProspectsContext = createContext<ProspectsContextType | undefined>(undefined);
 
 export const ProspectsProvider = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+
   // Use TanStack Query for data fetching
   const { data: prospects = [], isLoading } = useProspectsListQuery();
 
@@ -74,11 +76,12 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
 
   // Deprecated: Use useProspectQuery instead
   const getProspectDetails = useCallback(
-    async (_prospectId: string): Promise<Prospect | null> => {
+    async (prospectId: string): Promise<Prospect | null> => {
       console.warn('getProspectDetails is deprecated. Use useProspectQuery hook instead.');
-      return null;
+      if (!user) return null;
+      return getProspect(user.uid, prospectId);
     },
-    []
+    [user]
   );
 
   // No-op: TanStack Query handles refetching automatically via real-time subscription

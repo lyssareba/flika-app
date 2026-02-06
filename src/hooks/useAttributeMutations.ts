@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
+import i18n from 'i18next';
 import {
   createAttribute,
   updateAttribute,
@@ -40,9 +41,9 @@ export const useAttributeMutations = () => {
         queryKeys.attributes.list()
       );
 
-      // Check for duplicates
+      // Check for duplicates - skip optimistic update if duplicate
       if (previousAttributes?.some((a) => a.name.toLowerCase() === trimmedName.toLowerCase())) {
-        return { previousAttributes, isDuplicate: true };
+        return { previousAttributes };
       }
 
       // Optimistically add the attribute
@@ -60,13 +61,16 @@ export const useAttributeMutations = () => {
         );
       }
 
-      return { previousAttributes, isDuplicate: false };
+      return { previousAttributes };
     },
     onError: (error, _variables, context) => {
       if (context?.previousAttributes) {
         queryClient.setQueryData(queryKeys.attributes.list(), context.previousAttributes);
       }
-      Alert.alert('Error', 'Could not add attribute. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not add attribute. Please try again.')
+      );
       console.error('Create attribute error:', error);
     },
     onSettled: () => {
@@ -108,7 +112,10 @@ export const useAttributeMutations = () => {
       if (context?.previousAttributes) {
         queryClient.setQueryData(queryKeys.attributes.list(), context.previousAttributes);
       }
-      Alert.alert('Error', 'Could not update attribute. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not update attribute. Please try again.')
+      );
       console.error('Update attribute error:', error);
     },
     onSettled: () => {
@@ -156,7 +163,10 @@ export const useAttributeMutations = () => {
       if (context?.previousAttributes) {
         queryClient.setQueryData(queryKeys.attributes.list(), context.previousAttributes);
       }
-      Alert.alert('Error', 'Could not update attribute. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not update attribute. Please try again.')
+      );
       console.error('Toggle category error:', error);
     },
     onSettled: () => {
@@ -197,7 +207,10 @@ export const useAttributeMutations = () => {
       if (context?.previousAttributes) {
         queryClient.setQueryData(queryKeys.attributes.list(), context.previousAttributes);
       }
-      Alert.alert('Error', 'Could not reorder attribute. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not reorder attribute. Please try again.')
+      );
       console.error('Reorder attribute error:', error);
     },
     onSettled: () => {
@@ -231,7 +244,10 @@ export const useAttributeMutations = () => {
       if (context?.previousAttributes) {
         queryClient.setQueryData(queryKeys.attributes.list(), context.previousAttributes);
       }
-      Alert.alert('Error', 'Could not delete attribute. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not delete attribute. Please try again.')
+      );
       console.error('Delete attribute error:', error);
     },
     onSettled: () => {

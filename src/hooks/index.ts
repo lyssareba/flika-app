@@ -17,7 +17,6 @@ export { queryKeys } from './queryKeys';
 export { useProspectQuery } from './useProspectQuery';
 export { useProspectsListQuery } from './useProspectsListQuery';
 export { useAttributesQuery } from './useAttributesQuery';
-export { useUserProfileQuery } from './useUserProfileQuery';
 
 // Mutations
 export { useTraitMutation } from './useTraitMutation';

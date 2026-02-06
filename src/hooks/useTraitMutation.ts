@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
+import i18n from 'i18next';
 import { updateTrait } from '@/services/firebase/firestore';
 import { useAuth } from './useAuth';
 import { queryKeys } from './queryKeys';
@@ -59,9 +60,8 @@ export const useTraitMutation = (prospectId: string | undefined) => {
 
       // Show error to user
       Alert.alert(
-        'Update Failed',
-        'Could not save trait change. Please try again.',
-        [{ text: 'OK' }]
+        i18n.t('common:Update Failed'),
+        i18n.t('common:Could not save trait change. Please try again.')
       );
 
       // Log error for debugging

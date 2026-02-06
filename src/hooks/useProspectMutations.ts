@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
+import i18n from 'i18next';
 import {
   createProspect,
   updateProspect,
@@ -31,7 +32,10 @@ export const useProspectMutations = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.prospects.list() });
     },
     onError: (error) => {
-      Alert.alert('Error', 'Could not create prospect. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not create prospect. Please try again.')
+      );
       console.error('Create prospect error:', error);
     },
   });
@@ -73,7 +77,10 @@ export const useProspectMutations = () => {
       if (context?.previousList) {
         queryClient.setQueryData(queryKeys.prospects.list(), context.previousList);
       }
-      Alert.alert('Error', 'Could not update prospect. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not update prospect. Please try again.')
+      );
       console.error('Update prospect error:', error);
     },
     onSettled: (_data, _error, { prospectId }) => {
@@ -128,7 +135,10 @@ export const useProspectMutations = () => {
       if (context?.previousList) {
         queryClient.setQueryData(queryKeys.prospects.list(), context.previousList);
       }
-      Alert.alert('Error', 'Could not update status. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not update status. Please try again.')
+      );
       console.error('Update status error:', error);
     },
     onSettled: (_data, _error, { prospectId }) => {
@@ -173,7 +183,10 @@ export const useProspectMutations = () => {
       if (context?.previousList) {
         queryClient.setQueryData(queryKeys.prospects.list(), context.previousList);
       }
-      Alert.alert('Error', 'Could not archive prospect. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not archive prospect. Please try again.')
+      );
       console.error('Archive prospect error:', error);
     },
     onSettled: (prospectId) => {
@@ -223,7 +236,10 @@ export const useProspectMutations = () => {
       if (context?.previousList) {
         queryClient.setQueryData(queryKeys.prospects.list(), context.previousList);
       }
-      Alert.alert('Error', 'Could not restore prospect. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not restore prospect. Please try again.')
+      );
       console.error('Restore prospect error:', error);
     },
     onSettled: (prospectId) => {
@@ -260,7 +276,10 @@ export const useProspectMutations = () => {
       if (context?.previousList) {
         queryClient.setQueryData(queryKeys.prospects.list(), context.previousList);
       }
-      Alert.alert('Error', 'Could not delete prospect. Please try again.');
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not delete prospect. Please try again.')
+      );
       console.error('Delete prospect error:', error);
     },
     onSettled: (prospectId) => {
