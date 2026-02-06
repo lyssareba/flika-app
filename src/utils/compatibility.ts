@@ -8,7 +8,7 @@ interface ScoringConfig {
 
 export type StrictnessLevel = 'gentle' | 'normal' | 'strict';
 
-const STRICTNESS_SETTINGS: Record<StrictnessLevel, number> = {
+export const STRICTNESS_SETTINGS: Record<StrictnessLevel, number> = {
   gentle: 1.0, // "No" has 1x impact (same as "Yes")
   normal: 1.5, // "No" has 1.5x impact (default)
   strict: 2.0, // "No" has 2x impact
