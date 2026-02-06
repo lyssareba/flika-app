@@ -29,12 +29,6 @@ const STRICTNESS_MULTIPLIERS: Record<string, string> = {
   strict: '2.5',
 };
 
-const STRICTNESS_LABELS: Record<string, string> = {
-  gentle: 'Gentle',
-  normal: 'Normal',
-  strict: 'Strict',
-};
-
 /**
  * Modal explaining how the compatibility score is calculated.
  */
@@ -52,7 +46,7 @@ export const ScoreBreakdownModal = ({
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const multiplier = STRICTNESS_MULTIPLIERS[strictness];
-  const strictnessLabel = STRICTNESS_LABELS[strictness];
+  const strictnessLabel = t(`strictness_${strictness}`);
 
   const dealbreakersBreakdown = breakdown.find((b) => b.category === 'dealbreaker');
   const desiredBreakdown = breakdown.find((b) => b.category === 'desired');
@@ -203,6 +197,23 @@ interface ProgressBarProps {
 }
 
 const ProgressBar = ({ score, theme }: ProgressBarProps) => {
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          height: 8,
+          borderRadius: 4,
+          backgroundColor: theme.colors.backgroundCard,
+          overflow: 'hidden',
+        },
+        fill: {
+          height: '100%',
+          borderRadius: 4,
+        },
+      }),
+    [theme]
+  );
+
   const barColor = useMemo(() => {
     if (score >= 70) return theme.colors.success;
     if (score >= 50) return theme.colors.warning;
@@ -210,30 +221,11 @@ const ProgressBar = ({ score, theme }: ProgressBarProps) => {
   }, [score, theme]);
 
   return (
-    <View style={progressBarStyles(theme).container}>
-      <View
-        style={[
-          progressBarStyles(theme).fill,
-          { width: `${score}%`, backgroundColor: barColor },
-        ]}
-      />
+    <View style={styles.container}>
+      <View style={[styles.fill, { width: `${score}%`, backgroundColor: barColor }]} />
     </View>
   );
 };
-
-const progressBarStyles = (theme: Theme) =>
-  StyleSheet.create({
-    container: {
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: theme.colors.backgroundCard,
-      overflow: 'hidden',
-    },
-    fill: {
-      height: '100%',
-      borderRadius: 4,
-    },
-  });
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({

@@ -53,5 +53,8 @@
   "\"No\" responses have {{multiplier}}x impact because losing something we want feels stronger than gaining it.": "\"No\" responses have {{multiplier}}x impact because losing something we want feels stronger than gaining it.",
   "Based on behavioral research (loss aversion)": "Based on behavioral research (loss aversion)",
   "Scoring mode": "Scoring mode",
-  "Adjust in Settings": "Adjust in Settings"
+  "Adjust in Settings": "Adjust in Settings",
+  "strictness_gentle": "Gentle",
+  "strictness_normal": "Normal",
+  "strictness_strict": "Strict"
 }
