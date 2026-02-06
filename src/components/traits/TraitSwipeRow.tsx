@@ -1,10 +1,11 @@
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, AccessibilityActionEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withTiming,
   interpolate,
   runOnJS,
   Extrapolation,
@@ -13,6 +14,7 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import { useReduceMotion } from '@/hooks';
 import type { Trait, TraitState } from '@/types';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -30,6 +32,7 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
 }) => {
   const { theme } = useThemeContext();
   const { t } = useTranslation('traits');
+  const reduceMotion = useReduceMotion();
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   const translateX = useSharedValue(0);
@@ -52,6 +55,23 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
       onStateChange(trait.id, 'unknown');
     }
   }, [trait.id, trait.state, onStateChange, triggerHaptic]);
+
+  const handleAccessibilityAction = useCallback(
+    (actionName: string) => {
+      switch (actionName) {
+        case 'activate':
+          handleResetToUnknown();
+          break;
+        case 'increment':
+          handleStateChange('yes');
+          break;
+        case 'decrement':
+          handleStateChange('no');
+          break;
+      }
+    },
+    [handleResetToUnknown, handleStateChange]
+  );
 
   const tapGesture = Gesture.Tap().onEnd(() => {
     runOnJS(handleResetToUnknown)();
@@ -81,12 +101,16 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
         runOnJS(handleStateChange)(newState);
       }
 
-      // Snap back smoothly without bounce
-      translateX.value = withSpring(0, {
-        damping: 25,
-        stiffness: 200,
-        overshootClamping: true,
-      });
+      // Snap back smoothly - respect reduce motion preference
+      if (reduceMotion) {
+        translateX.value = withTiming(0, { duration: 0 });
+      } else {
+        translateX.value = withSpring(0, {
+          damping: 25,
+          stiffness: 200,
+          overshootClamping: true,
+        });
+      }
       hasTriggeredHaptic.value = false;
     });
 
@@ -138,6 +162,17 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
 
   const isDealbreaker = trait.attributeCategory === 'dealbreaker';
 
+  const getStateLabel = (): string => {
+    switch (trait.state) {
+      case 'yes':
+        return t('Yes');
+      case 'no':
+        return t('No');
+      default:
+        return t('Unknown');
+    }
+  };
+
   const getStateIndicator = () => {
     switch (trait.state) {
       case 'yes':
@@ -180,7 +215,20 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
 
       {/* Swipeable row */}
       <GestureDetector gesture={composedGesture}>
-        <Animated.View style={[styles.row, rowStyle]}>
+        <Animated.View
+          style={[styles.row, rowStyle]}
+          accessibilityRole="button"
+          accessibilityLabel={`${trait.attributeName}, ${getStateLabel()}`}
+          accessibilityHint={t('Swipe right for yes, left for no, tap to reset')}
+          accessibilityActions={[
+            { name: 'activate', label: 'Reset to unknown' },
+            { name: 'increment', label: 'Set to yes' },
+            { name: 'decrement', label: 'Set to no' },
+          ]}
+          onAccessibilityAction={(event: AccessibilityActionEvent) =>
+            handleAccessibilityAction(event.nativeEvent.actionName)
+          }
+        >
           <View style={styles.rowContent}>
             <Text style={styles.traitName}>
               {trait.attributeName}

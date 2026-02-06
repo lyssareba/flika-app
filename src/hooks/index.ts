@@ -26,3 +26,7 @@ export { useAttributeMutations } from './useAttributeMutations';
 // Context-based hooks (will be refactored to use queries)
 export { useAttributes } from './useAttributes';
 export { useProspects } from './useProspects';
+
+// Accessibility
+export { useReduceMotion } from './useReduceMotion';
+export { useAccessibilityMode } from './useAccessibilityMode';

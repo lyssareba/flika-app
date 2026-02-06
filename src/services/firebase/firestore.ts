@@ -62,6 +62,7 @@ export const createUserProfile = async (
     appLockEnabled: false,
     appLockTimeout: 10,
     biometricEnabled: false,
+    useCheckboxView: false,
   };
 
   const profile = {
