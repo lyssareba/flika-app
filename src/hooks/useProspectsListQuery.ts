@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   subscribeToProspects,
@@ -21,19 +21,15 @@ import { queryKeys } from './queryKeys';
 export const useProspectsListQuery = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  // Track user.uid to avoid re-subscribing on every render
-  const userIdRef = useRef<string | null>(null);
+  // Extract userId to use as stable dependency
+  const userId = user?.uid;
 
   // Set up real-time subscription that updates the query cache
   useEffect(() => {
-    if (!user) return;
-
-    // Only re-subscribe if user ID actually changed
-    if (userIdRef.current === user.uid) return;
-    userIdRef.current = user.uid;
+    if (!userId) return;
 
     const unsubscribe = subscribeToProspects(
-      user.uid,
+      userId,
       (prospects) => {
         // Update the query cache with fresh data from subscription
         queryClient.setQueryData(queryKeys.prospects.list(), prospects);
@@ -45,27 +41,26 @@ export const useProspectsListQuery = () => {
 
     return () => {
       unsubscribe();
-      userIdRef.current = null;
     };
-  }, [user, queryClient]);
+  }, [userId, queryClient]);
 
   // Use query for initial data and cache management
   return useQuery({
     queryKey: queryKeys.prospects.list(),
     queryFn: async (): Promise<ProspectListData[]> => {
-      if (!user) return [];
+      if (!userId) return [];
       // Fetch prospects as fallback/initial data
       // The subscription will update the cache with real-time changes
       const [active, archived] = await Promise.all([
-        getActiveProspects(user.uid),
-        getArchivedProspects(user.uid),
+        getActiveProspects(userId),
+        getArchivedProspects(userId),
       ]);
       // Combine and sort by updatedAt
       return [...active, ...archived].sort(
         (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
       );
     },
-    enabled: !!user,
+    enabled: !!userId,
     // Don't refetch automatically since we have real-time updates
     staleTime: Infinity,
     refetchOnMount: false,

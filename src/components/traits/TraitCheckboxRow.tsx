@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +26,7 @@ export const TraitCheckboxRow: React.FC<TraitCheckboxRowProps> = ({
   const handleStateChange = useCallback(
     (newState: TraitState) => {
       if (trait.state !== newState) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onStateChange(trait.id, newState);
       }
     },

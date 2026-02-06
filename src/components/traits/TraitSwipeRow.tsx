@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, AccessibilityActionEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -15,7 +15,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
 import { useReduceMotion } from '@/hooks';
-import { TraitLongPressMenu } from './TraitLongPressMenu';
 import type { Trait, TraitState } from '@/types';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -38,7 +37,6 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
 
   const translateX = useSharedValue(0);
   const hasTriggeredHaptic = useSharedValue(false);
-  const [menuVisible, setMenuVisible] = useState(false);
 
   const triggerHaptic = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -58,26 +56,11 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
     }
   }, [trait.id, trait.state, onStateChange, triggerHaptic]);
 
-  const openMenu = useCallback(() => {
-    setMenuVisible(true);
-    triggerHaptic();
-  }, [triggerHaptic]);
-
-  const handleMenuSelect = useCallback(
-    (state: TraitState) => {
-      if (trait.state !== state) {
-        triggerHaptic();
-        onStateChange(trait.id, state);
-      }
-    },
-    [trait.id, trait.state, onStateChange, triggerHaptic]
-  );
-
   const handleAccessibilityAction = useCallback(
     (actionName: string) => {
       switch (actionName) {
         case 'activate':
-          openMenu();
+          handleResetToUnknown();
           break;
         case 'increment':
           handleStateChange('yes');
@@ -87,18 +70,12 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
           break;
       }
     },
-    [openMenu, handleStateChange]
+    [handleResetToUnknown, handleStateChange]
   );
 
   const tapGesture = Gesture.Tap().onEnd(() => {
     runOnJS(handleResetToUnknown)();
   });
-
-  const longPressGesture = Gesture.LongPress()
-    .minDuration(500)
-    .onEnd(() => {
-      runOnJS(openMenu)();
-    });
 
   const panGesture = Gesture.Pan()
     .activeOffsetX([-10, 10])
@@ -137,7 +114,7 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
       hasTriggeredHaptic.value = false;
     });
 
-  const composedGesture = Gesture.Race(panGesture, Gesture.Exclusive(longPressGesture, tapGesture));
+  const composedGesture = Gesture.Race(panGesture, tapGesture);
 
   const rowStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -242,9 +219,9 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
           style={[styles.row, rowStyle]}
           accessibilityRole="button"
           accessibilityLabel={`${trait.attributeName}, ${getStateLabel()}`}
-          accessibilityHint={t('Swipe right for yes, left for no, or double tap for options')}
+          accessibilityHint={t('Swipe right for yes, left for no, tap to reset')}
           accessibilityActions={[
-            { name: 'activate', label: 'Open options' },
+            { name: 'activate', label: 'Reset to unknown' },
             { name: 'increment', label: 'Set to yes' },
             { name: 'decrement', label: 'Set to no' },
           ]}
@@ -261,14 +238,6 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
           </View>
         </Animated.View>
       </GestureDetector>
-
-      {/* Long press menu */}
-      <TraitLongPressMenu
-        visible={menuVisible}
-        trait={trait}
-        onSelect={handleMenuSelect}
-        onClose={() => setMenuVisible(false)}
-      />
     </View>
   );
 };
