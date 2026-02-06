@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useProspects, useCompatibility } from '@/hooks';
 import { useTranslation } from 'react-i18next';
+import { ScoreBreakdownModal } from '@/components/prospects';
 import type { Prospect, ProspectStatus } from '@/types';
 
 type ScoreMessage = {
@@ -70,13 +71,14 @@ const ProspectScreen = () => {
   const { t: tc } = useTranslation('common');
   const { getProspectDetails, updateProspectInfo, updateProspectStatus, archive, remove } =
     useProspects();
-  const { calculateScore } = useCompatibility();
+  const { calculateScore, getBreakdown, strictness } = useCompatibility();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [prospect, setProspect] = useState<Prospect | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showScoreModal, setShowScoreModal] = useState(false);
   const [notesText, setNotesText] = useState('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
 
@@ -98,6 +100,12 @@ const ProspectScreen = () => {
     if (!prospect?.traits.length) return null;
     return calculateScore(prospect.traits);
   }, [prospect?.traits, calculateScore]);
+
+  // Get score breakdown for modal
+  const scoreBreakdown = useMemo(() => {
+    if (!prospect?.traits.length) return [];
+    return getBreakdown(prospect.traits);
+  }, [prospect?.traits, getBreakdown]);
 
   const scoreMessage = useMemo(() => {
     return getScoreMessage(
@@ -177,9 +185,8 @@ const ProspectScreen = () => {
   }, [router, id]);
 
   const handleWhyThisScore = useCallback(() => {
-    // TODO: Open score breakdown modal
-    Alert.alert(tc('Coming soon'), 'Score breakdown will be available soon.');
-  }, [tc]);
+    setShowScoreModal(true);
+  }, []);
 
   const handleOpenNotesModal = useCallback(() => {
     setNotesText(prospect?.notes || '');
@@ -425,6 +432,15 @@ const ProspectScreen = () => {
           </KeyboardAvoidingView>
         </SafeAreaView>
       </Modal>
+
+      {/* Score Breakdown Modal */}
+      <ScoreBreakdownModal
+        visible={showScoreModal}
+        onClose={() => setShowScoreModal(false)}
+        breakdown={scoreBreakdown}
+        overallScore={compatibility?.overall ?? 0}
+        strictness={strictness}
+      />
     </SafeAreaView>
   );
 };
