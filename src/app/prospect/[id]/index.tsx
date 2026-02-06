@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   Alert,
   ActivityIndicator,
   TextInput,
+  Keyboard,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -76,6 +78,7 @@ const ProspectScreen = () => {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesText, setNotesText] = useState('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Load prospect details
   useEffect(() => {
@@ -196,7 +199,15 @@ const ProspectScreen = () => {
   const handleCancelNotes = useCallback(() => {
     setNotesText(prospect?.notes || '');
     setIsEditingNotes(false);
+    Keyboard.dismiss();
   }, [prospect?.notes]);
+
+  const handleNotesInputFocus = useCallback(() => {
+    // Delay to allow keyboard to appear, then scroll to bottom
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, Platform.OS === 'ios' ? 300 : 100);
+  }, []);
 
   if (isLoading) {
     return (
@@ -272,7 +283,12 @@ const ProspectScreen = () => {
         </View>
       )}
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Photo */}
         <View style={styles.photoSection}>
           {prospect.photoUri ? (
@@ -359,6 +375,8 @@ const ProspectScreen = () => {
                 placeholderTextColor={theme.colors.textMuted}
                 multiline
                 textAlignVertical="top"
+                onFocus={handleNotesInputFocus}
+                autoFocus
               />
               <View style={styles.notesEditActions}>
                 <TouchableOpacity
