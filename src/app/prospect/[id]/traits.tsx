@@ -12,11 +12,12 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
-import { useAuth, useProspectQuery, useTraitMutation } from '@/hooks';
+import { useAuth, useProspectQuery, useTraitMutation, useAccessibilityMode } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import {
   TraitFilterBar,
   TraitSwipeRow,
+  TraitCheckboxRow,
   SwipeTutorial,
 } from '@/components/traits';
 import {
@@ -39,6 +40,7 @@ const TraitsScreen = () => {
   // TanStack Query for prospect data
   const { data: prospect, isLoading } = useProspectQuery(id);
   const traitMutation = useTraitMutation(id);
+  const { useCheckboxView } = useAccessibilityMode();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterOption>('all');
@@ -112,10 +114,13 @@ const TraitsScreen = () => {
   );
 
   const renderTrait = useCallback(
-    ({ item }: { item: Trait }) => (
-      <TraitSwipeRow trait={item} onStateChange={handleTraitStateChange} />
-    ),
-    [handleTraitStateChange]
+    ({ item }: { item: Trait }) => {
+      if (useCheckboxView) {
+        return <TraitCheckboxRow trait={item} onStateChange={handleTraitStateChange} />;
+      }
+      return <TraitSwipeRow trait={item} onStateChange={handleTraitStateChange} />;
+    },
+    [handleTraitStateChange, useCheckboxView]
   );
 
   const keyExtractor = useCallback((item: Trait) => item.id, []);
@@ -171,8 +176,8 @@ const TraitsScreen = () => {
           counts={counts}
         />
 
-        {/* Tutorial */}
-        {showTutorial && (
+        {/* Tutorial - only show in swipe mode */}
+        {showTutorial && !useCheckboxView && (
           <SwipeTutorial visible={showTutorial} onDismiss={handleTutorialDismiss} />
         )}
 

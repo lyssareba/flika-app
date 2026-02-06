@@ -42,6 +42,10 @@ export const SwipeTutorial: React.FC<SwipeTutorialProps> = ({
           <Ionicons name="finger-print" size={18} color={theme.colors.textMuted} />
           <Text style={styles.tapText}>{t('Tap = Reset to unknown')}</Text>
         </View>
+        <View style={styles.tapInstruction}>
+          <Ionicons name="menu" size={18} color={theme.colors.textMuted} />
+          <Text style={styles.tapText}>{t('Long press for options')}</Text>
+        </View>
       </View>
       <TouchableOpacity
         style={styles.dismissButton}

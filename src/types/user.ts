@@ -9,6 +9,7 @@ export interface UserSettings {
   appLockEnabled: boolean;
   appLockTimeout: number;
   biometricEnabled: boolean;
+  useCheckboxView?: boolean; // Defaults to false
 }
 
 export interface UserProfile {

@@ -1,10 +1,11 @@
-import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, Dimensions, AccessibilityActionEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
+  withTiming,
   interpolate,
   runOnJS,
   Extrapolation,
@@ -13,6 +14,8 @@ import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import { useReduceMotion } from '@/hooks';
+import { TraitLongPressMenu } from './TraitLongPressMenu';
 import type { Trait, TraitState } from '@/types';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -30,10 +33,12 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
 }) => {
   const { theme } = useThemeContext();
   const { t } = useTranslation('traits');
+  const reduceMotion = useReduceMotion();
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   const translateX = useSharedValue(0);
   const hasTriggeredHaptic = useSharedValue(false);
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const triggerHaptic = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -53,9 +58,47 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
     }
   }, [trait.id, trait.state, onStateChange, triggerHaptic]);
 
+  const openMenu = useCallback(() => {
+    setMenuVisible(true);
+    triggerHaptic();
+  }, [triggerHaptic]);
+
+  const handleMenuSelect = useCallback(
+    (state: TraitState) => {
+      if (trait.state !== state) {
+        triggerHaptic();
+        onStateChange(trait.id, state);
+      }
+    },
+    [trait.id, trait.state, onStateChange, triggerHaptic]
+  );
+
+  const handleAccessibilityAction = useCallback(
+    (actionName: string) => {
+      switch (actionName) {
+        case 'activate':
+          openMenu();
+          break;
+        case 'increment':
+          handleStateChange('yes');
+          break;
+        case 'decrement':
+          handleStateChange('no');
+          break;
+      }
+    },
+    [openMenu, handleStateChange]
+  );
+
   const tapGesture = Gesture.Tap().onEnd(() => {
     runOnJS(handleResetToUnknown)();
   });
+
+  const longPressGesture = Gesture.LongPress()
+    .minDuration(500)
+    .onEnd(() => {
+      runOnJS(openMenu)();
+    });
 
   const panGesture = Gesture.Pan()
     .activeOffsetX([-10, 10])
@@ -81,16 +124,20 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
         runOnJS(handleStateChange)(newState);
       }
 
-      // Snap back smoothly without bounce
-      translateX.value = withSpring(0, {
-        damping: 25,
-        stiffness: 200,
-        overshootClamping: true,
-      });
+      // Snap back smoothly - respect reduce motion preference
+      if (reduceMotion) {
+        translateX.value = withTiming(0, { duration: 0 });
+      } else {
+        translateX.value = withSpring(0, {
+          damping: 25,
+          stiffness: 200,
+          overshootClamping: true,
+        });
+      }
       hasTriggeredHaptic.value = false;
     });
 
-  const composedGesture = Gesture.Race(panGesture, tapGesture);
+  const composedGesture = Gesture.Race(panGesture, Gesture.Exclusive(longPressGesture, tapGesture));
 
   const rowStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -138,6 +185,17 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
 
   const isDealbreaker = trait.attributeCategory === 'dealbreaker';
 
+  const getStateLabel = (): string => {
+    switch (trait.state) {
+      case 'yes':
+        return t('Yes');
+      case 'no':
+        return t('No');
+      default:
+        return t('Unknown');
+    }
+  };
+
   const getStateIndicator = () => {
     switch (trait.state) {
       case 'yes':
@@ -180,7 +238,20 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
 
       {/* Swipeable row */}
       <GestureDetector gesture={composedGesture}>
-        <Animated.View style={[styles.row, rowStyle]}>
+        <Animated.View
+          style={[styles.row, rowStyle]}
+          accessibilityRole="button"
+          accessibilityLabel={`${trait.attributeName}, ${getStateLabel()}`}
+          accessibilityHint={t('Swipe right for yes, left for no, or double tap for options')}
+          accessibilityActions={[
+            { name: 'activate', label: 'Open options' },
+            { name: 'increment', label: 'Set to yes' },
+            { name: 'decrement', label: 'Set to no' },
+          ]}
+          onAccessibilityAction={(event: AccessibilityActionEvent) =>
+            handleAccessibilityAction(event.nativeEvent.actionName)
+          }
+        >
           <View style={styles.rowContent}>
             <Text style={styles.traitName}>
               {trait.attributeName}
@@ -190,6 +261,14 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
           </View>
         </Animated.View>
       </GestureDetector>
+
+      {/* Long press menu */}
+      <TraitLongPressMenu
+        visible={menuVisible}
+        trait={trait}
+        onSelect={handleMenuSelect}
+        onClose={() => setMenuVisible(false)}
+      />
     </View>
   );
 };
