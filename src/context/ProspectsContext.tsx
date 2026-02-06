@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useMemo, useCallback } from 'react';
-import { useProspectsListQuery, useProspectMutations, useAuth } from '@/hooks';
+import { useQueryClient } from '@tanstack/react-query';
+import { useProspectsListQuery, useProspectMutations, useAuth, queryKeys } from '@/hooks';
 import { type ProspectListData, getProspect } from '@/services/firebase/firestore';
 import type { Prospect, ProspectInput, ProspectStatus } from '@/types';
 
@@ -33,6 +34,7 @@ const ProspectsContext = createContext<ProspectsContextType | undefined>(undefin
 
 export const ProspectsProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   // Use TanStack Query for data fetching
   const { data: prospects = [], isLoading } = useProspectsListQuery();
@@ -84,10 +86,10 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
     [user]
   );
 
-  // No-op: TanStack Query handles refetching automatically via real-time subscription
+  // Invalidate the prospects query to force a refetch
   const refreshProspects = useCallback(() => {
-    // Real-time subscription handles updates automatically
-  }, []);
+    queryClient.invalidateQueries({ queryKey: queryKeys.prospects.list() });
+  }, [queryClient]);
 
   const value = useMemo(
     () => ({

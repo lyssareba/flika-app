@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   subscribeToProspects,
+  getActiveProspects,
+  getArchivedProspects,
   type ProspectListData,
 } from '@/services/firebase/firestore';
 import { useAuth } from './useAuth';
@@ -19,10 +21,16 @@ import { queryKeys } from './queryKeys';
 export const useProspectsListQuery = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  // Track user.uid to avoid re-subscribing on every render
+  const userIdRef = useRef<string | null>(null);
 
   // Set up real-time subscription that updates the query cache
   useEffect(() => {
     if (!user) return;
+
+    // Only re-subscribe if user ID actually changed
+    if (userIdRef.current === user.uid) return;
+    userIdRef.current = user.uid;
 
     const unsubscribe = subscribeToProspects(
       user.uid,
@@ -37,6 +45,7 @@ export const useProspectsListQuery = () => {
 
     return () => {
       unsubscribe();
+      userIdRef.current = null;
     };
   }, [user, queryClient]);
 
@@ -44,9 +53,17 @@ export const useProspectsListQuery = () => {
   return useQuery({
     queryKey: queryKeys.prospects.list(),
     queryFn: async (): Promise<ProspectListData[]> => {
-      // Return empty array - actual data comes from subscription
-      // This prevents a race condition where query might return stale data
-      return [];
+      if (!user) return [];
+      // Fetch prospects as fallback/initial data
+      // The subscription will update the cache with real-time changes
+      const [active, archived] = await Promise.all([
+        getActiveProspects(user.uid),
+        getArchivedProspects(user.uid),
+      ]);
+      // Combine and sort by updatedAt
+      return [...active, ...archived].sort(
+        (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+      );
     },
     enabled: !!user,
     // Don't refetch automatically since we have real-time updates
