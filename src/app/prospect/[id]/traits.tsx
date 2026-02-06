@@ -12,7 +12,8 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
-import { useProspects, useTraits, useAuth } from '@/hooks';
+import { useAuth } from '@/hooks';
+import { useProspectQuery, useTraitMutation } from '@/hooks/useProspectQuery';
 import { useTranslation } from 'react-i18next';
 import {
   TraitFilterBar,
@@ -23,7 +24,7 @@ import {
   isSwipeTutorialDismissed,
   setSwipeTutorialDismissed,
 } from '@/services/storage/asyncStorage';
-import type { Prospect, Trait, TraitState } from '@/types';
+import type { Trait, TraitState } from '@/types';
 
 type FilterOption = 'all' | TraitState;
 
@@ -33,32 +34,16 @@ const TraitsScreen = () => {
   const { theme } = useThemeContext();
   const { t } = useTranslation('traits');
   const { t: tc } = useTranslation('common');
-  const { getProspectDetails, updateCachedProspect } = useProspects();
-  const { updateTraitState } = useTraits();
   const { user } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const [prospect, setProspect] = useState<Prospect | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // TanStack Query for prospect data
+  const { data: prospect, isLoading } = useProspectQuery(id);
+  const traitMutation = useTraitMutation(id);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterOption>('all');
   const [showTutorial, setShowTutorial] = useState(false);
-
-  // Load prospect details
-  useEffect(() => {
-    const loadProspect = async () => {
-      if (!id) return;
-      // Only show loading if we don't have data yet
-      if (!prospect) {
-        setIsLoading(true);
-      }
-      const data = await getProspectDetails(id);
-      setProspect(data);
-      setIsLoading(false);
-    };
-    loadProspect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
 
   // Check tutorial dismissal state
   useEffect(() => {
@@ -121,26 +106,10 @@ const TraitsScreen = () => {
   }, [user]);
 
   const handleTraitStateChange = useCallback(
-    async (traitId: string, newState: TraitState) => {
-      if (!id || !prospect) return;
-
-      try {
-        await updateTraitState(id, traitId, newState);
-
-        // Update local state and cache
-        const updatedProspect = {
-          ...prospect,
-          traits: prospect.traits.map((t) =>
-            t.id === traitId ? { ...t, state: newState, updatedAt: new Date() } : t
-          ),
-        };
-        setProspect(updatedProspect);
-        updateCachedProspect(updatedProspect);
-      } catch (error) {
-        console.error('Error updating trait:', error);
-      }
+    (traitId: string, newState: TraitState) => {
+      traitMutation.mutate({ traitId, state: newState });
     },
-    [id, prospect, updateTraitState, updateCachedProspect]
+    [traitMutation]
   );
 
   const renderTrait = useCallback(

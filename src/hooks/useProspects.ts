@@ -35,8 +35,6 @@ interface UseProspectsReturn {
   remove: ReturnType<typeof useProspectsContext>['remove'];
   /** Get full prospect details */
   getProspectDetails: ReturnType<typeof useProspectsContext>['getProspectDetails'];
-  /** Update cached prospect details */
-  updateCachedProspect: ReturnType<typeof useProspectsContext>['updateCachedProspect'];
   /** Refresh prospects */
   refreshProspects: ReturnType<typeof useProspectsContext>['refreshProspects'];
 }
@@ -75,7 +73,6 @@ export const useProspects = (options: UseProspectsOptions = {}): UseProspectsRet
     restore,
     remove,
     getProspectDetails,
-    updateCachedProspect,
     refreshProspects,
   } = useProspectsContext();
 
@@ -127,7 +124,6 @@ export const useProspects = (options: UseProspectsOptions = {}): UseProspectsRet
     restore,
     remove,
     getProspectDetails,
-    updateCachedProspect,
     refreshProspects,
   };
 };
