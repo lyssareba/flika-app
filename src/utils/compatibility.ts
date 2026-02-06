@@ -21,10 +21,11 @@ const DESIRED_WEIGHT = 0.4;
  * Calculate the compatibility score for a prospect based on their traits.
  *
  * The algorithm uses loss aversion from behavioral psychology:
- * - "No" responses are penalized more heavily than "Yes" responses reward
+ * - Score starts at 0% and builds up as "Yes" responses are recorded
+ * - "No" responses subtract points with loss aversion multiplier (1.5x-2.5x)
  * - Dealbreakers are weighted 60%, desired traits 40%
- * - Unknown traits don't affect the score (neutral)
- * - Score is clamped to 0-100
+ * - Unknown traits don't affect the score
+ * - Score is clamped to 0-100 (never goes negative)
  *
  * @param traits - Array of traits for the prospect
  * @param strictness - Scoring strictness level (affects loss aversion)
@@ -68,8 +69,10 @@ export function calculateCompatibility(
  * Calculate the score for a single category (dealbreakers or desired).
  *
  * - Returns 100 if the category has no traits (perfect by default)
- * - Returns 50 if no traits are confirmed (neutral)
- * - Each "yes" adds points, each "no" subtracts points * lossAversion
+ * - Returns 0 if no traits are confirmed (starting point)
+ * - Each "yes" adds 100/totalTraits points
+ * - Each "no" subtracts (100/totalTraits) * lossAversion points
+ * - Score is clamped to 0-100
  *
  * @param traits - Array of traits in this category
  * @param lossAversion - Multiplier for "no" penalty
@@ -79,10 +82,10 @@ export function calculateCategoryScore(traits: Trait[], lossAversion: number): n
   if (traits.length === 0) return 100;
 
   const confirmed = traits.filter((t) => t.state !== 'unknown');
-  if (confirmed.length === 0) return 50; // Neutral when no data
+  if (confirmed.length === 0) return 0; // Start at 0 when no data
 
-  let score = 50; // Start neutral
-  const impactPerTrait = 50 / traits.length;
+  let score = 0; // Start at 0
+  const impactPerTrait = 100 / traits.length;
 
   confirmed.forEach((trait) => {
     if (trait.state === 'yes') {
