@@ -28,6 +28,7 @@ const queryClient = new QueryClient({
 });
 
 const AppContent = () => {
+  const { theme } = useThemeContext();
   const { isLocked } = useAppLock();
   const { userProfile, refreshProfile } = useAuth();
 
@@ -43,6 +44,7 @@ const AppContent = () => {
     <Stack
       screenOptions={{
         headerShown: false,
+        contentStyle: { backgroundColor: theme.colors.background },
       }}
     />
   );
