@@ -8,7 +8,6 @@ import {
   ScrollView,
   Pressable,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
@@ -54,160 +53,161 @@ export const ScoreBreakdownModal = ({
       transparent
       onRequestClose={onClose}
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.modalContainer} onPress={(e) => e.stopPropagation()}>
-          <SafeAreaView edges={['bottom']}>
-            {/* Header */}
-            <View style={styles.header}>
-              <Text style={styles.title}>{t('Why this score?')}</Text>
-              <TouchableOpacity
-                onPress={onClose}
-                style={styles.closeButton}
-                accessibilityRole="button"
-                accessibilityLabel={tc('Close')}
-              >
-                <Ionicons name="close" size={24} color={theme.colors.textPrimary} />
-              </TouchableOpacity>
+      <View style={styles.container}>
+        {/* Tappable overlay - behind the modal */}
+        <Pressable style={styles.overlay} onPress={onClose} />
+        {/* Modal content - sibling, not child of Pressable */}
+        <View style={styles.modalContainer}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>{t('Why this score?')}</Text>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              accessibilityRole="button"
+              accessibilityLabel={tc('Close')}
+            >
+              <Ionicons name="close" size={24} color={theme.colors.textPrimary} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+            {/* Overall Score */}
+            <View style={styles.overallSection}>
+              <Text style={styles.overallScore}>{overallScore}%</Text>
+              <Text style={styles.overallLabel}>{t('compatible')}</Text>
             </View>
 
-            <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-              {/* Overall Score */}
-              <View style={styles.overallSection}>
-                <Text style={styles.overallScore}>{overallScore}%</Text>
-                <Text style={styles.overallLabel}>{t('compatible')}</Text>
-              </View>
-
-              {/* Dealbreakers Section */}
-              {dealbreakersBreakdown && (
-                <View style={styles.categorySection}>
-                  <View style={styles.categoryHeader}>
-                    <Text style={styles.categoryTitle}>{t('Dealbreakers')}</Text>
-                    <Text style={styles.categoryWeight}>(60%)</Text>
-                  </View>
-                  <ProgressBar score={dealbreakersBreakdown.score} theme={theme} />
-                  <View style={styles.categoryStats}>
-                    <Text style={styles.statText}>
-                      {t('{{confirmed}} of {{total}} confirmed', {
-                        confirmed: dealbreakersBreakdown.confirmed,
-                        total: dealbreakersBreakdown.total,
-                      })}
-                    </Text>
-                    <View style={styles.yesNoStats}>
-                      <View style={styles.statBadge}>
-                        <Ionicons name="checkmark" size={14} color={theme.colors.success} />
-                        <Text style={[styles.statBadgeText, { color: theme.colors.success }]}>
-                          {dealbreakersBreakdown.yesCount}
-                        </Text>
-                      </View>
-                      <View style={styles.statBadge}>
-                        <Ionicons name="close" size={14} color={theme.colors.error} />
-                        <Text style={[styles.statBadgeText, { color: theme.colors.error }]}>
-                          {dealbreakersBreakdown.noCount}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  <Text style={styles.categoryScore}>
-                    {t('Category score')}: {dealbreakersBreakdown.score}%
-                  </Text>
+            {/* Dealbreakers Section */}
+            {dealbreakersBreakdown && (
+              <View style={styles.categorySection}>
+                <View style={styles.categoryHeader}>
+                  <Text style={styles.categoryTitle}>{t('Dealbreakers')}</Text>
+                  <Text style={styles.categoryWeight}>(60%)</Text>
                 </View>
-              )}
-
-              {/* Desired Section */}
-              {desiredBreakdown && (
-                <View style={styles.categorySection}>
-                  <View style={styles.categoryHeader}>
-                    <Text style={styles.categoryTitle}>{t('Desired Traits')}</Text>
-                    <Text style={styles.categoryWeight}>(40%)</Text>
-                  </View>
-                  <ProgressBar score={desiredBreakdown.score} theme={theme} />
-                  <View style={styles.categoryStats}>
-                    <Text style={styles.statText}>
-                      {t('{{confirmed}} of {{total}} confirmed', {
-                        confirmed: desiredBreakdown.confirmed,
-                        total: desiredBreakdown.total,
-                      })}
-                    </Text>
-                    <View style={styles.yesNoStats}>
-                      <View style={styles.statBadge}>
-                        <Ionicons name="checkmark" size={14} color={theme.colors.success} />
-                        <Text style={[styles.statBadgeText, { color: theme.colors.success }]}>
-                          {desiredBreakdown.yesCount}
-                        </Text>
-                      </View>
-                      <View style={styles.statBadge}>
-                        <Ionicons name="close" size={14} color={theme.colors.error} />
-                        <Text style={[styles.statBadgeText, { color: theme.colors.error }]}>
-                          {desiredBreakdown.noCount}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  <Text style={styles.categoryScore}>
-                    {t('Category score')}: {desiredBreakdown.score}%
-                  </Text>
-                </View>
-              )}
-
-              {/* Loss Aversion Explanation */}
-              <View style={styles.explanationSection}>
-                <Text style={styles.explanationTitle}>{t('How scoring works')}</Text>
-                <Text style={styles.explanationText}>
-                  {t(
-                    '"No" responses have {{multiplier}}x impact because losing something we want feels stronger than gaining it.',
-                    { multiplier }
-                  )}
-                </Text>
-                <Text style={styles.explanationSubtext}>
-                  {t('Based on behavioral research (loss aversion)')}
-                </Text>
-              </View>
-
-              {/* Strictness Selector */}
-              {onStrictnessChange && (
-                <View style={styles.strictnessSection}>
-                  <Text style={styles.strictnessSectionTitle}>{t('Scoring mode')}</Text>
-                  <View style={styles.strictnessOptions}>
-                    {STRICTNESS_OPTIONS.map((level) => {
-                      const isSelected = level === strictness;
-                      const levelMultiplier = STRICTNESS_SETTINGS[level];
-                      return (
-                        <TouchableOpacity
-                          key={level}
-                          style={[
-                            styles.strictnessOption,
-                            isSelected && styles.strictnessOptionSelected,
-                          ]}
-                          onPress={() => onStrictnessChange(level)}
-                          accessibilityRole="radio"
-                          accessibilityState={{ checked: isSelected }}
-                        >
-                          <Text
-                            style={[
-                              styles.strictnessOptionLabel,
-                              isSelected && styles.strictnessOptionLabelSelected,
-                            ]}
-                          >
-                            {t(`strictness_${level}`)}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.strictnessOptionMultiplier,
-                              isSelected && styles.strictnessOptionMultiplierSelected,
-                            ]}
-                          >
-                            {levelMultiplier}x
-                          </Text>
-                        </TouchableOpacity>
-                      );
+                <ProgressBar score={dealbreakersBreakdown.score} theme={theme} />
+                <View style={styles.categoryStats}>
+                  <Text style={styles.statText}>
+                    {t('{{confirmed}} of {{total}} confirmed', {
+                      confirmed: dealbreakersBreakdown.confirmed,
+                      total: dealbreakersBreakdown.total,
                     })}
+                  </Text>
+                  <View style={styles.yesNoStats}>
+                    <View style={styles.statBadge}>
+                      <Ionicons name="checkmark" size={14} color={theme.colors.success} />
+                      <Text style={[styles.statBadgeText, { color: theme.colors.success }]}>
+                        {dealbreakersBreakdown.yesCount}
+                      </Text>
+                    </View>
+                    <View style={styles.statBadge}>
+                      <Ionicons name="close" size={14} color={theme.colors.error} />
+                      <Text style={[styles.statBadgeText, { color: theme.colors.error }]}>
+                        {dealbreakersBreakdown.noCount}
+                      </Text>
+                    </View>
                   </View>
                 </View>
-              )}
-            </ScrollView>
-          </SafeAreaView>
-        </Pressable>
-      </Pressable>
+                <Text style={styles.categoryScore}>
+                  {t('Category score')}: {dealbreakersBreakdown.score}%
+                </Text>
+              </View>
+            )}
+
+            {/* Desired Section */}
+            {desiredBreakdown && (
+              <View style={styles.categorySection}>
+                <View style={styles.categoryHeader}>
+                  <Text style={styles.categoryTitle}>{t('Desired Traits')}</Text>
+                  <Text style={styles.categoryWeight}>(40%)</Text>
+                </View>
+                <ProgressBar score={desiredBreakdown.score} theme={theme} />
+                <View style={styles.categoryStats}>
+                  <Text style={styles.statText}>
+                    {t('{{confirmed}} of {{total}} confirmed', {
+                      confirmed: desiredBreakdown.confirmed,
+                      total: desiredBreakdown.total,
+                    })}
+                  </Text>
+                  <View style={styles.yesNoStats}>
+                    <View style={styles.statBadge}>
+                      <Ionicons name="checkmark" size={14} color={theme.colors.success} />
+                      <Text style={[styles.statBadgeText, { color: theme.colors.success }]}>
+                        {desiredBreakdown.yesCount}
+                      </Text>
+                    </View>
+                    <View style={styles.statBadge}>
+                      <Ionicons name="close" size={14} color={theme.colors.error} />
+                      <Text style={[styles.statBadgeText, { color: theme.colors.error }]}>
+                        {desiredBreakdown.noCount}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <Text style={styles.categoryScore}>
+                  {t('Category score')}: {desiredBreakdown.score}%
+                </Text>
+              </View>
+            )}
+
+            {/* Loss Aversion Explanation */}
+            <View style={styles.explanationSection}>
+              <Text style={styles.explanationTitle}>{t('How scoring works')}</Text>
+              <Text style={styles.explanationText}>
+                {t(
+                  '"No" responses have {{multiplier}}x impact because losing something we want feels stronger than gaining it.',
+                  { multiplier }
+                )}
+              </Text>
+              <Text style={styles.explanationSubtext}>
+                {t('Based on behavioral research (loss aversion)')}
+              </Text>
+            </View>
+
+            {/* Strictness Selector */}
+            {onStrictnessChange && (
+              <View style={styles.strictnessSection}>
+                <Text style={styles.strictnessSectionTitle}>{t('Scoring mode')}</Text>
+                <View style={styles.strictnessOptions}>
+                  {STRICTNESS_OPTIONS.map((level) => {
+                    const isSelected = level === strictness;
+                    const levelMultiplier = STRICTNESS_SETTINGS[level];
+                    return (
+                      <TouchableOpacity
+                        key={level}
+                        style={[
+                          styles.strictnessOption,
+                          isSelected && styles.strictnessOptionSelected,
+                        ]}
+                        onPress={() => onStrictnessChange(level)}
+                        accessibilityRole="radio"
+                        accessibilityState={{ checked: isSelected }}
+                      >
+                        <Text
+                          style={[
+                            styles.strictnessOptionLabel,
+                            isSelected && styles.strictnessOptionLabelSelected,
+                          ]}
+                        >
+                          {t(`strictness_${level}`)}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.strictnessOptionMultiplier,
+                            isSelected && styles.strictnessOptionMultiplierSelected,
+                          ]}
+                        >
+                          {levelMultiplier}x
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </View>
     </Modal>
   );
 };
@@ -250,12 +250,15 @@ const ProgressBar = ({ score, theme }: ProgressBarProps) => {
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    overlay: {
+    container: {
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
       justifyContent: 'center',
       alignItems: 'center',
       padding: 20,
+    },
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContainer: {
       width: '100%',
@@ -282,9 +285,7 @@ const createStyles = (theme: Theme) =>
     closeButton: {
       padding: 4,
     },
-    content: {
-      padding: 20,
-    },
+    contentContainer: { padding: 20, paddingBottom: 20 },
     overallSection: {
       alignItems: 'center',
       marginBottom: 24,
