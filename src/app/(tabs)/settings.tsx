@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -13,14 +13,30 @@ const SettingsScreen = () => {
   const { user, userProfile, refreshProfile } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  // Local state for optimistic updates
+  const [checkboxView, setCheckboxView] = useState(
+    userProfile?.settings?.useCheckboxView ?? false
+  );
+
+  // Sync local state when userProfile changes (e.g., on initial load)
+  useEffect(() => {
+    setCheckboxView(userProfile?.settings?.useCheckboxView ?? false);
+  }, [userProfile?.settings?.useCheckboxView]);
+
   const handleCheckboxViewToggle = useCallback(
     async (value: boolean) => {
       if (!user) return;
+
+      // Optimistic update - immediately reflect in UI
+      setCheckboxView(value);
+
       try {
         await updateUserSettings(user.uid, { useCheckboxView: value });
-        await refreshProfile();
+        // Background refresh to sync state (non-blocking)
+        refreshProfile();
       } catch (error) {
-        // Handle error silently for now
+        // Revert on error
+        setCheckboxView(!value);
         console.error('Failed to update setting:', error);
       }
     },
@@ -40,7 +56,7 @@ const SettingsScreen = () => {
           <View style={styles.sectionContent}>
             <Toggle
               label={t('Use checkbox view instead of swipes')}
-              value={userProfile?.settings?.useCheckboxView ?? false}
+              value={checkboxView}
               onValueChange={handleCheckboxViewToggle}
             />
           </View>
