@@ -1,3 +1,4 @@
+import { View, StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -45,6 +46,7 @@ const AppContent = () => {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: theme.colors.background },
+        navigationBarColor: theme.colors.background,
       }}
     />
   );
@@ -75,17 +77,23 @@ const AuthGate = () => {
 };
 
 const RootLayoutNav = () => {
-  const { effectiveMode } = useThemeContext();
+  const { theme, effectiveMode } = useThemeContext();
 
   return (
-    <>
+    <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
       <StatusBar style={effectiveMode === 'dark' ? 'light' : 'dark'} />
       <AuthProvider>
         <AuthGate />
       </AuthProvider>
-    </>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});
 
 const RootLayout = () => {
   return (
