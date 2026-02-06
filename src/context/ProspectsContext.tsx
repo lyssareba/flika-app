@@ -42,6 +42,8 @@ interface ProspectsContextType {
   remove: (prospectId: string) => Promise<void>;
   /** Get a single prospect with full details (traits, dates) */
   getProspectDetails: (prospectId: string) => Promise<Prospect | null>;
+  /** Update cached prospect details (for optimistic updates) */
+  updateCachedProspect: (prospect: Prospect) => void;
   /** Refresh prospects list */
   refreshProspects: () => void;
 }
@@ -54,6 +56,14 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
   const [prospects, setProspects] = useState<ProspectListData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  // Cache for prospect details (with traits/dates)
+  const prospectDetailsCache = React.useRef<Map<string, Prospect>>(new Map());
+
+  // Clear cache when user changes
+  useEffect(() => {
+    prospectDetailsCache.current.clear();
+  }, [user?.uid]);
 
   // Subscribe to real-time updates
   useEffect(() => {
@@ -138,12 +148,34 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
   );
 
   const getProspectDetails = useCallback(
-    async (prospectId: string): Promise<Prospect | null> => {
+    async (prospectId: string, forceRefresh = false): Promise<Prospect | null> => {
       if (!user) return null;
-      return getProspect(user.uid, prospectId);
+
+      // Return cached data if available and not forcing refresh
+      const cached = prospectDetailsCache.current.get(prospectId);
+      if (cached && !forceRefresh) {
+        // Refresh in background for next time
+        getProspect(user.uid, prospectId).then((fresh) => {
+          if (fresh) {
+            prospectDetailsCache.current.set(prospectId, fresh);
+          }
+        });
+        return cached;
+      }
+
+      // Fetch fresh data
+      const prospect = await getProspect(user.uid, prospectId);
+      if (prospect) {
+        prospectDetailsCache.current.set(prospectId, prospect);
+      }
+      return prospect;
     },
     [user]
   );
+
+  const updateCachedProspect = useCallback((prospect: Prospect) => {
+    prospectDetailsCache.current.set(prospect.id, prospect);
+  }, []);
 
   const refreshProspects = useCallback(() => {
     setRefreshKey((prev) => prev + 1);
@@ -160,6 +192,7 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
       restore,
       remove,
       getProspectDetails,
+      updateCachedProspect,
       refreshProspects,
     }),
     [
@@ -172,6 +205,7 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
       restore,
       remove,
       getProspectDetails,
+      updateCachedProspect,
       refreshProspects,
     ]
   );

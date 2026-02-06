@@ -33,7 +33,7 @@ const TraitsScreen = () => {
   const { theme } = useThemeContext();
   const { t } = useTranslation('traits');
   const { t: tc } = useTranslation('common');
-  const { getProspectDetails } = useProspects();
+  const { getProspectDetails, updateCachedProspect } = useProspects();
   const { updateTraitState } = useTraits();
   const { user } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -48,13 +48,17 @@ const TraitsScreen = () => {
   useEffect(() => {
     const loadProspect = async () => {
       if (!id) return;
-      setIsLoading(true);
+      // Only show loading if we don't have data yet
+      if (!prospect) {
+        setIsLoading(true);
+      }
       const data = await getProspectDetails(id);
       setProspect(data);
       setIsLoading(false);
     };
     loadProspect();
-  }, [id, getProspectDetails]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   // Check tutorial dismissal state
   useEffect(() => {
@@ -123,21 +127,20 @@ const TraitsScreen = () => {
       try {
         await updateTraitState(id, traitId, newState);
 
-        // Update local state optimistically
-        setProspect((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            traits: prev.traits.map((t) =>
-              t.id === traitId ? { ...t, state: newState, updatedAt: new Date() } : t
-            ),
-          };
-        });
+        // Update local state and cache
+        const updatedProspect = {
+          ...prospect,
+          traits: prospect.traits.map((t) =>
+            t.id === traitId ? { ...t, state: newState, updatedAt: new Date() } : t
+          ),
+        };
+        setProspect(updatedProspect);
+        updateCachedProspect(updatedProspect);
       } catch (error) {
         console.error('Error updating trait:', error);
       }
     },
-    [id, prospect, updateTraitState]
+    [id, prospect, updateTraitState, updateCachedProspect]
   );
 
   const renderTrait = useCallback(
