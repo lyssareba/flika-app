@@ -81,10 +81,11 @@ export const TraitSwipeRow: React.FC<TraitSwipeRowProps> = ({
         runOnJS(handleStateChange)(newState);
       }
 
-      // Snap back
+      // Snap back smoothly without bounce
       translateX.value = withSpring(0, {
-        damping: 20,
-        stiffness: 300,
+        damping: 25,
+        stiffness: 200,
+        overshootClamping: true,
       });
       hasTriggeredHaptic.value = false;
     });
