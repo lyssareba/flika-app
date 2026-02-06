@@ -4,3 +4,4 @@ export { useAttributes } from './useAttributes';
 export { useAuth } from './useAuth';
 export { useCompatibility } from './useCompatibility';
 export { useProspects } from './useProspects';
+export { useTraits } from './useTraits';

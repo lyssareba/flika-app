@@ -56,3 +56,24 @@ export const hasLockTimeoutElapsed = async (userId: string): Promise<boolean> =>
 
   return elapsed >= timeoutMs;
 };
+
+// ============================================================================
+// Swipe Tutorial
+// ============================================================================
+
+const getSwipeTutorialKey = (userId: string) => `${userId}_swipeTutorialDismissed`;
+
+/**
+ * Mark the swipe tutorial as dismissed for a user
+ */
+export const setSwipeTutorialDismissed = async (userId: string): Promise<void> => {
+  await AsyncStorage.setItem(getSwipeTutorialKey(userId), JSON.stringify(true));
+};
+
+/**
+ * Check if the swipe tutorial has been dismissed
+ */
+export const isSwipeTutorialDismissed = async (userId: string): Promise<boolean> => {
+  const value = await AsyncStorage.getItem(getSwipeTutorialKey(userId));
+  return value ? JSON.parse(value) : false;
+};
