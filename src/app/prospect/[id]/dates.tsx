@@ -152,7 +152,7 @@ const DatesScreen = () => {
   );
 
   const handleNavigateToTraits = useCallback(() => {
-    setShowDateForm(false);
+    // Keep the modal open so user can return to it after evaluating traits
     router.push(`/prospect/${id}/traits`);
   }, [router, id]);
 
