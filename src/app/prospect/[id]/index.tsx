@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -85,18 +86,20 @@ const ProspectScreen = () => {
   const [notesText, setNotesText] = useState('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
 
-  // Load prospect details
-  useEffect(() => {
-    const loadProspect = async () => {
-      if (!id) return;
-      setIsLoading(true);
-      const data = await getProspectDetails(id);
-      setProspect(data);
-      setNotesText(data?.notes || '');
-      setIsLoading(false);
-    };
-    loadProspect();
-  }, [id, getProspectDetails]);
+  // Load prospect details when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      const loadProspect = async () => {
+        if (!id) return;
+        setIsLoading(true);
+        const data = await getProspectDetails(id);
+        setProspect(data);
+        setNotesText(data?.notes || '');
+        setIsLoading(false);
+      };
+      loadProspect();
+    }, [id, getProspectDetails])
+  );
 
   // Calculate compatibility
   const compatibility = useMemo(() => {
