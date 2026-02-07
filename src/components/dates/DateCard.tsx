@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks';
 import { formatDateLong, getTraitsConfirmedOnDate } from '@/utils/dateHelpers';
 import { FlameRating } from './FlameRating';
+import type { Theme } from '@/theme';
 import type { DateEntry, Trait } from '@/types/prospect';
 
 // Enable LayoutAnimation on Android
@@ -39,117 +40,11 @@ export const DateCard: React.FC<DateCardProps> = ({
   const { t } = useTranslation('prospect');
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const confirmedTraits = useMemo(
     () => getTraitsConfirmedOnDate(traits, new Date(dateEntry.date)),
     [traits, dateEntry.date]
-  );
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
-          backgroundColor: theme.colors.backgroundCard,
-          borderRadius: theme.borderRadius.lg,
-          padding: 16,
-          ...theme.shadows.sm,
-        },
-        header: {
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-        },
-        headerLeft: {
-          flex: 1,
-        },
-        dateRow: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        },
-        dateText: {
-          fontSize: theme.typography.fontSize.base,
-          fontWeight: '600',
-          color: theme.colors.textPrimary,
-        },
-        expandButton: {
-          padding: 4,
-        },
-        ratingRow: {
-          marginTop: 12,
-        },
-        location: {
-          fontSize: theme.typography.fontSize.sm,
-          color: theme.colors.textSecondary,
-          marginBottom: 4,
-        },
-        notesPreview: {
-          fontSize: theme.typography.fontSize.sm,
-          color: theme.colors.textSecondary,
-          lineHeight: theme.typography.fontSize.sm * 1.4,
-        },
-        notesFull: {
-          fontSize: theme.typography.fontSize.base,
-          color: theme.colors.textPrimary,
-          lineHeight: theme.typography.fontSize.base * 1.5,
-          marginTop: 8,
-        },
-        traitsSection: {
-          marginTop: 16,
-          paddingTop: 16,
-          borderTopWidth: 1,
-          borderTopColor: theme.colors.border,
-        },
-        traitsLabel: {
-          fontSize: theme.typography.fontSize.xs,
-          fontWeight: '600',
-          color: theme.colors.textSecondary,
-          textTransform: 'uppercase',
-          letterSpacing: 0.5,
-          marginBottom: 8,
-        },
-        traitsContainer: {
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          gap: 4,
-        },
-        traitChip: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.colors.traitYes,
-          borderRadius: theme.borderRadius.full,
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-          gap: 4,
-        },
-        traitChipText: {
-          fontSize: theme.typography.fontSize.xs,
-          fontWeight: '500',
-          color: theme.colors.traitYesText,
-        },
-        actionsRow: {
-          flexDirection: 'row',
-          justifyContent: 'flex-end',
-          gap: 16,
-          marginTop: 16,
-          paddingTop: 16,
-          borderTopWidth: 1,
-          borderTopColor: theme.colors.border,
-        },
-        actionButton: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 4,
-        },
-        actionText: {
-          fontSize: theme.typography.fontSize.sm,
-          color: theme.colors.textSecondary,
-        },
-        deleteText: {
-          color: theme.colors.error,
-        },
-      }),
-    [theme]
   );
 
   const toggleExpanded = () => {
@@ -264,3 +159,107 @@ export const DateCard: React.FC<DateCardProps> = ({
     </TouchableOpacity>
   );
 };
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.backgroundCard,
+      borderRadius: theme.borderRadius.lg,
+      padding: 16,
+      ...theme.shadows.sm,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+    },
+    headerLeft: {
+      flex: 1,
+    },
+    dateRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    dateText: {
+      fontSize: theme.typography.fontSize.base,
+      fontWeight: '600',
+      color: theme.colors.textPrimary,
+    },
+    expandButton: {
+      padding: 4,
+    },
+    ratingRow: {
+      marginTop: 12,
+    },
+    location: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      marginBottom: 4,
+    },
+    notesPreview: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+      lineHeight: theme.typography.fontSize.sm * 1.4,
+    },
+    notesFull: {
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.textPrimary,
+      lineHeight: theme.typography.fontSize.base * 1.5,
+      marginTop: 8,
+    },
+    traitsSection: {
+      marginTop: 16,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    traitsLabel: {
+      fontSize: theme.typography.fontSize.xs,
+      fontWeight: '600',
+      color: theme.colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 8,
+    },
+    traitsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 4,
+    },
+    traitChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.traitYes,
+      borderRadius: theme.borderRadius.full,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      gap: 4,
+    },
+    traitChipText: {
+      fontSize: theme.typography.fontSize.xs,
+      fontWeight: '500',
+      color: theme.colors.traitYesText,
+    },
+    actionsRow: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 16,
+      marginTop: 16,
+      paddingTop: 16,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    actionButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    actionText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+    },
+    deleteText: {
+      color: theme.colors.error,
+    },
+  });

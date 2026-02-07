@@ -18,6 +18,7 @@ import { useTheme } from '@/hooks';
 import { formatDateLong } from '@/utils/dateHelpers';
 import { FlameRating } from './FlameRating';
 import { TraitEvaluationCTA } from './TraitEvaluationCTA';
+import type { Theme } from '@/theme';
 import type { DateEntry } from '@/types/prospect';
 
 interface DateFormProps {
@@ -46,6 +47,7 @@ export const DateForm: React.FC<DateFormProps> = ({
 }) => {
   const { t } = useTranslation('prospect');
   const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [date, setDate] = useState<Date>(
     initialData ? new Date(initialData.date) : new Date()
@@ -65,101 +67,6 @@ export const DateForm: React.FC<DateFormProps> = ({
       setNotes(initialData?.notes || '');
     }
   }, [visible, initialData]);
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        overlay: {
-          flex: 1,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          justifyContent: 'flex-end',
-        },
-        container: {
-          backgroundColor: theme.colors.background,
-          borderTopLeftRadius: theme.borderRadius.xl,
-          borderTopRightRadius: theme.borderRadius.xl,
-          maxHeight: '90%',
-        },
-        header: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingHorizontal: 16,
-          paddingVertical: 16,
-          borderBottomWidth: 1,
-          borderBottomColor: theme.colors.border,
-        },
-        headerButton: {
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-        },
-        headerButtonText: {
-          fontSize: theme.typography.fontSize.base,
-          color: theme.colors.primary,
-          fontWeight: '500',
-        },
-        headerButtonDisabled: {
-          opacity: 0.5,
-        },
-        headerTitle: {
-          fontSize: theme.typography.fontSize.lg,
-          fontWeight: '600',
-          color: theme.colors.textPrimary,
-        },
-        content: {
-          padding: 24,
-        },
-        section: {
-          marginBottom: 24,
-        },
-        label: {
-          fontSize: theme.typography.fontSize.xs,
-          fontWeight: '600',
-          color: theme.colors.textSecondary,
-          textTransform: 'uppercase',
-          letterSpacing: 0.5,
-          marginBottom: 8,
-        },
-        required: {
-          color: theme.colors.error,
-        },
-        dateButton: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.colors.backgroundCard,
-          borderRadius: theme.borderRadius.md,
-          padding: 16,
-          borderWidth: 1,
-          borderColor: theme.colors.border,
-        },
-        dateButtonText: {
-          flex: 1,
-          fontSize: theme.typography.fontSize.base,
-          color: theme.colors.textPrimary,
-          marginLeft: 8,
-        },
-        textInput: {
-          backgroundColor: theme.colors.backgroundCard,
-          borderRadius: theme.borderRadius.md,
-          padding: 16,
-          borderWidth: 1,
-          borderColor: theme.colors.border,
-          fontSize: theme.typography.fontSize.base,
-          color: theme.colors.textPrimary,
-        },
-        multilineInput: {
-          minHeight: 100,
-          textAlignVertical: 'top',
-        },
-        placeholder: {
-          color: theme.colors.textMuted,
-        },
-        ctaContainer: {
-          marginTop: 16,
-        },
-      }),
-    [theme]
-  );
 
   const handleSave = async () => {
     if (isSubmitting) return;
@@ -305,3 +212,92 @@ export const DateForm: React.FC<DateFormProps> = ({
     </Modal>
   );
 };
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'flex-end',
+    },
+    container: {
+      backgroundColor: theme.colors.background,
+      borderTopLeftRadius: theme.borderRadius.xl,
+      borderTopRightRadius: theme.borderRadius.xl,
+      maxHeight: '90%',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    headerButton: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+    },
+    headerButtonText: {
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.primary,
+      fontWeight: '500',
+    },
+    headerButtonDisabled: {
+      opacity: 0.5,
+    },
+    headerTitle: {
+      fontSize: theme.typography.fontSize.lg,
+      fontWeight: '600',
+      color: theme.colors.textPrimary,
+    },
+    content: {
+      padding: 24,
+    },
+    section: {
+      marginBottom: 24,
+    },
+    label: {
+      fontSize: theme.typography.fontSize.xs,
+      fontWeight: '600',
+      color: theme.colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 8,
+    },
+    required: {
+      color: theme.colors.error,
+    },
+    dateButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.backgroundCard,
+      borderRadius: theme.borderRadius.md,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    dateButtonText: {
+      flex: 1,
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.textPrimary,
+      marginLeft: 8,
+    },
+    textInput: {
+      backgroundColor: theme.colors.backgroundCard,
+      borderRadius: theme.borderRadius.md,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.textPrimary,
+    },
+    multilineInput: {
+      minHeight: 100,
+      textAlignVertical: 'top',
+    },
+    ctaContainer: {
+      marginTop: 16,
+    },
+  });
