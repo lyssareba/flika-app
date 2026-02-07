@@ -440,6 +440,7 @@ const getProspectTraits = async (
       attributeCategory: attr?.category || 'desired',
       state: data.state,
       updatedAt: toDate(data.updatedAt),
+      confirmedAt: data.confirmedAt ? toDate(data.confirmedAt) : undefined,
     };
   });
 };
@@ -453,10 +454,20 @@ export const updateTrait = async (
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
   const traitDocRef = doc(prospectDocRef, 'traits', traitId);
 
-  await updateDoc(traitDocRef, {
+  // Build update object - set confirmedAt when state is "yes"
+  const updateData: Record<string, unknown> = {
     state,
     updatedAt: Timestamp.now(),
-  });
+  };
+
+  if (state === 'yes') {
+    updateData.confirmedAt = Timestamp.now();
+  } else {
+    // Clear confirmedAt when not "yes"
+    updateData.confirmedAt = null;
+  }
+
+  await updateDoc(traitDocRef, updateData);
 
   // Also update prospect's updatedAt
   await updateDoc(prospectDocRef, {

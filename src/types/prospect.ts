@@ -10,6 +10,7 @@ export interface Trait {
   attributeCategory: AttributeCategory;
   state: TraitState;
   updatedAt: Date;
+  confirmedAt?: Date; // When this trait was set to "yes"
 }
 
 export interface DateEntry {

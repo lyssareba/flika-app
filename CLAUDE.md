@@ -78,6 +78,34 @@ src/
 
 - **All UI text must use i18n translations** - Never hardcode user-facing strings. Use `useTranslation` hook with appropriate namespace (`common`, `prospect`, `onboarding`, etc.) and add keys to the corresponding locale files in `src/i18n/locales/`
 
+- **StyleSheet pattern** - Define a `createStyles` function at the bottom of the file that takes the theme and returns `StyleSheet.create({...})`. In the component, use `useMemo(() => createStyles(theme), [theme])` to get the styles. Never define StyleSheet.create inline inside the component body.
+
+```tsx
+// Good pattern:
+const MyComponent = () => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  return <View style={styles.container} />;
+};
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: { ... },
+  });
+```
+
+- **React hooks imports** - Import React hooks directly from 'react' rather than accessing them via `React.useEffect`, `React.useState`, etc. Always use named imports.
+
+```tsx
+// Good:
+import React, { useState, useEffect, useMemo } from 'react';
+useEffect(() => { ... }, []);
+
+// Bad:
+import React from 'react';
+React.useEffect(() => { ... }, []);
+```
+
 ## Workflow Rules
 
 - **Never commit directly to main** - Always create a new branch for changes, associated with the most closely related issue (e.g., `fix/issue-74-white-flash` or `feature/issue-18-trait-evaluation`)
