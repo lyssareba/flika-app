@@ -76,8 +76,7 @@ export const DateCard: React.FC<DateCardProps> = ({
           padding: 4,
         },
         ratingRow: {
-          marginTop: 6,
-          marginBottom: 4,
+          marginTop: 12,
         },
         location: {
           fontSize: theme.typography.fontSize.sm,
@@ -192,13 +191,6 @@ export const DateCard: React.FC<DateCardProps> = ({
             </TouchableOpacity>
           </View>
 
-          {/* Rating - below date */}
-          {dateEntry.rating && (
-            <View style={styles.ratingRow}>
-              <FlameRating value={dateEntry.rating} displayOnly size="xs" />
-            </View>
-          )}
-
           {/* Location */}
           {dateEntry.location && (
             <Text style={styles.location}>{dateEntry.location}</Text>
@@ -212,6 +204,13 @@ export const DateCard: React.FC<DateCardProps> = ({
           )}
         </View>
       </View>
+
+      {/* Rating - at bottom of card */}
+      {dateEntry.rating && (
+        <View style={styles.ratingRow}>
+          <FlameRating value={dateEntry.rating} displayOnly size="xs" />
+        </View>
+      )}
 
       {/* Expanded content */}
       {expanded && (
