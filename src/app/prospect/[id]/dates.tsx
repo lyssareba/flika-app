@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -55,7 +55,7 @@ const DatesScreen = () => {
   }, [id, getProspectDetails]);
 
   // Initial load
-  React.useEffect(() => {
+  useEffect(() => {
     const init = async () => {
       setIsLoading(true);
       await loadProspect();
