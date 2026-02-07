@@ -66,21 +66,18 @@ export const DateCard: React.FC<DateCardProps> = ({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: 4,
         },
         dateText: {
           fontSize: theme.typography.fontSize.base,
           fontWeight: '600',
           color: theme.colors.textPrimary,
         },
-        ratingContainer: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 8,
-        },
         expandButton: {
           padding: 4,
-          marginLeft: 8,
+        },
+        ratingRow: {
+          marginTop: 6,
+          marginBottom: 4,
         },
         location: {
           fontSize: theme.typography.fontSize.sm,
@@ -175,34 +172,32 @@ export const DateCard: React.FC<DateCardProps> = ({
       accessibilityLabel={`Date on ${formatDateLong(new Date(dateEntry.date))}${dateEntry.location ? ` at ${dateEntry.location}` : ''}`}
       accessibilityHint={expanded ? 'Tap to collapse' : 'Tap to expand'}
     >
-      {/* Header with date, rating, and expand button */}
+      {/* Header with date and expand button */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.dateRow}>
             <Text style={styles.dateText}>
               {formatDateLong(new Date(dateEntry.date))}
             </Text>
-            <View style={styles.ratingContainer}>
-              {dateEntry.rating && (
-                <FlameRating
-                  value={dateEntry.rating}
-                  displayOnly
-                  size="sm"
-                />
-              )}
-              <TouchableOpacity
-                style={styles.expandButton}
-                onPress={toggleExpanded}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Ionicons
-                  name={expanded ? 'chevron-up' : 'chevron-down'}
-                  size={20}
-                  color={theme.colors.textSecondary}
-                />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={styles.expandButton}
+              onPress={toggleExpanded}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons
+                name={expanded ? 'chevron-up' : 'chevron-down'}
+                size={20}
+                color={theme.colors.textSecondary}
+              />
+            </TouchableOpacity>
           </View>
+
+          {/* Rating - below date */}
+          {dateEntry.rating && (
+            <View style={styles.ratingRow}>
+              <FlameRating value={dateEntry.rating} displayOnly size="xs" />
+            </View>
+          )}
 
           {/* Location */}
           {dateEntry.location && (

@@ -24,7 +24,7 @@ interface FlameRatingProps {
   value?: number;
   onChange?: (rating: number) => void;
   displayOnly?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
 export const FlameRating: React.FC<FlameRatingProps> = ({
@@ -37,6 +37,8 @@ export const FlameRating: React.FC<FlameRatingProps> = ({
 
   const dimensions = useMemo(() => {
     switch (size) {
+      case 'xs':
+        return { bubble: 20, icon: 12, gap: 4 };
       case 'sm':
         return { bubble: 28, icon: 16, gap: 6 };
       case 'lg':
