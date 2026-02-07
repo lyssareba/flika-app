@@ -20,7 +20,7 @@ export const TraitEvaluationCTA: React.FC<TraitEvaluationCTAProps> = ({
         container: {
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: theme.colors.peach,
+          backgroundColor: theme.colors.primary + '15', // 15 = ~8% opacity
           borderRadius: theme.borderRadius.md,
           padding: 16,
           gap: 12,
