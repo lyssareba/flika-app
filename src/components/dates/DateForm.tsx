@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -59,7 +59,7 @@ export const DateForm: React.FC<DateFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Reset form when initialData changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
       setDate(initialData ? new Date(initialData.date) : new Date());
       setLocation(initialData?.location || '');

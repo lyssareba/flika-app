@@ -94,6 +94,18 @@ const createStyles = (theme: Theme) =>
   });
 ```
 
+- **React hooks imports** - Import React hooks directly from 'react' rather than accessing them via `React.useEffect`, `React.useState`, etc. Always use named imports.
+
+```tsx
+// Good:
+import React, { useState, useEffect, useMemo } from 'react';
+useEffect(() => { ... }, []);
+
+// Bad:
+import React from 'react';
+React.useEffect(() => { ... }, []);
+```
+
 ## Workflow Rules
 
 - **Never commit directly to main** - Always create a new branch for changes, associated with the most closely related issue (e.g., `fix/issue-74-white-flash` or `feature/issue-18-trait-evaluation`)
