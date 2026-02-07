@@ -3,6 +3,7 @@ import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks';
+import type { Theme } from '@/theme';
 
 interface TraitEvaluationCTAProps {
   onPress: () => void;
@@ -13,40 +14,7 @@ export const TraitEvaluationCTA: React.FC<TraitEvaluationCTAProps> = ({
 }) => {
   const { t } = useTranslation('prospect');
   const theme = useTheme();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: theme.colors.primary + '15', // 15 = ~8% opacity
-          borderRadius: theme.borderRadius.md,
-          padding: 16,
-          gap: 12,
-        },
-        iconContainer: {
-          width: 32,
-          height: 32,
-          borderRadius: 16,
-          backgroundColor: theme.colors.primary,
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-        textContainer: {
-          flex: 1,
-        },
-        text: {
-          fontSize: theme.typography.fontSize.base,
-          fontWeight: '500',
-          color: theme.colors.textPrimary,
-        },
-        arrow: {
-          marginLeft: 4,
-        },
-      }),
-    [theme]
-  );
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <TouchableOpacity
@@ -72,3 +40,34 @@ export const TraitEvaluationCTA: React.FC<TraitEvaluationCTAProps> = ({
     </TouchableOpacity>
   );
 };
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.primary + '15', // 15 = ~8% opacity
+      borderRadius: theme.borderRadius.md,
+      padding: 16,
+      gap: 12,
+    },
+    iconContainer: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: theme.colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    textContainer: {
+      flex: 1,
+    },
+    text: {
+      fontSize: theme.typography.fontSize.base,
+      fontWeight: '500',
+      color: theme.colors.textPrimary,
+    },
+    arrow: {
+      marginLeft: 4,
+    },
+  });

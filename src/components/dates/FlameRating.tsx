@@ -27,6 +27,12 @@ interface FlameRatingProps {
   size?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
+interface Dimensions {
+  bubble: number;
+  icon: number;
+  gap: number;
+}
+
 export const FlameRating: React.FC<FlameRatingProps> = ({
   value,
   onChange,
@@ -35,7 +41,7 @@ export const FlameRating: React.FC<FlameRatingProps> = ({
 }) => {
   const theme = useTheme();
 
-  const dimensions = useMemo(() => {
+  const dimensions = useMemo((): Dimensions => {
     switch (size) {
       case 'xs':
         return { bubble: 20, icon: 12, gap: 4 };
@@ -50,29 +56,7 @@ export const FlameRating: React.FC<FlameRatingProps> = ({
   }, [size]);
 
   const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: dimensions.gap,
-        },
-        bubble: {
-          width: dimensions.bubble,
-          height: dimensions.bubble,
-          borderRadius: dimensions.bubble / 2,
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderWidth: 2,
-        },
-        bubbleUnselected: {
-          borderColor:
-            theme.mode === 'light'
-              ? UNSELECTED_COLOR_LIGHT
-              : UNSELECTED_COLOR_DARK,
-          backgroundColor: 'transparent',
-        },
-      }),
+    () => createStyles(theme.mode, dimensions),
     [theme.mode, dimensions]
   );
 
@@ -155,3 +139,25 @@ export const FlameRating: React.FC<FlameRatingProps> = ({
     </View>
   );
 };
+
+const createStyles = (mode: 'light' | 'dark', dimensions: Dimensions) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: dimensions.gap,
+    },
+    bubble: {
+      width: dimensions.bubble,
+      height: dimensions.bubble,
+      borderRadius: dimensions.bubble / 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 2,
+    },
+    bubbleUnselected: {
+      borderColor:
+        mode === 'light' ? UNSELECTED_COLOR_LIGHT : UNSELECTED_COLOR_DARK,
+      backgroundColor: 'transparent',
+    },
+  });

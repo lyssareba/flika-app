@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/hooks';
 import { Button } from '@/components/ui/Button/Button';
+import type { Theme } from '@/theme';
 
 interface EmptyDateStateProps {
   prospectName: string;
@@ -16,42 +17,7 @@ export const EmptyDateState: React.FC<EmptyDateStateProps> = ({
 }) => {
   const { t } = useTranslation('prospect');
   const theme = useTheme();
-
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        container: {
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingHorizontal: 32,
-          paddingVertical: 48,
-        },
-        iconContainer: {
-          width: 80,
-          height: 80,
-          borderRadius: 40,
-          backgroundColor: theme.colors.peach,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 24,
-        },
-        title: {
-          fontSize: theme.typography.fontSize.lg,
-          fontWeight: '600',
-          color: theme.colors.textPrimary,
-          marginBottom: 8,
-          textAlign: 'center',
-        },
-        subtitle: {
-          fontSize: theme.typography.fontSize.base,
-          color: theme.colors.textSecondary,
-          textAlign: 'center',
-          marginBottom: 32,
-        },
-      }),
-    [theme]
-  );
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View style={styles.container}>
@@ -70,3 +36,36 @@ export const EmptyDateState: React.FC<EmptyDateStateProps> = ({
     </View>
   );
 };
+
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 32,
+      paddingVertical: 48,
+    },
+    iconContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: theme.colors.peach,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 24,
+    },
+    title: {
+      fontSize: theme.typography.fontSize.lg,
+      fontWeight: '600',
+      color: theme.colors.textPrimary,
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    subtitle: {
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: 32,
+    },
+  });
