@@ -76,5 +76,10 @@
   "Delete Date": "Delete Date",
   "Are you sure you want to delete this date?": "Are you sure you want to delete this date?",
   "Where did you go?": "Where did you go?",
-  "How did it go?": "How did it go?"
+  "How did it go?": "How did it go?",
+  "No archived prospects": "No archived prospects",
+  "Prospects you archive will appear here": "Prospects you archive will appear here",
+  "Archived {{date}}": "Archived {{date}}",
+  "Restore {{name}}?": "Restore {{name}}?",
+  "This will move {{name}} back to your active prospects.": "This will move {{name}} back to your active prospects."
 }

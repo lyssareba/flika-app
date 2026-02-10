@@ -29,6 +29,8 @@ interface UseProspectsReturn {
   updateProspectStatus: ReturnType<typeof useProspectsContext>['updateProspectStatus'];
   /** Archive a prospect */
   archive: ReturnType<typeof useProspectsContext>['archive'];
+  /** Archive all other prospects (set target to relationship) */
+  archiveOthers: ReturnType<typeof useProspectsContext>['archiveOthers'];
   /** Restore a prospect */
   restore: ReturnType<typeof useProspectsContext>['restore'];
   /** Delete a prospect */
@@ -70,6 +72,7 @@ export const useProspects = (options: UseProspectsOptions = {}): UseProspectsRet
     updateProspectInfo,
     updateProspectStatus,
     archive,
+    archiveOthers,
     restore,
     remove,
     getProspectDetails,
@@ -121,6 +124,7 @@ export const useProspects = (options: UseProspectsOptions = {}): UseProspectsRet
     updateProspectInfo,
     updateProspectStatus,
     archive,
+    archiveOthers,
     restore,
     remove,
     getProspectDetails,

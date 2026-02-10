@@ -5,6 +5,7 @@ import {
   createProspect,
   updateProspect,
   archiveProspect,
+  archiveOtherProspects,
   restoreProspect,
   deleteProspect,
   type ProspectListData,
@@ -250,6 +251,57 @@ export const useProspectMutations = () => {
     },
   });
 
+  const archiveOthersMutation = useMutation({
+    mutationFn: async (prospectId: string) => {
+      if (!user) throw new Error('User not authenticated');
+      await archiveOtherProspects(user.uid, prospectId);
+      return prospectId;
+    },
+    onMutate: async (prospectId) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.prospects.list() });
+
+      const previousList = queryClient.getQueryData<ProspectListData[]>(
+        queryKeys.prospects.list()
+      );
+
+      if (previousList) {
+        queryClient.setQueryData<ProspectListData[]>(
+          queryKeys.prospects.list(),
+          previousList.map((p) => {
+            if (p.id === prospectId) {
+              return { ...p, status: 'relationship' as const, updatedAt: new Date() };
+            }
+            if (p.status !== 'archived') {
+              return {
+                ...p,
+                status: 'archived' as const,
+                previousStatus: p.status,
+                archivedAt: new Date(),
+                updatedAt: new Date(),
+              };
+            }
+            return p;
+          })
+        );
+      }
+
+      return { previousList };
+    },
+    onError: (error, _prospectId, context) => {
+      if (context?.previousList) {
+        queryClient.setQueryData(queryKeys.prospects.list(), context.previousList);
+      }
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Could not archive prospects. Please try again.')
+      );
+      console.error('Archive others error:', error);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.prospects.list() });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async (prospectId: string) => {
       if (!user) throw new Error('User not authenticated');
@@ -295,11 +347,13 @@ export const useProspectMutations = () => {
     updateProspectInfo: updateInfoMutation.mutate,
     updateProspectStatus: updateStatusMutation.mutate,
     archive: archiveMutation.mutate,
+    archiveOthers: archiveOthersMutation.mutate,
     restore: restoreMutation.mutate,
     remove: deleteMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateInfoMutation.isPending || updateStatusMutation.isPending,
     isArchiving: archiveMutation.isPending,
+    isArchivingOthers: archiveOthersMutation.isPending,
     isRestoring: restoreMutation.isPending,
     isDeleting: deleteMutation.isPending,
   };

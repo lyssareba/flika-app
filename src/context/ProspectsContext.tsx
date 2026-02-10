@@ -20,6 +20,8 @@ interface ProspectsContextType {
   updateProspectStatus: (prospectId: string, status: ProspectStatus) => void;
   /** Archive a prospect */
   archive: (prospectId: string) => void;
+  /** Archive all other prospects (set target to relationship) */
+  archiveOthers: (prospectId: string) => void;
   /** Restore an archived prospect */
   restore: (prospectId: string) => void;
   /** Permanently delete a prospect */
@@ -45,6 +47,7 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
     updateProspectInfo: updateInfo,
     updateProspectStatus: updateStatus,
     archive: archiveProspect,
+    archiveOthers: archiveOthersProspect,
     restore: restoreProspect,
     remove: removeProspect,
   } = useProspectMutations();
@@ -76,6 +79,14 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
     [updateStatus]
   );
 
+  // Wrapper for archiveOthers
+  const archiveOthers = useCallback(
+    (prospectId: string) => {
+      archiveOthersProspect(prospectId);
+    },
+    [archiveOthersProspect]
+  );
+
   // Deprecated: Use useProspectQuery instead
   const getProspectDetails = useCallback(
     async (prospectId: string): Promise<Prospect | null> => {
@@ -99,6 +110,7 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
       updateProspectInfo,
       updateProspectStatus,
       archive: archiveProspect,
+      archiveOthers,
       restore: restoreProspect,
       remove: removeProspect,
       getProspectDetails,
@@ -111,6 +123,7 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
       updateProspectInfo,
       updateProspectStatus,
       archiveProspect,
+      archiveOthers,
       restoreProspect,
       removeProspect,
       getProspectDetails,

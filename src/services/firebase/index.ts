@@ -33,6 +33,7 @@ export {
   getArchivedProspects,
   updateProspect,
   archiveProspect,
+  archiveOtherProspects,
   deleteProspect,
   // Traits
   updateTrait,

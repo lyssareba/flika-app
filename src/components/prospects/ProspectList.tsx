@@ -1,5 +1,6 @@
 import React, { useMemo, useCallback } from 'react';
 import { View, Text, SectionList, StyleSheet, RefreshControl } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
 import { ProspectCard } from './ProspectCard';
@@ -62,13 +63,25 @@ export const ProspectList = ({
   // For now, we'll show "still learning" and calculate on detail view
   // In a future iteration, we could cache scores or compute them
 
+  const relationshipTitle = t('In a Relationship');
+
   const renderSectionHeader = useCallback(
-    ({ section }: { section: Section }) => (
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{section.title}</Text>
-      </View>
-    ),
-    [styles]
+    ({ section }: { section: Section }) => {
+      if (section.title === relationshipTitle) {
+        return (
+          <View style={styles.relationshipBanner}>
+            <Ionicons name="heart" size={18} color={theme.colors.primary} />
+            <Text style={styles.relationshipBannerText}>{section.title}</Text>
+          </View>
+        );
+      }
+      return (
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{section.title}</Text>
+        </View>
+      );
+    },
+    [styles, relationshipTitle, theme.colors.primary]
   );
 
   const renderItem = useCallback(
@@ -130,6 +143,24 @@ const createStyles = (theme: Theme) =>
       fontSize: theme.typography.fontSize.sm,
       fontWeight: '600',
       color: theme.colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    relationshipBanner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: theme.colors.primary + '15',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderRadius: 12,
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    relationshipBannerText: {
+      fontSize: theme.typography.fontSize.sm,
+      fontWeight: '600',
+      color: theme.colors.primary,
       textTransform: 'uppercase',
       letterSpacing: 0.5,
     },
