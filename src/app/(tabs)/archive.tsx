@@ -44,7 +44,7 @@ const ArchiveScreen = () => {
     (prospect: ProspectListData) => {
       Alert.alert(
         t('Delete Prospect'),
-        `Are you sure you want to delete ${prospect.name}? This cannot be undone.`,
+        t('Are you sure you want to delete {{name}}? This cannot be undone.', { name: prospect.name }),
         [
           { text: tc('Cancel'), style: 'cancel' },
           {

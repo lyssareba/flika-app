@@ -297,8 +297,11 @@ export const useProspectMutations = () => {
       );
       console.error('Archive others error:', error);
     },
-    onSettled: () => {
+    onSettled: (prospectId) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.prospects.list() });
+      if (prospectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.prospects.detail(prospectId) });
+      }
     },
   });
 

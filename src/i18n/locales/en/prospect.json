@@ -81,5 +81,6 @@
   "Prospects you archive will appear here": "Prospects you archive will appear here",
   "Archived {{date}}": "Archived {{date}}",
   "Restore {{name}}?": "Restore {{name}}?",
-  "This will move {{name}} back to your active prospects.": "This will move {{name}} back to your active prospects."
+  "This will move {{name}} back to your active prospects.": "This will move {{name}} back to your active prospects.",
+  "Are you sure you want to delete {{name}}? This cannot be undone.": "Are you sure you want to delete {{name}}? This cannot be undone."
 }

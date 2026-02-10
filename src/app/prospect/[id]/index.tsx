@@ -501,7 +501,7 @@ const ProspectScreen = () => {
         hasOtherActiveProspects={hasOtherActiveProspects}
         onArchiveOthers={handleArchiveOthers}
         onKeepOthers={handleKeepOthers}
-        onClose={() => setShowCelebrationModal(false)}
+        onClose={handleKeepOthers}
       />
     </SafeAreaView>
   );
