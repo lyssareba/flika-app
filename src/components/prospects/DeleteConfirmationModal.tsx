@@ -16,7 +16,6 @@ interface DeleteConfirmationModalProps {
   prospectName: string;
   dateCount: number;
   evaluatedTraitCount: number;
-  hasNotes: boolean;
   onDelete: () => void;
   onCancel: () => void;
 }
@@ -26,7 +25,6 @@ export const DeleteConfirmationModal = ({
   prospectName,
   dateCount,
   evaluatedTraitCount,
-  hasNotes,
   onDelete,
   onCancel,
 }: DeleteConfirmationModalProps) => {

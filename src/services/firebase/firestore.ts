@@ -379,23 +379,20 @@ export const getProspectSummary = async (
   prospectId: string
 ): Promise<{ dateCount: number; evaluatedTraitCount: number; hasNotes: boolean }> => {
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
-
-  // Get prospect doc for notes
-  const prospectSnap = await getDoc(prospectDocRef);
-  const hasNotes = !!prospectSnap.data()?.notes;
-
-  // Count evaluated traits (state !== 'unknown')
   const traitsColRef = collection(prospectDocRef, 'traits');
-  const traitsQuery = query(traitsColRef, where('state', '!=', 'unknown'));
-  const traitsSnapshot = await getDocs(traitsQuery);
-  const evaluatedTraitCount = traitsSnapshot.size;
-
-  // Count dates
   const datesColRef = collection(prospectDocRef, 'dates');
-  const datesSnapshot = await getDocs(datesColRef);
-  const dateCount = datesSnapshot.size;
 
-  return { dateCount, evaluatedTraitCount, hasNotes };
+  const [prospectSnap, traitsSnapshot, datesSnapshot] = await Promise.all([
+    getDoc(prospectDocRef),
+    getDocs(query(traitsColRef, where('state', '!=', 'unknown'))),
+    getDocs(datesColRef),
+  ]);
+
+  return {
+    dateCount: datesSnapshot.size,
+    evaluatedTraitCount: traitsSnapshot.size,
+    hasNotes: !!prospectSnap.data()?.notes,
+  };
 };
 
 export const resetArchiveTimer = async (

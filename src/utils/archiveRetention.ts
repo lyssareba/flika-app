@@ -3,6 +3,7 @@ const WARNING_MONTHS = 11;
 
 /**
  * Get the number of full months remaining before archived data expires.
+ * Uses day-aware calculation to avoid calendar month boundary inaccuracies.
  */
 export const getMonthsUntilExpiry = (archivedAt: Date): number => {
   const now = new Date();
@@ -12,12 +13,18 @@ export const getMonthsUntilExpiry = (archivedAt: Date): number => {
   const diffMs = expiryDate.getTime() - now.getTime();
   if (diffMs <= 0) return 0;
 
-  // Calculate months remaining
-  const diffMonths =
+  // Use day-aware month calculation to avoid edge cases
+  // (e.g. April 1 vs March 30 should be 0 months, not 1)
+  let months =
     (expiryDate.getFullYear() - now.getFullYear()) * 12 +
     (expiryDate.getMonth() - now.getMonth());
 
-  return Math.max(0, diffMonths);
+  // Adjust if we haven't reached the same day-of-month yet
+  if (expiryDate.getDate() < now.getDate()) {
+    months--;
+  }
+
+  return Math.max(0, months);
 };
 
 /**

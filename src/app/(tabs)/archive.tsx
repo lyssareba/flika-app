@@ -261,7 +261,6 @@ const ArchiveScreen = () => {
           prospectName={deleteTarget.name}
           dateCount={deleteSummary?.dateCount ?? 0}
           evaluatedTraitCount={deleteSummary?.evaluatedTraitCount ?? 0}
-          hasNotes={deleteSummary?.hasNotes ?? false}
           onDelete={handleDeleteConfirm}
           onCancel={handleDeleteCancel}
         />
