@@ -8,6 +8,7 @@ import {
   Pressable,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
@@ -51,9 +52,9 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
       const data = await gatherExportData(user.uid, userProfile);
       await shareAccountExport(data);
     } catch {
-      // Export error handled silently — user can retry
+      Alert.alert(t('Export failed'), t('Could not export data. Please try again.'));
     }
-  }, [user, userProfile]);
+  }, [user, userProfile, t]);
 
   const handleDelete = useCallback(async () => {
     if (!user || !password.trim()) return;
