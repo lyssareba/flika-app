@@ -1,46 +1,193 @@
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useThemeContext, type Theme } from '@/theme';
-import { useAuth } from '@/hooks';
+import { useAuth, useAppLock } from '@/hooks';
 import { updateUserSettings } from '@/services/firebase/firestore';
 import { Toggle } from '@/components/ui';
+import { type StrictnessLevel } from '@/utils/compatibility';
+
+type ThemePreference = 'system' | 'light' | 'dark';
+
+const THEME_OPTIONS: { value: ThemePreference; labelKey: string }[] = [
+  { value: 'system', labelKey: 'System' },
+  { value: 'light', labelKey: 'Light' },
+  { value: 'dark', labelKey: 'Dark' },
+];
+
+const STRICTNESS_OPTIONS: {
+  value: StrictnessLevel;
+  labelKey: string;
+  descKey: string;
+}[] = [
+  {
+    value: 'noEffect',
+    labelKey: 'No Effect',
+    descKey: 'No Effect: "No" has same impact as "Yes"',
+  },
+  {
+    value: 'gentle',
+    labelKey: 'Gentle',
+    descKey: 'Gentle: "No" has 1.5× impact',
+  },
+  {
+    value: 'normal',
+    labelKey: 'Normal',
+    descKey: 'Normal: "No" has 2× impact',
+  },
+  {
+    value: 'strict',
+    labelKey: 'Strict',
+    descKey: 'Strict: "No" has 2.5× impact',
+  },
+];
+
+const TIMEOUT_OPTIONS = [1, 5, 10, 15];
 
 const SettingsScreen = () => {
-  const { theme } = useThemeContext();
+  const { theme, mode, setMode } = useThemeContext();
   const { t } = useTranslation('settings');
-  const { user, userProfile, refreshProfile } = useAuth();
+  const { user, userProfile, signOut, refreshProfile } = useAuth();
+  const {
+    isAppLockEnabled,
+    isBiometricEnabled,
+    isBiometricAvailable,
+    enableAppLock,
+    enableBiometric,
+    updateTimeout,
+    getLockTimeout,
+    hasPinSet,
+  } = useAppLock();
+  const router = useRouter();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // Local state for optimistic updates
   const [checkboxView, setCheckboxView] = useState(
     userProfile?.settings?.useCheckboxView ?? false
   );
+  const [strictness, setStrictness] = useState<StrictnessLevel>(
+    userProfile?.settings?.scoringStrictness ?? 'normal'
+  );
+  const [appLockEnabled, setAppLockEnabled] = useState(isAppLockEnabled);
+  const [biometricEnabled, setBiometricEnabled] = useState(isBiometricEnabled);
+  const [lockTimeout, setLockTimeout] = useState(5);
 
-  // Sync local state when userProfile changes (e.g., on initial load)
+  // Sync local state when external state changes
   useEffect(() => {
     setCheckboxView(userProfile?.settings?.useCheckboxView ?? false);
   }, [userProfile?.settings?.useCheckboxView]);
 
+  useEffect(() => {
+    setStrictness(userProfile?.settings?.scoringStrictness ?? 'normal');
+  }, [userProfile?.settings?.scoringStrictness]);
+
+  useEffect(() => {
+    setAppLockEnabled(isAppLockEnabled);
+  }, [isAppLockEnabled]);
+
+  useEffect(() => {
+    setBiometricEnabled(isBiometricEnabled);
+  }, [isBiometricEnabled]);
+
+  useEffect(() => {
+    getLockTimeout().then((timeout) => {
+      if (timeout != null) setLockTimeout(timeout);
+    });
+  }, [getLockTimeout]);
+
   const handleCheckboxViewToggle = useCallback(
     async (value: boolean) => {
       if (!user) return;
-
-      // Optimistic update - immediately reflect in UI
       setCheckboxView(value);
-
       try {
         await updateUserSettings(user.uid, { useCheckboxView: value });
-        // Background refresh to sync state (non-blocking)
         refreshProfile();
-      } catch (error) {
-        // Revert on error
+      } catch {
         setCheckboxView(!value);
-        console.error('Failed to update setting:', error);
       }
     },
     [user, refreshProfile]
+  );
+
+  const handleStrictnessChange = useCallback(
+    async (value: StrictnessLevel) => {
+      if (!user) return;
+      const prev = strictness;
+      setStrictness(value);
+      try {
+        await updateUserSettings(user.uid, { scoringStrictness: value });
+        refreshProfile();
+      } catch {
+        setStrictness(prev);
+      }
+    },
+    [user, strictness, refreshProfile]
+  );
+
+  const handleAppLockToggle = useCallback(
+    async (value: boolean) => {
+      if (value && !hasPinSet) {
+        router.push('/onboarding/security');
+        return;
+      }
+      const prev = appLockEnabled;
+      setAppLockEnabled(value);
+      try {
+        await enableAppLock(value);
+      } catch {
+        setAppLockEnabled(prev);
+      }
+    },
+    [hasPinSet, appLockEnabled, enableAppLock, router]
+  );
+
+  const handleBiometricToggle = useCallback(
+    async (value: boolean) => {
+      const prev = biometricEnabled;
+      setBiometricEnabled(value);
+      try {
+        await enableBiometric(value);
+      } catch {
+        setBiometricEnabled(prev);
+      }
+    },
+    [biometricEnabled, enableBiometric]
+  );
+
+  const handleTimeoutChange = useCallback(
+    async (minutes: number) => {
+      setLockTimeout(minutes);
+      await updateTimeout(minutes);
+    },
+    [updateTimeout]
+  );
+
+  const handleSignOut = useCallback(() => {
+    Alert.alert(t('Sign out of Flika'), t('Are you sure you want to sign out?'), [
+      { text: t('Cancel'), style: 'cancel' },
+      {
+        text: t('Sign Out'),
+        style: 'destructive',
+        onPress: () => signOut(),
+      },
+    ]);
+  }, [t, signOut]);
+
+  const handleComingSoon = useCallback(
+    (messageKey: string) => {
+      Alert.alert(t(messageKey));
+    },
+    [t]
   );
 
   return (
@@ -50,6 +197,65 @@ const SettingsScreen = () => {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        {/* Appearance Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('Appearance')}</Text>
+          <View style={styles.sectionContent}>
+            <Text style={styles.settingLabel}>{t('Theme')}</Text>
+            <View style={styles.optionRow}>
+              {THEME_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.optionChip,
+                    mode === option.value && styles.optionChipSelected,
+                  ]}
+                  onPress={() => setMode(option.value)}
+                >
+                  <Text
+                    style={[
+                      styles.optionChipLabel,
+                      mode === option.value && styles.optionChipLabelSelected,
+                    ]}
+                  >
+                    {t(option.labelKey)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        {/* Scoring Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('Scoring')}</Text>
+          <View style={styles.sectionContent}>
+            <Text style={styles.settingLabel}>{t('Scoring Strictness')}</Text>
+            <View style={styles.optionRow}>
+              {STRICTNESS_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.optionChip,
+                    strictness === option.value && styles.optionChipSelected,
+                  ]}
+                  onPress={() => handleStrictnessChange(option.value)}
+                >
+                  <Text
+                    style={[
+                      styles.optionChipLabel,
+                      strictness === option.value && styles.optionChipLabelSelected,
+                    ]}
+                  >
+                    {t(option.labelKey)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.settingDescription}>{t(STRICTNESS_OPTIONS.find((o) => o.value === strictness)?.descKey ?? '')}</Text>
+          </View>
+        </View>
+
         {/* Accessibility Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('Accessibility')}</Text>
@@ -59,6 +265,119 @@ const SettingsScreen = () => {
               value={checkboxView}
               onValueChange={handleCheckboxViewToggle}
             />
+          </View>
+        </View>
+
+        {/* Security Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('Security')}</Text>
+          <View style={styles.sectionContent}>
+            <Toggle
+              label={t('Enable app lock')}
+              value={appLockEnabled}
+              onValueChange={handleAppLockToggle}
+            />
+            {appLockEnabled && (
+              <>
+                <View style={styles.settingRow}>
+                  <Text style={styles.settingLabel}>{t('Lock after')}</Text>
+                  <View style={styles.optionRow}>
+                    {TIMEOUT_OPTIONS.map((minutes) => (
+                      <TouchableOpacity
+                        key={minutes}
+                        style={[
+                          styles.optionChip,
+                          lockTimeout === minutes && styles.optionChipSelected,
+                        ]}
+                        onPress={() => handleTimeoutChange(minutes)}
+                      >
+                        <Text
+                          style={[
+                            styles.optionChipLabel,
+                            lockTimeout === minutes && styles.optionChipLabelSelected,
+                          ]}
+                        >
+                          {t('{{count}} minutes', { count: minutes })}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                {isBiometricAvailable && (
+                  <Toggle
+                    label={t('Use Biometrics')}
+                    value={biometricEnabled}
+                    onValueChange={handleBiometricToggle}
+                  />
+                )}
+              </>
+            )}
+          </View>
+        </View>
+
+        {/* Manage Attributes Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('Manage Attributes')}</Text>
+          <TouchableOpacity
+            style={[styles.sectionContent, styles.actionRow]}
+            onPress={() => router.push('/settings/attributes')}
+          >
+            <Text style={styles.actionRowText}>{t('Your Attributes')}</Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.colors.textMuted}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Notifications Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('Notifications')}</Text>
+          <View style={styles.sectionContent}>
+            <Text style={styles.comingSoonText}>
+              {t('Notifications coming soon')}
+            </Text>
+          </View>
+        </View>
+
+        {/* Data Management Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('Data Management')}</Text>
+          <View style={styles.sectionContent}>
+            <TouchableOpacity
+              style={styles.actionRow}
+              onPress={() => handleComingSoon('Export coming soon')}
+            >
+              <Text style={styles.actionRowText}>{t('Export My Data')}</Text>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={theme.colors.textMuted}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionRow}
+              onPress={() => handleComingSoon('Delete account coming soon')}
+            >
+              <Text style={styles.actionRowDestructive}>{t('Delete Account')}</Text>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={theme.colors.error}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Account Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('Account')}</Text>
+          <View style={styles.sectionContent}>
+            <Text style={styles.emailText}>{userProfile?.email}</Text>
+            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+              <Text style={styles.actionRowDestructive}>{t('Sign Out')}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -105,6 +424,71 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.backgroundCard,
       paddingHorizontal: 16,
       paddingVertical: 8,
+    },
+    settingRow: {
+      paddingVertical: 8,
+    },
+    settingLabel: {
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.textPrimary,
+      marginBottom: 8,
+    },
+    settingDescription: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textMuted,
+      marginTop: 4,
+    },
+    optionRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    optionChip: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: theme.borderRadius.lg,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.background,
+    },
+    optionChipSelected: {
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.colors.primaryLight,
+    },
+    optionChipLabel: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textSecondary,
+    },
+    optionChipLabelSelected: {
+      color: theme.colors.primary,
+      fontWeight: '600',
+    },
+    actionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+    },
+    actionRowText: {
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.textPrimary,
+    },
+    actionRowDestructive: {
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.error,
+    },
+    comingSoonText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textMuted,
+      paddingVertical: 8,
+    },
+    emailText: {
+      fontSize: theme.typography.fontSize.base,
+      color: theme.colors.textSecondary,
+      paddingVertical: 8,
+    },
+    signOutButton: {
+      paddingVertical: 12,
     },
   });
 
