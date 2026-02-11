@@ -18,6 +18,7 @@ interface DeleteConfirmationModalProps {
   evaluatedTraitCount: number;
   onDelete: () => void;
   onCancel: () => void;
+  onExport?: () => void;
 }
 
 export const DeleteConfirmationModal = ({
@@ -27,6 +28,7 @@ export const DeleteConfirmationModal = ({
   evaluatedTraitCount,
   onDelete,
   onCancel,
+  onExport,
 }: DeleteConfirmationModalProps) => {
   const { theme } = useThemeContext();
   const { t } = useTranslation('prospect');
@@ -100,6 +102,16 @@ export const DeleteConfirmationModal = ({
               </Text>
             </TouchableOpacity>
 
+            {onExport && (
+              <TouchableOpacity
+                style={styles.exportButton}
+                onPress={onExport}
+                accessibilityRole="button"
+              >
+                <Text style={styles.exportButtonText}>{t('Export First')}</Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={onCancel}
@@ -150,7 +162,8 @@ const createStyles = (theme: Theme) =>
     subtitle: {
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.textSecondary,
-      textAlign: 'center',
+      alignSelf: 'stretch',
+      paddingHorizontal: 16,
       marginBottom: 12,
     },
     bulletList: {
@@ -193,6 +206,21 @@ const createStyles = (theme: Theme) =>
     },
     deleteButtonText: {
       color: '#FFFFFF',
+      fontSize: theme.typography.fontSize.base,
+      fontWeight: '600',
+    },
+    exportButton: {
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      borderRadius: 12,
+      alignSelf: 'stretch',
+      alignItems: 'center',
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+    },
+    exportButtonText: {
+      color: theme.colors.primary,
       fontSize: theme.typography.fontSize.base,
       fontWeight: '600',
     },

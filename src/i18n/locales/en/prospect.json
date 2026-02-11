@@ -99,5 +99,9 @@
   "Less than a month left": "Less than a month left",
   "{{name}} will be removed soon": "{{name}} will be removed soon",
   "This prospect's data will be automatically removed. Would you like to keep it?": "This prospect's data will be automatically removed. Would you like to keep it?",
-  "Keep in Archive": "Keep in Archive"
+  "Keep in Archive": "Keep in Archive",
+  "Export First": "Export First",
+  "Export": "Export",
+  "Export failed": "Export failed",
+  "Could not export data. Please try again.": "Could not export data. Please try again."
 }

@@ -65,6 +65,9 @@
   "Delete attribute?": "Delete attribute?",
   "This will remove \"{{name}}\" from all prospects.": "This will remove \"{{name}}\" from all prospects.",
   "Suggestions": "Suggestions",
+  "Exporting...": "Exporting...",
+  "Export failed": "Export failed",
+  "Could not export data. Please try again.": "Could not export data. Please try again.",
   "Sign Out": "Sign Out",
   "Cancel": "Cancel",
   "Delete": "Delete"
