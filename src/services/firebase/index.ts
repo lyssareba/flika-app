@@ -35,6 +35,8 @@ export {
   archiveProspect,
   archiveOtherProspects,
   deleteProspect,
+  getProspectSummary,
+  resetArchiveTimer,
   // Traits
   updateTrait,
   // Date entries

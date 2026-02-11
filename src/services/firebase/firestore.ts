@@ -374,6 +374,38 @@ export const archiveOtherProspects = async (
   await batch.commit();
 };
 
+export const getProspectSummary = async (
+  userId: string,
+  prospectId: string
+): Promise<{ dateCount: number; evaluatedTraitCount: number; hasNotes: boolean }> => {
+  const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
+  const traitsColRef = collection(prospectDocRef, 'traits');
+  const datesColRef = collection(prospectDocRef, 'dates');
+
+  const [prospectSnap, traitsSnapshot, datesSnapshot] = await Promise.all([
+    getDoc(prospectDocRef),
+    getDocs(query(traitsColRef, where('state', '!=', 'unknown'))),
+    getDocs(datesColRef),
+  ]);
+
+  return {
+    dateCount: datesSnapshot.size,
+    evaluatedTraitCount: traitsSnapshot.size,
+    hasNotes: !!prospectSnap.data()?.notes,
+  };
+};
+
+export const resetArchiveTimer = async (
+  userId: string,
+  prospectId: string
+): Promise<void> => {
+  const docRef = getUserDoc(userId, 'prospects', prospectId);
+  await updateDoc(docRef, {
+    archivedAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  });
+};
+
 export const deleteProspect = async (
   userId: string,
   prospectId: string

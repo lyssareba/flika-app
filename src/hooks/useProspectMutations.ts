@@ -8,6 +8,7 @@ import {
   archiveOtherProspects,
   restoreProspect,
   deleteProspect,
+  resetArchiveTimer,
   type ProspectListData,
 } from '@/services/firebase/firestore';
 import { useAuth } from './useAuth';
@@ -345,6 +346,50 @@ export const useProspectMutations = () => {
     },
   });
 
+  const resetArchiveTimerMutation = useMutation({
+    mutationFn: async (prospectId: string) => {
+      if (!user) throw new Error('User not authenticated');
+      await resetArchiveTimer(user.uid, prospectId);
+      return prospectId;
+    },
+    onMutate: async (prospectId) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.prospects.list() });
+
+      const previousList = queryClient.getQueryData<ProspectListData[]>(
+        queryKeys.prospects.list()
+      );
+
+      if (previousList) {
+        queryClient.setQueryData<ProspectListData[]>(
+          queryKeys.prospects.list(),
+          previousList.map((p) =>
+            p.id === prospectId
+              ? { ...p, archivedAt: new Date(), updatedAt: new Date() }
+              : p
+          )
+        );
+      }
+
+      return { previousList };
+    },
+    onError: (error, _prospectId, context) => {
+      if (context?.previousList) {
+        queryClient.setQueryData(queryKeys.prospects.list(), context.previousList);
+      }
+      Alert.alert(
+        i18n.t('common:Error'),
+        i18n.t('common:Something went wrong. Please try again.')
+      );
+      console.error('Reset archive timer error:', error);
+    },
+    onSettled: (prospectId) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.prospects.list() });
+      if (prospectId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.prospects.detail(prospectId) });
+      }
+    },
+  });
+
   return {
     createProspect: createMutation.mutateAsync,
     updateProspectInfo: updateInfoMutation.mutate,
@@ -353,11 +398,13 @@ export const useProspectMutations = () => {
     archiveOthers: archiveOthersMutation.mutate,
     restore: restoreMutation.mutate,
     remove: deleteMutation.mutate,
+    resetArchiveTimer: resetArchiveTimerMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateInfoMutation.isPending || updateStatusMutation.isPending,
     isArchiving: archiveMutation.isPending,
     isArchivingOthers: archiveOthersMutation.isPending,
     isRestoring: restoreMutation.isPending,
     isDeleting: deleteMutation.isPending,
+    isResettingArchiveTimer: resetArchiveTimerMutation.isPending,
   };
 };

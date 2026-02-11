@@ -82,5 +82,22 @@
   "Archived {{date}}": "Archived {{date}}",
   "Restore {{name}}?": "Restore {{name}}?",
   "This will move {{name}} back to your active prospects.": "This will move {{name}} back to your active prospects.",
-  "Are you sure you want to delete {{name}}? This cannot be undone.": "Are you sure you want to delete {{name}}? This cannot be undone."
+  "Are you sure you want to delete {{name}}? This cannot be undone.": "Are you sure you want to delete {{name}}? This cannot be undone.",
+  "Delete {{name}}?": "Delete {{name}}?",
+  "This will permanently delete:": "This will permanently delete:",
+  "{{count}} date": "{{count}} date",
+  "{{count}} dates": "{{count}} dates",
+  "{{count}} evaluated trait": "{{count}} evaluated trait",
+  "{{count}} evaluated traits": "{{count}} evaluated traits",
+  "All notes and data": "All notes and data",
+  "This action cannot be undone.": "This action cannot be undone.",
+  "Delete Permanently": "Delete Permanently",
+  "Expiring soon": "Expiring soon",
+  "Archived data is removed after 12 months": "Archived data is removed after 12 months",
+  "{{count}} month left": "{{count}} month left",
+  "{{count}} months left": "{{count}} months left",
+  "Less than a month left": "Less than a month left",
+  "{{name}} will be removed soon": "{{name}} will be removed soon",
+  "This prospect's data will be automatically removed. Would you like to keep it?": "This prospect's data will be automatically removed. Would you like to keep it?",
+  "Keep in Archive": "Keep in Archive"
 }

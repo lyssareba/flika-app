@@ -109,6 +109,7 @@ React.useEffect(() => { ... }, []);
 ## Workflow Rules
 
 - **Never commit directly to main** - Always create a new branch for changes, associated with the most closely related issue (e.g., `fix/issue-74-white-flash` or `feature/issue-18-trait-evaluation`)
+- **Always link PRs to their issue** - Include `Closes #N` at the top of the PR body so GitHub associates and auto-closes the issue on merge
 - **Never merge PRs without explicit permission** - Always wait for the user to say "merge it" or similar before merging
 - **Don't ask for confirmation to create issues** - Just create them when needed
 - **Run agents one at a time** - Don't run multiple agents in parallel to avoid branch conflicts

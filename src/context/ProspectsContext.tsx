@@ -26,6 +26,8 @@ interface ProspectsContextType {
   restore: (prospectId: string) => void;
   /** Permanently delete a prospect */
   remove: (prospectId: string) => void;
+  /** Reset the archive timer (extends retention) */
+  resetArchiveTimer: (prospectId: string) => void;
   /** Get a single prospect with full details (traits, dates) - deprecated, use useProspectQuery */
   getProspectDetails: (prospectId: string) => Promise<Prospect | null>;
   /** Refresh prospects list - now handled automatically by TanStack Query */
@@ -50,6 +52,7 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
     archiveOthers: archiveOthersProspect,
     restore: restoreProspect,
     remove: removeProspect,
+    resetArchiveTimer: resetArchiveTimerProspect,
   } = useProspectMutations();
 
   // Wrapper for addProspect that matches the old interface
@@ -113,6 +116,7 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
       archiveOthers,
       restore: restoreProspect,
       remove: removeProspect,
+      resetArchiveTimer: resetArchiveTimerProspect,
       getProspectDetails,
       refreshProspects,
     }),
@@ -126,6 +130,7 @@ export const ProspectsProvider = ({ children }: { children: React.ReactNode }) =
       archiveOthers,
       restoreProspect,
       removeProspect,
+      resetArchiveTimerProspect,
       getProspectDetails,
       refreshProspects,
     ]
