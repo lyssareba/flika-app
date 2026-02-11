@@ -5,6 +5,8 @@ import {
   createAttribute,
   updateAttribute,
   deleteAttribute,
+  addTraitToAllProspects,
+  removeTraitFromAllProspects,
 } from '@/services/firebase/firestore';
 import { useAuth } from './useAuth';
 import { queryKeys } from './queryKeys';
@@ -31,6 +33,7 @@ export const useAttributeMutations = () => {
 
       const input: AttributeInput = { name: trimmedName, category };
       const id = await createAttribute(user.uid, input);
+      await addTraitToAllProspects(user.uid, id);
       return { id, name: trimmedName, category };
     },
     onMutate: async ({ name, category }) => {
@@ -75,6 +78,7 @@ export const useAttributeMutations = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.attributes.list() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.prospects.all });
     },
   });
 
@@ -120,6 +124,7 @@ export const useAttributeMutations = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.attributes.list() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.prospects.all });
     },
   });
 
@@ -171,6 +176,7 @@ export const useAttributeMutations = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.attributes.list() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.prospects.all });
     },
   });
 
@@ -221,6 +227,7 @@ export const useAttributeMutations = () => {
   const deleteMutation = useMutation({
     mutationFn: async (attributeId: string) => {
       if (!user) throw new Error('User not authenticated');
+      await removeTraitFromAllProspects(user.uid, attributeId);
       await deleteAttribute(user.uid, attributeId);
       return attributeId;
     },
@@ -252,6 +259,7 @@ export const useAttributeMutations = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.attributes.list() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.prospects.all });
     },
   });
 

@@ -171,6 +171,80 @@ export const deleteAttribute = async (
   await deleteDoc(docRef);
 };
 
+const BATCH_LIMIT = 499;
+
+/**
+ * Commit a batch and return a fresh one when the operation count reaches
+ * the Firestore limit (500 operations per batch).
+ */
+const commitIfFull = async (
+  batch: ReturnType<typeof writeBatch>,
+  count: number
+): Promise<{ batch: ReturnType<typeof writeBatch>; count: number }> => {
+  if (count >= BATCH_LIMIT) {
+    await batch.commit();
+    return { batch: writeBatch(db), count: 0 };
+  }
+  return { batch, count };
+};
+
+/**
+ * Add a trait for the given attribute to every prospect.
+ * Called when a new attribute is created so existing prospects pick it up.
+ */
+export const addTraitToAllProspects = async (
+  userId: string,
+  attributeId: string
+): Promise<void> => {
+  const prospectsSnap = await getDocs(getUserCollection(userId, 'prospects'));
+  if (prospectsSnap.empty) return;
+
+  let batch = writeBatch(db);
+  let opCount = 0;
+  const now = Timestamp.now();
+
+  for (const prospectDoc of prospectsSnap.docs) {
+    const traitRef = doc(collection(prospectDoc.ref, 'traits'));
+    batch.set(traitRef, {
+      attributeId,
+      state: 'unknown',
+      updatedAt: now,
+    });
+    opCount++;
+    ({ batch, count: opCount } = await commitIfFull(batch, opCount));
+  }
+
+  if (opCount > 0) await batch.commit();
+};
+
+/**
+ * Remove all traits referencing the given attribute from every prospect.
+ * Called when an attribute is deleted so orphan traits are cleaned up.
+ */
+export const removeTraitFromAllProspects = async (
+  userId: string,
+  attributeId: string
+): Promise<void> => {
+  const prospectsSnap = await getDocs(getUserCollection(userId, 'prospects'));
+  if (prospectsSnap.empty) return;
+
+  let batch = writeBatch(db);
+  let opCount = 0;
+
+  for (const prospectDoc of prospectsSnap.docs) {
+    const traitsSnap = await getDocs(
+      query(collection(prospectDoc.ref, 'traits'), where('attributeId', '==', attributeId))
+    );
+    for (const traitDoc of traitsSnap.docs) {
+      batch.delete(traitDoc.ref);
+      opCount++;
+      ({ batch, count: opCount } = await commitIfFull(batch, opCount));
+    }
+  }
+
+  if (opCount > 0) await batch.commit();
+};
+
 // ============================================================================
 // Prospects Operations
 // ============================================================================
