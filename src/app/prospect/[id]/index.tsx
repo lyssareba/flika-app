@@ -43,14 +43,19 @@ const getScoreMessage = (
 
   const unknownRatio = unknownCount / totalTraits;
 
+  if (unknownRatio >= 0.75) {
+    return { message: t('Still learning...'), icon: 'thinking' };
+  }
+
+  if (unknownRatio > 0.5) {
+    return { message: t('Still getting to know them'), icon: 'thinking' };
+  }
+
   if (score >= 70) {
     return { message: t('Looking great!'), icon: 'happy' };
   }
 
   if (score >= 50) {
-    if (unknownRatio > 0.5) {
-      return { message: t('Still getting to know them'), icon: 'thinking' };
-    }
     return { message: t('Some things to consider'), icon: 'neutral' };
   }
 
