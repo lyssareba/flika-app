@@ -65,9 +65,12 @@ export const shareExportFile = async (data: ExportData): Promise<void> => {
   try {
     await Sharing.shareAsync(file.uri, { mimeType: 'application/json' });
   } finally {
-    // Clean up temp file
-    if (file.exists) {
-      file.delete();
+    try {
+      if (file.exists) {
+        file.delete();
+      }
+    } catch {
+      // Ignore cleanup errors
     }
   }
 };
