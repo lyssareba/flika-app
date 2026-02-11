@@ -35,14 +35,6 @@ const INNER_PATH =
 const GLOW_PATH =
   'M50 8 C58 18, 78 30, 85 46 C91 58, 87 72, 78 80 C70 87, 60 90, 50 90 C40 90, 30 87, 22 80 C13 72, 9 58, 15 46 C22 30, 42 18, 50 8 Z';
 
-// Side flame wisps
-const LEFT_WISP = 'M24 46 C18 38, 12 28, 16 18 C20 28, 24 36, 28 42 Z';
-const RIGHT_WISP = 'M76 46 C82 38, 88 28, 84 18 C80 28, 76 36, 72 42 Z';
-
-// Smaller top side flames flanking the main tip
-const LEFT_TOP_FLAME = 'M42 22 Q36 12, 36 4 Q44 14, 46 22 Z';
-const RIGHT_TOP_FLAME = 'M58 22 Q64 12, 64 4 Q56 14, 54 22 Z';
-
 // Stubby legs
 const LEFT_LEG = 'M38 78 C36 84, 37 90, 40 90 C43 90, 44 84, 42 78 Z';
 const RIGHT_LEG = 'M58 78 C56 84, 57 90, 60 90 C63 90, 64 84, 62 78 Z';
@@ -245,12 +237,6 @@ export const FlikaMascot = ({
       {renderGlow(config, isDark)}
 
       <G transform={bodyTransform}>
-        {/* Flame wisps — behind body */}
-        <Path d={LEFT_WISP} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
-        <Path d={RIGHT_WISP} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
-        <Path d={LEFT_TOP_FLAME} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
-        <Path d={RIGHT_TOP_FLAME} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
-
         {/* Legs — behind body */}
         <Path d={LEFT_LEG} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round" />
         <Path d={RIGHT_LEG} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round" />
