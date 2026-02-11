@@ -631,6 +631,9 @@ export const updateProspectCachedScore = async (
   strictness?: StrictnessLevel
 ): Promise<void> => {
   const traits = await getProspectTraits(userId, prospectId);
+  const confirmed = traits.filter((t) => t.state !== 'unknown');
+  if (confirmed.length === 0) return; // Nothing evaluated yet — don't cache
+
   const result = calculateCompatibility(traits, strictness ?? 'normal');
 
   const docRef = getUserDoc(userId, 'prospects', prospectId);

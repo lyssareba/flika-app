@@ -76,7 +76,7 @@ export const useTraitMutation = (prospectId: string | undefined) => {
       console.error('Trait mutation error:', error);
     },
     // Invalidate after success to ensure consistency
-    onSettled: () => {
+    onSettled: (_data, error) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.prospects.detail(prospectId ?? ''),
       });
@@ -85,8 +85,8 @@ export const useTraitMutation = (prospectId: string | undefined) => {
         queryKey: queryKeys.prospects.list(),
       });
 
-      // Recompute and cache score on prospect document
-      if (user && prospectId) {
+      // Recompute and cache score on prospect document (skip on failed mutations)
+      if (!error && user && prospectId) {
         updateProspectCachedScore(
           user.uid,
           prospectId,
