@@ -69,6 +69,7 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
         setError(t('Incorrect password. Please try again.'));
       } else {
         setError(t('Could not delete account. Please try again.'));
+        Alert.alert(t('Delete Account'), t('Could not delete account. Please try again.'));
       }
       setLoading(false);
     }
