@@ -19,69 +19,91 @@ interface FlikaMascotProps {
   testID?: string;
 }
 
-const BODY_PATH =
-  'M50 8 C50 8, 28 25, 22 50 C16 75, 30 92, 50 92 C70 92, 84 75, 78 50 C72 25, 50 8, 50 8 Z';
+const OUTLINE = '#5A2100';
+const FACE_COLOR = '#4A1E0A';
+const BLUSH = '#F0A070';
 
+// Main body — rounded blob narrowing into a flame tip at top
+const BODY_PATH =
+  'M50 14 C57 22, 72 34, 78 48 C83 58, 80 66, 72 74 C66 79, 58 82, 50 82 C42 82, 34 79, 28 74 C20 66, 17 58, 22 48 C28 34, 43 22, 50 14 Z';
+
+// Inner lighter area — belly/face region inside the body
 const INNER_PATH =
-  'M50 28 C50 28, 38 38, 35 52 C32 66, 38 78, 50 78 C62 78, 68 66, 65 52 C62 38, 50 28, 50 28 Z';
+  'M50 32 C55 38, 64 44, 67 54 C70 62, 67 70, 61 74 C56 77, 44 77, 39 74 C33 70, 30 62, 33 54 C36 44, 45 38, 50 32 Z';
+
+// Glow — enlarged body silhouette
+const GLOW_PATH =
+  'M50 8 C58 18, 78 30, 85 46 C91 58, 87 72, 78 80 C70 87, 60 90, 50 90 C40 90, 30 87, 22 80 C13 72, 9 58, 15 46 C22 30, 42 18, 50 8 Z';
+
+// Side flame wisps
+const LEFT_WISP = 'M24 46 C18 38, 12 28, 16 18 C20 28, 24 36, 28 42 Z';
+const RIGHT_WISP = 'M76 46 C82 38, 88 28, 84 18 C80 28, 76 36, 72 42 Z';
+
+// Smaller top side flames flanking the main tip
+const LEFT_TOP_FLAME = 'M42 22 Q36 12, 36 4 Q44 14, 46 22 Z';
+const RIGHT_TOP_FLAME = 'M58 22 Q64 12, 64 4 Q56 14, 54 22 Z';
+
+// Stubby legs
+const LEFT_LEG = 'M38 78 C36 84, 37 90, 40 90 C43 90, 44 84, 42 78 Z';
+const RIGHT_LEG = 'M58 78 C56 84, 57 90, 60 90 C63 90, 64 84, 62 78 Z';
 
 const renderGlow = (config: MascotStateConfig, isDark: boolean) => {
   const opacity = isDark ? config.glowOpacity * 1.5 : config.glowOpacity;
   if (opacity <= 0) return null;
-
-  return (
-    <Path
-      d="M50 2 C50 2, 22 22, 14 52 C6 82, 24 98, 50 98 C76 98, 94 82, 86 52 C78 22, 50 2, 50 2 Z"
-      fill={config.bodyFill}
-      opacity={opacity}
-    />
-  );
+  return <Path d={GLOW_PATH} fill={config.bodyFill} opacity={opacity} />;
 };
 
 const renderEyes = (variant: EyeVariant) => {
+  // Left eye at (39, 56), right eye at (61, 56)
   switch (variant) {
     case 'happy':
       return (
         <G>
-          <Path d="M37 52 Q40 48, 43 52" stroke="#FFFFFF" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-          <Path d="M57 52 Q60 48, 63 52" stroke="#FFFFFF" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <Path d="M34 57 Q39 51, 44 57" stroke={FACE_COLOR} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <Path d="M56 57 Q61 51, 66 57" stroke={FACE_COLOR} strokeWidth="2.5" fill="none" strokeLinecap="round" />
         </G>
       );
     case 'closed':
       return (
         <G>
-          <Path d="M36 52 L44 52" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
-          <Path d="M56 52 L64 52" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+          <Path d="M35 56 L43 56" stroke={FACE_COLOR} strokeWidth="2.5" strokeLinecap="round" />
+          <Path d="M57 56 L65 56" stroke={FACE_COLOR} strokeWidth="2.5" strokeLinecap="round" />
         </G>
       );
     case 'wide':
       return (
         <G>
-          <Circle cx="40" cy="50" r="4" fill="#FFFFFF" />
-          <Circle cx="40" cy="50" r="2" fill="#2A1F18" />
-          <Circle cx="60" cy="50" r="4" fill="#FFFFFF" />
-          <Circle cx="60" cy="50" r="2" fill="#2A1F18" />
+          <Circle cx="39" cy="56" r="6.5" fill="#FFFFFF" />
+          <Circle cx="39" cy="56" r="5" fill={FACE_COLOR} />
+          <Circle cx="37" cy="54" r="2" fill="#FFFFFF" />
+          <Circle cx="61" cy="56" r="6.5" fill="#FFFFFF" />
+          <Circle cx="61" cy="56" r="5" fill={FACE_COLOR} />
+          <Circle cx="59" cy="54" r="2" fill="#FFFFFF" />
         </G>
       );
     case 'sparkle':
       return (
         <G>
-          <Circle cx="40" cy="50" r="3.5" fill="#FFFFFF" />
-          <Circle cx="40" cy="49" r="1.5" fill="#2A1F18" />
-          <Circle cx="41.5" cy="48" r="1" fill="#FFFFFF" />
-          <Circle cx="60" cy="50" r="3.5" fill="#FFFFFF" />
-          <Circle cx="60" cy="49" r="1.5" fill="#2A1F18" />
-          <Circle cx="61.5" cy="48" r="1" fill="#FFFFFF" />
+          <Circle cx="39" cy="56" r="5.5" fill="#FFFFFF" />
+          <Circle cx="39" cy="56" r="4.5" fill={FACE_COLOR} />
+          <Circle cx="37" cy="54" r="2" fill="#FFFFFF" />
+          <Circle cx="40.5" cy="57.5" r="1" fill="#FFFFFF" />
+          <Circle cx="61" cy="56" r="5.5" fill="#FFFFFF" />
+          <Circle cx="61" cy="56" r="4.5" fill={FACE_COLOR} />
+          <Circle cx="59" cy="54" r="2" fill="#FFFFFF" />
+          <Circle cx="62.5" cy="57.5" r="1" fill="#FFFFFF" />
         </G>
       );
     case 'normal':
     default:
       return (
         <G>
-          <Circle cx="40" cy="50" r="3" fill="#FFFFFF" />
-          <Circle cx="40" cy="50" r="1.5" fill="#2A1F18" />
-          <Circle cx="60" cy="50" r="3" fill="#FFFFFF" />
-          <Circle cx="60" cy="50" r="1.5" fill="#2A1F18" />
+          <Circle cx="39" cy="56" r="5.5" fill="#FFFFFF" />
+          <Circle cx="39" cy="56" r="4.5" fill={FACE_COLOR} />
+          <Circle cx="37" cy="54" r="1.5" fill="#FFFFFF" />
+          <Circle cx="61" cy="56" r="5.5" fill="#FFFFFF" />
+          <Circle cx="61" cy="56" r="4.5" fill={FACE_COLOR} />
+          <Circle cx="59" cy="54" r="1.5" fill="#FFFFFF" />
         </G>
       );
   }
@@ -92,8 +114,8 @@ const renderMouth = (variant: MouthVariant) => {
     case 'smile':
       return (
         <Path
-          d="M43 62 Q50 68, 57 62"
-          stroke="#FFFFFF"
+          d="M44 66 Q50 72, 56 66"
+          stroke={FACE_COLOR}
           strokeWidth="2"
           fill="none"
           strokeLinecap="round"
@@ -102,16 +124,15 @@ const renderMouth = (variant: MouthVariant) => {
     case 'open':
       return (
         <Path
-          d="M44 62 Q50 70, 56 62 Z"
-          fill="#FFFFFF"
-          opacity={0.9}
+          d="M46 65 Q50 72, 54 65 Q50 63, 46 65 Z"
+          fill={FACE_COLOR}
         />
       );
     case 'small':
       return (
         <Path
-          d="M46 63 Q50 65, 54 63"
-          stroke="#FFFFFF"
+          d="M47 67 Q50 69, 53 67"
+          stroke={FACE_COLOR}
           strokeWidth="1.5"
           fill="none"
           strokeLinecap="round"
@@ -120,8 +141,8 @@ const renderMouth = (variant: MouthVariant) => {
     case 'grin':
       return (
         <Path
-          d="M40 60 Q50 72, 60 60"
-          stroke="#FFFFFF"
+          d="M41 64 Q50 74, 59 64"
+          stroke={FACE_COLOR}
           strokeWidth="2"
           fill="none"
           strokeLinecap="round"
@@ -131,47 +152,53 @@ const renderMouth = (variant: MouthVariant) => {
     default:
       return (
         <Path
-          d="M45 63 L55 63"
-          stroke="#FFFFFF"
-          strokeWidth="2"
+          d="M46 67 Q50 69, 54 67"
+          stroke={FACE_COLOR}
+          strokeWidth="1.5"
+          fill="none"
           strokeLinecap="round"
         />
       );
   }
 };
 
+const renderCheeks = () => (
+  <G>
+    <Circle cx="30" cy="62" r="4.5" fill={BLUSH} opacity={0.3} />
+    <Circle cx="70" cy="62" r="4.5" fill={BLUSH} opacity={0.3} />
+  </G>
+);
+
 const renderAccessory = (accessory: Accessory) => {
   switch (accessory) {
     case 'sparkles':
       return (
         <G>
-          <SvgText x="18" y="22" fontSize="10" fill="#FFD93D">*</SvgText>
-          <SvgText x="78" y="18" fontSize="8" fill="#FFD93D">*</SvgText>
-          <SvgText x="82" y="40" fontSize="12" fill="#FFE58F">*</SvgText>
-          <SvgText x="12" y="45" fontSize="9" fill="#FFE58F">*</SvgText>
+          <Path d="M10 18 L12 14 L14 18 L12 22 Z" fill="#FFD93D" />
+          <Path d="M88 12 L90 9 L92 12 L90 15 Z" fill="#FFE58F" />
+          <Path d="M92 40 L95 36 L98 40 L95 44 Z" fill="#FFD93D" />
+          <Circle cx="6" cy="44" r="2" fill="#FFE58F" />
         </G>
       );
     case 'eyebrow':
       return (
-        <G>
-          <Path
-            d="M55 40 Q60 36, 66 39"
-            stroke="#FFFFFF"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-          />
-        </G>
+        <Path
+          d="M57 46 Q63 42, 69 45"
+          stroke={FACE_COLOR}
+          strokeWidth="2.5"
+          fill="none"
+          strokeLinecap="round"
+        />
       );
     case 'question':
       return (
         <SvgText
-          x="76"
-          y="30"
+          x="80"
+          y="26"
           fontSize="16"
           fontWeight="bold"
-          fill="#FFFFFF"
-          opacity={0.8}
+          fill={OUTLINE}
+          opacity={0.7}
         >
           ?
         </SvgText>
@@ -179,9 +206,9 @@ const renderAccessory = (accessory: Accessory) => {
     case 'zzz':
       return (
         <G>
-          <SvgText x="68" y="30" fontSize="10" fontWeight="bold" fill="#FFFFFF" opacity={0.5}>z</SvgText>
-          <SvgText x="75" y="22" fontSize="8" fontWeight="bold" fill="#FFFFFF" opacity={0.4}>z</SvgText>
-          <SvgText x="80" y="16" fontSize="6" fontWeight="bold" fill="#FFFFFF" opacity={0.3}>z</SvgText>
+          <SvgText x="70" y="26" fontSize="11" fontWeight="bold" fill={OUTLINE} opacity={0.5}>z</SvgText>
+          <SvgText x="78" y="18" fontSize="9" fontWeight="bold" fill={OUTLINE} opacity={0.4}>z</SvgText>
+          <SvgText x="84" y="12" fontSize="7" fontWeight="bold" fill={OUTLINE} opacity={0.3}>z</SvgText>
         </G>
       );
     default:
@@ -200,10 +227,10 @@ export const FlikaMascot = ({
   const isDark = theme.mode === 'dark';
   const config = STATE_CONFIGS[state];
 
-  const bodyTransform =
-    config.bodyScale !== 1.0 || config.bodyRotation !== 0
-      ? `scale(${config.bodyScale}) rotate(${config.bodyRotation}, 50, 50)`
-      : undefined;
+  const needsTransform = config.bodyScale !== 1.0 || config.bodyRotation !== 0;
+  const bodyTransform = needsTransform
+    ? `translate(50, 50) scale(${config.bodyScale}) rotate(${config.bodyRotation}) translate(-50, -50)`
+    : undefined;
 
   return (
     <Svg
@@ -218,8 +245,26 @@ export const FlikaMascot = ({
       {renderGlow(config, isDark)}
 
       <G transform={bodyTransform}>
-        <Path d={BODY_PATH} fill={config.bodyFill} />
-        <Path d={INNER_PATH} fill={config.innerFill} opacity={0.6} />
+        {/* Flame wisps — behind body */}
+        <Path d={LEFT_WISP} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+        <Path d={RIGHT_WISP} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+        <Path d={LEFT_TOP_FLAME} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+        <Path d={RIGHT_TOP_FLAME} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+
+        {/* Legs — behind body */}
+        <Path d={LEFT_LEG} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round" />
+        <Path d={RIGHT_LEG} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="2" strokeLinejoin="round" />
+
+        {/* Main body */}
+        <Path d={BODY_PATH} fill={config.bodyFill} stroke={OUTLINE} strokeWidth="2.5" strokeLinejoin="round" />
+
+        {/* Inner highlight — belly/face area */}
+        <Path d={INNER_PATH} fill={config.innerFill} opacity={0.85} />
+
+        {/* Cheeks */}
+        {renderCheeks()}
+
+        {/* Face */}
         {renderEyes(config.eyeVariant)}
         {renderMouth(config.mouthVariant)}
       </G>
