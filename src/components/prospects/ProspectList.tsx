@@ -63,7 +63,7 @@ export const ProspectList = ({
   // For now, we'll show "still learning" and calculate on detail view
   // In a future iteration, we could cache scores or compute them
 
-  const relationshipTitle = t('In a Relationship');
+  const relationshipTitle = useMemo(() => t('In a Relationship'), [t]);
 
   const renderSectionHeader = useCallback(
     ({ section }: { section: Section }) => {

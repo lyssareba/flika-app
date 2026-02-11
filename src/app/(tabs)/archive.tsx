@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 import { useProspects } from '@/hooks';
 import type { ProspectListData } from '@/services/firebase/firestore';
 
@@ -62,7 +63,7 @@ const ArchiveScreen = () => {
     (date?: Date) => {
       if (!date) return '';
       return t('Archived {{date}}', {
-        date: date.toLocaleDateString(),
+        date: date.toLocaleDateString(i18n.language),
       });
     },
     [t]
@@ -70,7 +71,7 @@ const ArchiveScreen = () => {
 
   const renderItem = useCallback(
     ({ item }: { item: ProspectListData }) => (
-      <View style={styles.card}>
+      <View style={styles.card} accessibilityLabel={item.name}>
         <View style={styles.cardContent}>
           {item.photoUri ? (
             <Image source={{ uri: item.photoUri }} style={styles.photo} />
@@ -113,6 +114,11 @@ const ArchiveScreen = () => {
 
   const keyExtractor = useCallback((item: ProspectListData) => item.id, []);
 
+  const ItemSeparator = useCallback(
+    () => <View style={styles.separator} />,
+    [styles.separator]
+  );
+
   if (archivedProspects.length === 0 && !isLoading) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -143,7 +149,7 @@ const ArchiveScreen = () => {
         keyExtractor={keyExtractor}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={ItemSeparator}
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
