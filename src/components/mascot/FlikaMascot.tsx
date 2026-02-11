@@ -168,7 +168,7 @@ const renderAccessory = (accessory: Accessory) => {
         <G>
           <Path d="M10 18 L12 14 L14 18 L12 22 Z" fill="#FFD93D" />
           <Path d="M88 12 L90 9 L92 12 L90 15 Z" fill="#FFE58F" />
-          <Path d="M92 40 L95 36 L98 40 L95 44 Z" fill="#FFD93D" />
+          <Path d="M86 40 L89 36 L92 40 L89 44 Z" fill="#FFD93D" />
           <Circle cx="6" cy="44" r="2" fill="#FFE58F" />
         </G>
       );
@@ -253,9 +253,10 @@ export const FlikaMascot = ({
         {/* Face */}
         {renderEyes(config.eyeVariant)}
         {renderMouth(config.mouthVariant)}
-      </G>
 
-      {renderAccessory(config.accessory)}
+        {/* Accessories */}
+        {renderAccessory(config.accessory)}
+      </G>
     </Svg>
   );
 };

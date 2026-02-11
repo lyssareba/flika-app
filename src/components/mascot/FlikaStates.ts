@@ -142,6 +142,10 @@ export const getMascotState = (context: MascotContext): MascotState => {
     return 'thinking';
   }
 
+  if ((context.unknownRatio ?? 0) >= 0.75) {
+    return 'thinking';
+  }
+
   if (context.isTraitsScreen && (context.unknownRatio ?? 0) > 0.5) {
     return 'curious';
   }

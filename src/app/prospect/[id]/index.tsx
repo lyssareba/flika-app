@@ -26,44 +26,39 @@ import { updateUserSettings, updateProspectCachedScore } from '@/services/fireba
 import { type StrictnessLevel } from '@/utils/compatibility';
 import type { Prospect, ProspectStatus } from '@/types';
 
-type ScoreMessage = {
-  message: string;
-  icon: 'happy' | 'neutral' | 'thinking' | 'concerned' | 'sad';
-};
-
 const getScoreMessage = (
   score: number | null,
   unknownCount: number,
   totalTraits: number,
   t: (key: string) => string
-): ScoreMessage => {
+): string => {
   if (score === null || totalTraits === 0) {
-    return { message: t('Still learning...'), icon: 'thinking' };
+    return t('Still learning...');
   }
 
   const unknownRatio = unknownCount / totalTraits;
 
   if (unknownRatio >= 0.75) {
-    return { message: t('Still learning...'), icon: 'thinking' };
+    return t('Still learning...');
   }
 
   if (unknownRatio > 0.5) {
-    return { message: t('Still getting to know them'), icon: 'thinking' };
+    return t('Still getting to know them');
   }
 
   if (score >= 70) {
-    return { message: t('Looking great!'), icon: 'happy' };
+    return t('Looking great!');
   }
 
   if (score >= 50) {
-    return { message: t('Some things to consider'), icon: 'neutral' };
+    return t('Some things to consider');
   }
 
   if (score >= 30) {
-    return { message: t('Some important differences'), icon: 'concerned' };
+    return t('Some important differences');
   }
 
-  return { message: t("Might not be the best fit"), icon: 'sad' };
+  return t("Might not be the best fit");
 };
 
 const STATUS_OPTIONS: { value: ProspectStatus; labelKey: string }[] = [
@@ -378,7 +373,7 @@ const ProspectScreen = () => {
           <Text style={styles.scorePercentage}>
             {compatibility?.overall !== undefined ? `${compatibility.overall}%` : '--'}
           </Text>
-          <Text style={styles.scoreMessage}>{scoreMessage.message}</Text>
+          <Text style={styles.scoreMessage}>{scoreMessage}</Text>
           <TouchableOpacity onPress={handleWhyThisScore} style={styles.whyScoreLink}>
             <Text style={styles.whyScoreLinkText}>{t('Why this score?')}</Text>
             <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
@@ -628,7 +623,7 @@ const createStyles = (theme: Theme) =>
     },
     scoreSection: {
       alignItems: 'center',
-      gap: 2,
+      gap: 6,
     },
     scorePercentage: {
       fontSize: 48,
