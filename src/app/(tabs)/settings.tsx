@@ -203,13 +203,6 @@ const SettingsScreen = () => {
     }
   }, [user, userProfile, t]);
 
-  const handleComingSoon = useCallback(
-    (messageKey: string) => {
-      Alert.alert(t(messageKey));
-    },
-    [t]
-  );
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>

@@ -31,7 +31,10 @@ export const reauthenticateUser = async (
   user: User,
   password: string
 ): Promise<void> => {
-  const credential = EmailAuthProvider.credential(user.email!, password);
+  if (!user.email) {
+    throw new Error('No email associated with this account');
+  }
+  const credential = EmailAuthProvider.credential(user.email, password);
   await reauthenticateWithCredential(user, credential);
 };
 
@@ -86,7 +89,7 @@ export const deleteAccount = async (
 ): Promise<void> => {
   await reauthenticateUser(user, password);
   await deleteAllUserData(user.uid);
+  await deleteUser(user);
   await clearAllSecureStorage(user.uid);
   await clearAllUserStorage(user.uid);
-  await deleteUser(user);
 };

@@ -83,7 +83,11 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
       onRequestClose={handleCancel}
     >
       <View style={styles.container}>
-        <Pressable style={styles.overlay} onPress={loading ? undefined : handleCancel} />
+        <Pressable
+          style={styles.overlay}
+          onPress={handleCancel}
+          disabled={loading}
+        />
         <View style={styles.modalContainer}>
           <View style={styles.content}>
             {step === 1 ? (
