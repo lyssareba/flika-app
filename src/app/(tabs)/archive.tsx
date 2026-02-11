@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -8,21 +8,41 @@ import {
   StyleSheet,
   Alert,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
-import { useProspects } from '@/hooks';
+import { useProspects, useAuth } from '@/hooks';
 import type { ProspectListData } from '@/services/firebase/firestore';
+import { getProspectSummary } from '@/services/firebase/firestore';
+import { DeleteConfirmationModal, RetentionWarningModal } from '@/components/prospects';
+import { isExpiringSoon, isApproachingExpiry, getMonthsUntilExpiry } from '@/utils';
+
+interface DeleteSummary {
+  dateCount: number;
+  evaluatedTraitCount: number;
+  hasNotes: boolean;
+}
 
 const ArchiveScreen = () => {
   const { theme } = useThemeContext();
   const { t } = useTranslation('prospect');
   const { t: tc } = useTranslation('common');
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const { archivedProspects, restore, remove, refreshProspects, isLoading } = useProspects();
+  const { archivedProspects, restore, remove, resetArchiveTimer, refreshProspects, isLoading } =
+    useProspects();
+  const { user } = useAuth();
+
+  // Delete confirmation modal state
+  const [deleteTarget, setDeleteTarget] = useState<ProspectListData | null>(null);
+  const [deleteSummary, setDeleteSummary] = useState<DeleteSummary | null>(null);
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+
+  // Retention warning modal state
+  const [retentionTarget, setRetentionTarget] = useState<ProspectListData | null>(null);
 
   const handleRestore = useCallback(
     (prospect: ProspectListData) => {
@@ -41,23 +61,58 @@ const ArchiveScreen = () => {
     [t, tc, restore]
   );
 
-  const handleDelete = useCallback(
-    (prospect: ProspectListData) => {
-      Alert.alert(
-        t('Delete Prospect'),
-        t('Are you sure you want to delete {{name}}? This cannot be undone.', { name: prospect.name }),
-        [
-          { text: tc('Cancel'), style: 'cancel' },
-          {
-            text: tc('Delete'),
-            style: 'destructive',
-            onPress: () => remove(prospect.id),
-          },
-        ]
-      );
+  const handleDeletePress = useCallback(
+    async (prospect: ProspectListData) => {
+      if (!user) return;
+      setDeleteTarget(prospect);
+      setIsLoadingSummary(true);
+      try {
+        const summary = await getProspectSummary(user.uid, prospect.id);
+        setDeleteSummary(summary);
+      } catch {
+        // Fall back to showing modal without counts
+        setDeleteSummary({ dateCount: 0, evaluatedTraitCount: 0, hasNotes: false });
+      } finally {
+        setIsLoadingSummary(false);
+      }
     },
-    [t, tc, remove]
+    [user]
   );
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (deleteTarget) {
+      remove(deleteTarget.id);
+    }
+    setDeleteTarget(null);
+    setDeleteSummary(null);
+  }, [deleteTarget, remove]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteTarget(null);
+    setDeleteSummary(null);
+  }, []);
+
+  const handleRetentionCardPress = useCallback((prospect: ProspectListData) => {
+    setRetentionTarget(prospect);
+  }, []);
+
+  const handleRetentionRestore = useCallback(() => {
+    if (retentionTarget) {
+      restore(retentionTarget.id);
+    }
+    setRetentionTarget(null);
+  }, [retentionTarget, restore]);
+
+  const handleRetentionKeep = useCallback(() => {
+    if (retentionTarget) {
+      resetArchiveTimer(retentionTarget.id);
+    }
+    setRetentionTarget(null);
+  }, [retentionTarget, resetArchiveTimer]);
+
+  const handleRetentionClose = useCallback(() => {
+    setRetentionTarget(null);
+  }, []);
 
   const formatArchivedDate = useCallback(
     (date?: Date) => {
@@ -70,46 +125,86 @@ const ArchiveScreen = () => {
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: ProspectListData }) => (
-      <View style={styles.card} accessibilityLabel={item.name}>
-        <View style={styles.cardContent}>
-          {item.photoUri ? (
-            <Image source={{ uri: item.photoUri }} style={styles.photo} />
-          ) : (
-            <View style={styles.photoPlaceholder}>
-              <Ionicons name="person" size={24} color={theme.colors.textMuted} />
+    ({ item }: { item: ProspectListData }) => {
+      const expiringSoon = item.archivedAt ? isExpiringSoon(item.archivedAt) : false;
+      const approachingExpiry = item.archivedAt ? isApproachingExpiry(item.archivedAt) : false;
+      const monthsLeft = item.archivedAt ? getMonthsUntilExpiry(item.archivedAt) : null;
+      const hasWarning = expiringSoon || approachingExpiry;
+
+      return (
+        <TouchableOpacity
+          style={styles.card}
+          accessibilityLabel={item.name}
+          activeOpacity={hasWarning ? 0.7 : 1}
+          onPress={hasWarning ? () => handleRetentionCardPress(item) : undefined}
+          disabled={!hasWarning}
+        >
+          <View style={styles.cardContent}>
+            {item.photoUri ? (
+              <Image source={{ uri: item.photoUri }} style={styles.photo} />
+            ) : (
+              <View style={styles.photoPlaceholder}>
+                <Ionicons name="person" size={24} color={theme.colors.textMuted} />
+              </View>
+            )}
+            <View style={styles.cardInfo}>
+              <Text style={styles.cardName} numberOfLines={1}>
+                {item.name}
+              </Text>
+              <Text style={styles.cardDate}>
+                {formatArchivedDate(item.archivedAt)}
+              </Text>
+              {expiringSoon && (
+                <View style={[styles.warningBadge, styles.warningBadgeExpiring]}>
+                  <Ionicons name="warning" size={12} color={theme.colors.error} />
+                  <Text style={[styles.warningBadgeText, { color: theme.colors.error }]}>
+                    {t('Less than a month left')}
+                  </Text>
+                </View>
+              )}
+              {!expiringSoon && approachingExpiry && monthsLeft !== null && (
+                <View style={styles.warningBadge}>
+                  <Ionicons name="time-outline" size={12} color={theme.colors.warning} />
+                  <Text style={[styles.warningBadgeText, { color: theme.colors.warning }]}>
+                    {t(monthsLeft === 1 ? '{{count}} month left' : '{{count}} months left', {
+                      count: monthsLeft,
+                    })}
+                  </Text>
+                </View>
+              )}
             </View>
-          )}
-          <View style={styles.cardInfo}>
-            <Text style={styles.cardName} numberOfLines={1}>
-              {item.name}
-            </Text>
-            <Text style={styles.cardDate}>
-              {formatArchivedDate(item.archivedAt)}
-            </Text>
           </View>
-        </View>
-        <View style={styles.cardActions}>
-          <TouchableOpacity
-            style={styles.restoreButton}
-            onPress={() => handleRestore(item)}
-            accessibilityRole="button"
-            accessibilityLabel={t('Restore')}
-          >
-            <Ionicons name="arrow-undo" size={20} color={theme.colors.primary} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={() => handleDelete(item)}
-            accessibilityRole="button"
-            accessibilityLabel={tc('Delete')}
-          >
-            <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    ),
-    [styles, theme, formatArchivedDate, handleRestore, handleDelete, t, tc]
+          <View style={styles.cardActions}>
+            <TouchableOpacity
+              style={styles.restoreButton}
+              onPress={() => handleRestore(item)}
+              accessibilityRole="button"
+              accessibilityLabel={t('Restore')}
+            >
+              <Ionicons name="arrow-undo" size={20} color={theme.colors.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => handleDeletePress(item)}
+              accessibilityRole="button"
+              accessibilityLabel={tc('Delete')}
+            >
+              <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      );
+    },
+    [
+      styles,
+      theme,
+      formatArchivedDate,
+      handleRestore,
+      handleDeletePress,
+      handleRetentionCardPress,
+      t,
+      tc,
+    ]
   );
 
   const keyExtractor = useCallback((item: ProspectListData) => item.id, []);
@@ -158,6 +253,37 @@ const ArchiveScreen = () => {
           />
         }
       />
+
+      {/* Delete Confirmation Modal */}
+      {deleteTarget && (
+        <DeleteConfirmationModal
+          visible={!isLoadingSummary && deleteSummary !== null}
+          prospectName={deleteTarget.name}
+          dateCount={deleteSummary?.dateCount ?? 0}
+          evaluatedTraitCount={deleteSummary?.evaluatedTraitCount ?? 0}
+          hasNotes={deleteSummary?.hasNotes ?? false}
+          onDelete={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
+      )}
+
+      {/* Loading indicator while fetching summary */}
+      {isLoadingSummary && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      )}
+
+      {/* Retention Warning Modal */}
+      {retentionTarget && (
+        <RetentionWarningModal
+          visible={retentionTarget !== null}
+          prospectName={retentionTarget.name}
+          onRestore={handleRetentionRestore}
+          onKeepInArchive={handleRetentionKeep}
+          onClose={handleRetentionClose}
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -259,6 +385,30 @@ const createStyles = (theme: Theme) =>
       padding: 8,
       borderRadius: 8,
       backgroundColor: theme.colors.error + '15',
+    },
+    warningBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      marginTop: 4,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 8,
+      backgroundColor: theme.colors.warning + '15',
+      alignSelf: 'flex-start',
+    },
+    warningBadgeExpiring: {
+      backgroundColor: theme.colors.error + '15',
+    },
+    warningBadgeText: {
+      fontSize: theme.typography.fontSize.xs,
+      fontWeight: '500',
+    },
+    loadingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 

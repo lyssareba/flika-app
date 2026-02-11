@@ -4,4 +4,6 @@ export { EmptyState } from './EmptyState';
 export { ProspectCard } from './ProspectCard';
 export { ProspectList } from './ProspectList';
 export { RelationshipCelebrationModal } from './RelationshipCelebrationModal';
+export { DeleteConfirmationModal } from './DeleteConfirmationModal';
+export { RetentionWarningModal } from './RetentionWarningModal';
 export { ScoreBreakdownModal } from './ScoreBreakdownModal';

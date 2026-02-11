@@ -35,6 +35,8 @@ interface UseProspectsReturn {
   restore: ReturnType<typeof useProspectsContext>['restore'];
   /** Delete a prospect */
   remove: ReturnType<typeof useProspectsContext>['remove'];
+  /** Reset archive timer */
+  resetArchiveTimer: ReturnType<typeof useProspectsContext>['resetArchiveTimer'];
   /** Get full prospect details */
   getProspectDetails: ReturnType<typeof useProspectsContext>['getProspectDetails'];
   /** Refresh prospects */
@@ -75,6 +77,7 @@ export const useProspects = (options: UseProspectsOptions = {}): UseProspectsRet
     archiveOthers,
     restore,
     remove,
+    resetArchiveTimer,
     getProspectDetails,
     refreshProspects,
   } = useProspectsContext();
@@ -127,6 +130,7 @@ export const useProspects = (options: UseProspectsOptions = {}): UseProspectsRet
     archiveOthers,
     restore,
     remove,
+    resetArchiveTimer,
     getProspectDetails,
     refreshProspects,
   };
