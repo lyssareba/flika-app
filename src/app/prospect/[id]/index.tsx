@@ -321,16 +321,18 @@ const ProspectScreen = () => {
         >
           <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
         </TouchableOpacity>
-        {prospect.photoUri ? (
-          <Image source={{ uri: prospect.photoUri }} style={styles.headerAvatar} />
-        ) : (
-          <View style={styles.headerAvatarPlaceholder}>
-            <Ionicons name="person" size={18} color={theme.colors.textMuted} />
-          </View>
-        )}
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          {prospect.name}
-        </Text>
+        <View style={styles.headerCenter}>
+          {prospect.photoUri ? (
+            <Image source={{ uri: prospect.photoUri }} style={styles.headerAvatar} />
+          ) : (
+            <View style={styles.headerAvatarPlaceholder}>
+              <Ionicons name="person" size={18} color={theme.colors.textMuted} />
+            </View>
+          )}
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {prospect.name}
+          </Text>
+        </View>
         <TouchableOpacity
           onPress={handleMenuPress}
           style={styles.headerButton}
@@ -555,11 +557,17 @@ const createStyles = (theme: Theme) =>
     headerButton: {
       padding: 8,
     },
+    headerCenter: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
     headerAvatar: {
       width: 32,
       height: 32,
       borderRadius: 16,
-      marginLeft: 4,
     },
     headerAvatarPlaceholder: {
       width: 32,
@@ -568,14 +576,12 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.backgroundCard,
       justifyContent: 'center',
       alignItems: 'center',
-      marginLeft: 4,
     },
     headerTitle: {
-      flex: 1,
       fontSize: theme.typography.fontSize.lg,
       fontWeight: '600',
       color: theme.colors.textPrimary,
-      marginHorizontal: 8,
+      flexShrink: 1,
     },
     menuOverlay: {
       position: 'absolute',
