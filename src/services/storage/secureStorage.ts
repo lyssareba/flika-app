@@ -77,3 +77,11 @@ export const getBiometricEnabled = async (userId: string): Promise<boolean> => {
   const value = await SecureStore.getItemAsync(getBiometricEnabledKey(userId));
   return value ? JSON.parse(value) : false;
 };
+
+export const clearAllSecureStorage = async (userId: string): Promise<void> => {
+  await Promise.all([
+    SecureStore.deleteItemAsync(getPinHashKey(userId)),
+    SecureStore.deleteItemAsync(getAppLockEnabledKey(userId)),
+    SecureStore.deleteItemAsync(getBiometricEnabledKey(userId)),
+  ]);
+};

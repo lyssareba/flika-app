@@ -70,5 +70,22 @@
   "Could not export data. Please try again.": "Could not export data. Please try again.",
   "Sign Out": "Sign Out",
   "Cancel": "Cancel",
-  "Delete": "Delete"
+  "Delete": "Delete",
+  "Delete Your Account?": "Delete Your Account?",
+  "This will permanently delete:": "This will permanently delete:",
+  "Your profile and account": "Your profile and account",
+  "All prospects and their data": "All prospects and their data",
+  "All date history": "All date history",
+  "All settings and preferences": "All settings and preferences",
+  "This action cannot be undone.": "This action cannot be undone.",
+  "Export My Data First": "Export My Data First",
+  "Delete Immediately": "Delete Immediately",
+  "Confirm Deletion": "Confirm Deletion",
+  "Enter your password to confirm account deletion": "Enter your password to confirm account deletion",
+  "Delete My Account": "Delete My Account",
+  "Go Back": "Go Back",
+  "Deleting your account...": "Deleting your account...",
+  "Incorrect password. Please try again.": "Incorrect password. Please try again.",
+  "Could not delete account. Please try again.": "Could not delete account. Please try again.",
+  "Password": "Password"
 }
