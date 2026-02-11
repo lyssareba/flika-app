@@ -17,6 +17,7 @@ interface RetentionWarningModalProps {
   onRestore: () => void;
   onKeepInArchive: () => void;
   onClose: () => void;
+  onExport?: () => void;
 }
 
 export const RetentionWarningModal = ({
@@ -25,6 +26,7 @@ export const RetentionWarningModal = ({
   onRestore,
   onKeepInArchive,
   onClose,
+  onExport,
 }: RetentionWarningModalProps) => {
   const { theme } = useThemeContext();
   const { t } = useTranslation('prospect');
@@ -72,6 +74,16 @@ export const RetentionWarningModal = ({
                 {t('Keep in Archive')}
               </Text>
             </TouchableOpacity>
+
+            {onExport && (
+              <TouchableOpacity
+                style={styles.exportButton}
+                onPress={onExport}
+                accessibilityRole="button"
+              >
+                <Text style={styles.exportButtonText}>{t('Export')}</Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={styles.cancelButton}
@@ -154,6 +166,21 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.textPrimary,
       fontSize: theme.typography.fontSize.base,
       fontWeight: '500',
+    },
+    exportButton: {
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      borderRadius: 12,
+      alignSelf: 'stretch',
+      alignItems: 'center',
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+    },
+    exportButtonText: {
+      color: theme.colors.primary,
+      fontSize: theme.typography.fontSize.base,
+      fontWeight: '600',
     },
     cancelButton: {
       padding: 8,

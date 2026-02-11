@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { useThemeContext, type Theme } from '@/theme';
 import { useAuth, useAppLock } from '@/hooks';
 import { updateUserSettings } from '@/services/firebase/firestore';
+import { gatherExportData, shareExportFile } from '@/services/export';
 import { Toggle } from '@/components/ui';
 import { type StrictnessLevel } from '@/utils/compatibility';
 
@@ -83,6 +85,7 @@ const SettingsScreen = () => {
   const [appLockEnabled, setAppLockEnabled] = useState(isAppLockEnabled);
   const [biometricEnabled, setBiometricEnabled] = useState(isBiometricEnabled);
   const [lockTimeout, setLockTimeout] = useState(5);
+  const [exporting, setExporting] = useState(false);
 
   // Sync local state when external state changes
   useEffect(() => {
@@ -184,6 +187,19 @@ const SettingsScreen = () => {
       },
     ]);
   }, [t, signOut]);
+
+  const handleExportData = useCallback(async () => {
+    if (!user || !userProfile) return;
+    setExporting(true);
+    try {
+      const data = await gatherExportData(user.uid, userProfile);
+      await shareExportFile(data);
+    } catch {
+      Alert.alert(t('Export failed'), t('Could not export data. Please try again.'));
+    } finally {
+      setExporting(false);
+    }
+  }, [user, userProfile, t]);
 
   const handleComingSoon = useCallback(
     (messageKey: string) => {
@@ -349,14 +365,21 @@ const SettingsScreen = () => {
           <View style={styles.sectionContent}>
             <TouchableOpacity
               style={styles.actionRow}
-              onPress={() => handleComingSoon('Export coming soon')}
+              onPress={handleExportData}
+              disabled={exporting}
             >
-              <Text style={styles.actionRowText}>{t('Export My Data')}</Text>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={theme.colors.textMuted}
-              />
+              <Text style={[styles.actionRowText, exporting && styles.actionRowTextDisabled]}>
+                {exporting ? t('Exporting...') : t('Export My Data')}
+              </Text>
+              {exporting ? (
+                <ActivityIndicator size="small" color={theme.colors.primary} />
+              ) : (
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={theme.colors.textMuted}
+                />
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionRow}
@@ -475,6 +498,9 @@ const createStyles = (theme: Theme) =>
     actionRowText: {
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.textPrimary,
+    },
+    actionRowTextDisabled: {
+      color: theme.colors.textMuted,
     },
     actionRowDestructive: {
       fontSize: theme.typography.fontSize.base,

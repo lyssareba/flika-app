@@ -18,6 +18,7 @@ import i18n from 'i18next';
 import { useProspects, useAuth } from '@/hooks';
 import type { ProspectListData } from '@/services/firebase/firestore';
 import { getProspectSummary } from '@/services/firebase/firestore';
+import { gatherExportData, shareExportFile } from '@/services/export';
 import { DeleteConfirmationModal, RetentionWarningModal } from '@/components/prospects';
 import { isExpiringSoon, isApproachingExpiry, getMonthsUntilExpiry } from '@/utils';
 
@@ -34,7 +35,7 @@ const ArchiveScreen = () => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { archivedProspects, restore, remove, resetArchiveTimer, refreshProspects, isLoading } =
     useProspects();
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
 
   // Delete confirmation modal state
   const [deleteTarget, setDeleteTarget] = useState<ProspectListData | null>(null);
@@ -113,6 +114,16 @@ const ArchiveScreen = () => {
   const handleRetentionClose = useCallback(() => {
     setRetentionTarget(null);
   }, []);
+
+  const handleExport = useCallback(async () => {
+    if (!user || !userProfile) return;
+    try {
+      const data = await gatherExportData(user.uid, userProfile);
+      await shareExportFile(data);
+    } catch {
+      Alert.alert(t('Export failed'), t('Could not export data. Please try again.'));
+    }
+  }, [user, userProfile, t]);
 
   const formatArchivedDate = useCallback(
     (date?: Date) => {
@@ -263,6 +274,7 @@ const ArchiveScreen = () => {
           evaluatedTraitCount={deleteSummary?.evaluatedTraitCount ?? 0}
           onDelete={handleDeleteConfirm}
           onCancel={handleDeleteCancel}
+          onExport={handleExport}
         />
       )}
 
@@ -281,6 +293,7 @@ const ArchiveScreen = () => {
           onRestore={handleRetentionRestore}
           onKeepInArchive={handleRetentionKeep}
           onClose={handleRetentionClose}
+          onExport={handleExport}
         />
       )}
     </SafeAreaView>
