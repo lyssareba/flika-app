@@ -282,6 +282,7 @@ const createStyles = (theme: Theme) =>
     },
     listContent: {
       padding: 16,
+      paddingBottom: 48,
       flexGrow: 1,
     },
     attributeRow: {

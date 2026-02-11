@@ -406,7 +406,8 @@ const createStyles = (theme: Theme) =>
       flex: 1,
     },
     contentContainer: {
-      paddingVertical: 16,
+      paddingTop: 16,
+      paddingBottom: 48,
     },
     section: {
       marginBottom: 24,
