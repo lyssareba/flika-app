@@ -29,6 +29,7 @@ import {
   TraitState,
   DateEntry,
 } from '@/types';
+import { calculateCompatibility, type StrictnessLevel } from '@/utils/compatibility';
 
 // Helper to convert Firestore Timestamps to Dates
 const toDate = (timestamp: Timestamp | Date): Date => {
@@ -316,6 +317,8 @@ export const getProspect = async (
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
     archivedAt: data.archivedAt ? toDate(data.archivedAt) : undefined,
+    cachedScore: data.cachedScore ?? undefined,
+    cachedDealbreakersWithNo: data.cachedDealbreakersWithNo ?? undefined,
   };
 };
 
@@ -351,6 +354,8 @@ export const getProspects = async (
       createdAt: toDate(data.createdAt),
       updatedAt: toDate(data.updatedAt),
       archivedAt: data.archivedAt ? toDate(data.archivedAt) : undefined,
+      cachedScore: data.cachedScore ?? undefined,
+      cachedDealbreakersWithNo: data.cachedDealbreakersWithNo ?? undefined,
     });
   }
 
@@ -542,6 +547,8 @@ export const subscribeToProspects = (
           createdAt: toDate(data.createdAt),
           updatedAt: toDate(data.updatedAt),
           archivedAt: data.archivedAt ? toDate(data.archivedAt) : undefined,
+          cachedScore: data.cachedScore ?? undefined,
+          cachedDealbreakersWithNo: data.cachedDealbreakersWithNo ?? undefined,
         };
       });
       onData(prospects);
@@ -610,6 +617,29 @@ export const updateTrait = async (
   // Also update prospect's updatedAt
   await updateDoc(prospectDocRef, {
     updatedAt: Timestamp.now(),
+  });
+};
+
+/**
+ * Recompute and cache compatibility score on the prospect document.
+ * Called after trait changes so the list view can display scores
+ * without fetching subcollection data.
+ */
+export const updateProspectCachedScore = async (
+  userId: string,
+  prospectId: string,
+  strictness?: StrictnessLevel
+): Promise<void> => {
+  const traits = await getProspectTraits(userId, prospectId);
+  const confirmed = traits.filter((t) => t.state !== 'unknown');
+  if (confirmed.length === 0) return; // Nothing evaluated yet — don't cache
+
+  const result = calculateCompatibility(traits, strictness ?? 'normal');
+
+  const docRef = getUserDoc(userId, 'prospects', prospectId);
+  await updateDoc(docRef, {
+    cachedScore: result.overall,
+    cachedDealbreakersWithNo: result.dealbreakersWithNo.length,
   });
 };
 

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import i18n from 'i18next';
-import { updateTrait } from '@/services/firebase/firestore';
+import { updateTrait, updateProspectCachedScore } from '@/services/firebase/firestore';
 import { useAuth } from './useAuth';
 import { queryKeys } from './queryKeys';
 import type { Prospect, TraitState } from '@/types';
@@ -11,7 +11,7 @@ import type { Prospect, TraitState } from '@/types';
  * Includes error handling with user feedback.
  */
 export const useTraitMutation = (prospectId: string | undefined) => {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -76,7 +76,7 @@ export const useTraitMutation = (prospectId: string | undefined) => {
       console.error('Trait mutation error:', error);
     },
     // Invalidate after success to ensure consistency
-    onSettled: () => {
+    onSettled: (_data, error) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.prospects.detail(prospectId ?? ''),
       });
@@ -84,6 +84,15 @@ export const useTraitMutation = (prospectId: string | undefined) => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.prospects.list(),
       });
+
+      // Recompute and cache score on prospect document (skip on failed mutations)
+      if (!error && user && prospectId) {
+        updateProspectCachedScore(
+          user.uid,
+          prospectId,
+          userProfile?.settings?.scoringStrictness
+        ).catch((err) => console.error('Failed to update cached score:', err));
+      }
     },
   });
 };

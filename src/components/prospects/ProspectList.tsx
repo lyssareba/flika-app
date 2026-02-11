@@ -59,10 +59,6 @@ export const ProspectList = ({
     return result;
   }, [prospects, t]);
 
-  // We need to track scores per prospect
-  // For now, we'll show "still learning" and calculate on detail view
-  // In a future iteration, we could cache scores or compute them
-
   const relationshipTitle = useMemo(() => t('In a Relationship'), [t]);
 
   const renderSectionHeader = useCallback(
@@ -92,8 +88,8 @@ export const ProspectList = ({
           name={item.name}
           photoUri={item.photoUri}
           status={item.status}
-          compatibilityScore={null} // Will be calculated when we have traits
-          dealbreakersWithNoCount={0} // Will be calculated when we have traits
+          compatibilityScore={item.cachedScore ?? null}
+          dealbreakersWithNoCount={item.cachedDealbreakersWithNo ?? 0}
           lastDateAt={item.updatedAt} // Approximation - actual last date from dates subcollection
           createdAt={item.createdAt}
           onPress={onProspectPress}
