@@ -73,7 +73,7 @@ export const STATE_CONFIGS: Record<MascotState, MascotStateConfig> = {
     bodyScale: 1.0,
     bodyRotation: 0,
     eyeVariant: 'normal',
-    mouthVariant: 'smile',
+    mouthVariant: 'small',
     accessory: null,
   },
   sleepy: {
@@ -142,12 +142,8 @@ export const getMascotState = (context: MascotContext): MascotState => {
     return 'thinking';
   }
 
-  if ((context.unknownRatio ?? 0) >= 0.75) {
-    return 'thinking';
-  }
-
-  if (context.isTraitsScreen && (context.unknownRatio ?? 0) > 0.5) {
-    return 'curious';
+  if ((context.unknownRatio ?? 0) > 0.5) {
+    return context.isTraitsScreen ? 'curious' : 'thinking';
   }
 
   if (
