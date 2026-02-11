@@ -13,3 +13,9 @@ export interface ExportData {
   attributes: Attribute[];
   prospects: Prospect[]; // Includes traits[] and dates[]
 }
+
+export interface ProspectExportData {
+  exportedAt: string; // ISO date string
+  version: string; // "1.0"
+  prospect: Prospect; // Includes traits[] and dates[]
+}

@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { useThemeContext, type Theme } from '@/theme';
 import { useAuth, useAppLock } from '@/hooks';
 import { updateUserSettings } from '@/services/firebase/firestore';
-import { gatherExportData, shareExportFile } from '@/services/export';
+import { gatherExportData, shareAccountExport } from '@/services/export';
 import { Toggle } from '@/components/ui';
 import { type StrictnessLevel } from '@/utils/compatibility';
 
@@ -193,7 +193,7 @@ const SettingsScreen = () => {
     setExporting(true);
     try {
       const data = await gatherExportData(user.uid, userProfile);
-      await shareExportFile(data);
+      await shareAccountExport(data);
     } catch {
       Alert.alert(t('Export failed'), t('Could not export data. Please try again.'));
     } finally {

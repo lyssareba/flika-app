@@ -13,4 +13,4 @@ export type {
   ProspectInput,
 } from './prospect';
 export type { CompatibilityScore, ScoreBreakdown } from './compatibility';
-export type { ExportData } from './export';
+export type { ExportData, ProspectExportData } from './export';

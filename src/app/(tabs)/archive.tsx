@@ -18,7 +18,7 @@ import i18n from 'i18next';
 import { useProspects, useAuth } from '@/hooks';
 import type { ProspectListData } from '@/services/firebase/firestore';
 import { getProspectSummary } from '@/services/firebase/firestore';
-import { gatherExportData, shareExportFile } from '@/services/export';
+import { gatherProspectExportData, shareProspectExport } from '@/services/export';
 import { DeleteConfirmationModal, RetentionWarningModal } from '@/components/prospects';
 import { isExpiringSoon, isApproachingExpiry, getMonthsUntilExpiry } from '@/utils';
 
@@ -35,7 +35,7 @@ const ArchiveScreen = () => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const { archivedProspects, restore, remove, resetArchiveTimer, refreshProspects, isLoading } =
     useProspects();
-  const { user, userProfile } = useAuth();
+  const { user } = useAuth();
 
   // Delete confirmation modal state
   const [deleteTarget, setDeleteTarget] = useState<ProspectListData | null>(null);
@@ -115,15 +115,15 @@ const ArchiveScreen = () => {
     setRetentionTarget(null);
   }, []);
 
-  const handleExport = useCallback(async () => {
-    if (!user || !userProfile) return;
+  const handleExportProspect = useCallback(async (prospectId: string) => {
+    if (!user) return;
     try {
-      const data = await gatherExportData(user.uid, userProfile);
-      await shareExportFile(data);
+      const data = await gatherProspectExportData(user.uid, prospectId);
+      await shareProspectExport(data, prospectId);
     } catch {
       Alert.alert(t('Export failed'), t('Could not export data. Please try again.'));
     }
-  }, [user, userProfile, t]);
+  }, [user, t]);
 
   const formatArchivedDate = useCallback(
     (date?: Date) => {
@@ -274,7 +274,7 @@ const ArchiveScreen = () => {
           evaluatedTraitCount={deleteSummary?.evaluatedTraitCount ?? 0}
           onDelete={handleDeleteConfirm}
           onCancel={handleDeleteCancel}
-          onExport={handleExport}
+          onExport={() => handleExportProspect(deleteTarget.id)}
         />
       )}
 
@@ -293,7 +293,7 @@ const ArchiveScreen = () => {
           onRestore={handleRetentionRestore}
           onKeepInArchive={handleRetentionKeep}
           onClose={handleRetentionClose}
-          onExport={handleExport}
+          onExport={() => handleExportProspect(retentionTarget.id)}
         />
       )}
     </SafeAreaView>
