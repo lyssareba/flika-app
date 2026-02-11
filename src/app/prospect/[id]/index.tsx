@@ -373,7 +373,6 @@ const ProspectScreen = () => {
           <Text style={styles.scorePercentage}>
             {compatibility?.overall !== undefined ? `${compatibility.overall}%` : '--'}
           </Text>
-          <Text style={styles.scoreLabel}>{t('compatible')}</Text>
           <Text style={styles.scoreMessage}>{scoreMessage.message}</Text>
           <TouchableOpacity onPress={handleWhyThisScore} style={styles.whyScoreLink}>
             <Text style={styles.whyScoreLinkText}>{t('Why this score?')}</Text>
@@ -630,10 +629,6 @@ const createStyles = (theme: Theme) =>
       fontSize: 48,
       fontWeight: '700',
       color: theme.colors.primary,
-    },
-    scoreLabel: {
-      fontSize: theme.typography.fontSize.base,
-      color: theme.colors.textSecondary,
     },
     scoreMessage: {
       fontSize: theme.typography.fontSize.base,
