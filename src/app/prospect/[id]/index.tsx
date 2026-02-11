@@ -21,6 +21,7 @@ import { useThemeContext, type Theme } from '@/theme';
 import { useProspects, useCompatibility, useAuth } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { ScoreBreakdownModal, RelationshipCelebrationModal } from '@/components/prospects';
+import { FlikaMascot, getMascotState } from '@/components/mascot';
 import { updateUserSettings, updateProspectCachedScore } from '@/services/firebase';
 import { type StrictnessLevel } from '@/utils/compatibility';
 import type { Prospect, ProspectStatus } from '@/types';
@@ -136,6 +137,17 @@ const ProspectScreen = () => {
       t
     );
   }, [compatibility, prospect?.traits.length, t]);
+
+  const mascotState = useMemo(() => {
+    const totalTraits = prospect?.traits.length ?? 0;
+    const unknownCount = compatibility?.unknownCount ?? 0;
+    return getMascotState({
+      compatibilityScore: compatibility?.overall ?? null,
+      isRelationship: prospect?.status === 'relationship',
+      isLoading,
+      unknownRatio: totalTraits > 0 ? unknownCount / totalTraits : 0,
+    });
+  }, [compatibility, prospect?.status, prospect?.traits.length, isLoading]);
 
   const handleBack = useCallback(() => {
     router.back();
@@ -359,6 +371,7 @@ const ProspectScreen = () => {
 
         {/* Score Section */}
         <View style={styles.scoreSection}>
+          <FlikaMascot state={mascotState} size={64} testID="prospect-mascot" />
           <View style={styles.scoreRow}>
             <Text style={styles.scorePercentage}>
               {compatibility?.overall !== undefined ? `${compatibility.overall}%` : '--'}
