@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -115,7 +117,7 @@ const AttributesScreen = () => {
     [styles, t]
   );
 
-  const ListFooterComponent = useMemo(
+  const ListHeaderComponent = useMemo(
     () => (
       <View style={styles.addSection}>
         <View style={styles.addInputRow}>
@@ -234,14 +236,20 @@ const AttributesScreen = () => {
         <View style={styles.headerSpacer} />
       </View>
 
-      <FlatList
-        data={attributes}
-        keyExtractor={(item) => item.id}
-        renderItem={renderAttribute}
-        ListEmptyComponent={ListEmptyComponent}
-        ListFooterComponent={ListFooterComponent}
-        contentContainerStyle={styles.listContent}
-      />
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <FlatList
+          data={attributes}
+          keyExtractor={(item) => item.id}
+          renderItem={renderAttribute}
+          ListEmptyComponent={ListEmptyComponent}
+          ListHeaderComponent={ListHeaderComponent}
+          contentContainerStyle={styles.listContent}
+          keyboardShouldPersistTaps="handled"
+        />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -334,8 +342,11 @@ const createStyles = (theme: Theme) =>
       fontSize: theme.typography.fontSize.sm,
       color: theme.colors.textMuted,
     },
+    flex: {
+      flex: 1,
+    },
     addSection: {
-      marginTop: 16,
+      marginBottom: 16,
       backgroundColor: theme.colors.backgroundCard,
       borderRadius: theme.borderRadius.md,
       padding: 16,
