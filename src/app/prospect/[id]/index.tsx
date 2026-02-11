@@ -20,7 +20,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useProspects, useCompatibility, useAuth } from '@/hooks';
 import { useTranslation } from 'react-i18next';
-import { ScoreBreakdownModal } from '@/components/prospects';
+import { ScoreBreakdownModal, RelationshipCelebrationModal } from '@/components/prospects';
 import { updateUserSettings } from '@/services/firebase';
 import { type StrictnessLevel } from '@/utils/compatibility';
 import type { Prospect, ProspectStatus } from '@/types';
@@ -72,8 +72,15 @@ const ProspectScreen = () => {
   const { theme } = useThemeContext();
   const { t } = useTranslation('prospect');
   const { t: tc } = useTranslation('common');
-  const { getProspectDetails, updateProspectInfo, updateProspectStatus, archive, remove } =
-    useProspects();
+  const {
+    getProspectDetails,
+    updateProspectInfo,
+    updateProspectStatus,
+    archive,
+    archiveOthers,
+    remove,
+    activeProspects,
+  } = useProspects();
   const { calculateScore, getBreakdown, strictness } = useCompatibility();
   const { user, refreshProfile } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -85,6 +92,7 @@ const ProspectScreen = () => {
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [notesText, setNotesText] = useState('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [showCelebrationModal, setShowCelebrationModal] = useState(false);
 
   // Load prospect details when screen comes into focus
   useFocusEffect(
@@ -176,11 +184,34 @@ const ProspectScreen = () => {
   const handleStatusChange = useCallback(
     async (newStatus: ProspectStatus) => {
       if (!prospect || prospect.status === newStatus) return;
+      if (newStatus === 'relationship') {
+        setShowCelebrationModal(true);
+        return;
+      }
       await updateProspectStatus(prospect.id, newStatus);
       setProspect((prev) => (prev ? { ...prev, status: newStatus } : null));
     },
     [prospect, updateProspectStatus]
   );
+
+  const hasOtherActiveProspects = useMemo(
+    () => activeProspects.filter((p) => p.id !== prospect?.id).length > 0,
+    [activeProspects, prospect?.id]
+  );
+
+  const handleArchiveOthers = useCallback(() => {
+    if (!prospect) return;
+    archiveOthers(prospect.id);
+    setProspect((prev) => (prev ? { ...prev, status: 'relationship' } : null));
+    setShowCelebrationModal(false);
+  }, [prospect, archiveOthers]);
+
+  const handleKeepOthers = useCallback(() => {
+    if (!prospect) return;
+    updateProspectStatus(prospect.id, 'relationship');
+    setProspect((prev) => (prev ? { ...prev, status: 'relationship' } : null));
+    setShowCelebrationModal(false);
+  }, [prospect, updateProspectStatus]);
 
   const handleEvaluateTraits = useCallback(() => {
     router.push(`/prospect/${id}/traits`);
@@ -461,6 +492,16 @@ const ProspectScreen = () => {
         overallScore={compatibility?.overall ?? 0}
         strictness={strictness}
         onStrictnessChange={handleStrictnessChange}
+      />
+
+      {/* Relationship Celebration Modal */}
+      <RelationshipCelebrationModal
+        visible={showCelebrationModal}
+        prospectName={prospect.name}
+        hasOtherActiveProspects={hasOtherActiveProspects}
+        onArchiveOthers={handleArchiveOthers}
+        onKeepOthers={handleKeepOthers}
+        onClose={handleKeepOthers}
       />
     </SafeAreaView>
   );

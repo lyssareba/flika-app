@@ -342,6 +342,38 @@ export const restoreProspect = async (
   });
 };
 
+export const archiveOtherProspects = async (
+  userId: string,
+  relationshipProspectId: string
+): Promise<void> => {
+  const colRef = getUserCollection(userId, 'prospects');
+  const q = query(colRef, where('status', 'in', ['talking', 'dating', 'relationship']));
+  const snapshot = await getDocs(q);
+
+  const batch = writeBatch(db);
+  const now = Timestamp.now();
+
+  for (const docSnap of snapshot.docs) {
+    if (docSnap.id === relationshipProspectId) {
+      // Set the target prospect to relationship status
+      batch.update(docSnap.ref, {
+        status: 'relationship',
+        updatedAt: now,
+      });
+    } else {
+      // Archive all other active prospects
+      batch.update(docSnap.ref, {
+        status: 'archived',
+        previousStatus: docSnap.data().status,
+        archivedAt: now,
+        updatedAt: now,
+      });
+    }
+  }
+
+  await batch.commit();
+};
+
 export const deleteProspect = async (
   userId: string,
   prospectId: string
