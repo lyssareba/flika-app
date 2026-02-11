@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -78,6 +78,8 @@ const SettingsScreen = () => {
   const [strictness, setStrictness] = useState<StrictnessLevel>(
     userProfile?.settings?.scoringStrictness ?? 'normal'
   );
+  const strictnessRef = useRef(strictness);
+  strictnessRef.current = strictness;
   const [appLockEnabled, setAppLockEnabled] = useState(isAppLockEnabled);
   const [biometricEnabled, setBiometricEnabled] = useState(isBiometricEnabled);
   const [lockTimeout, setLockTimeout] = useState(5);
@@ -122,7 +124,7 @@ const SettingsScreen = () => {
   const handleStrictnessChange = useCallback(
     async (value: StrictnessLevel) => {
       if (!user) return;
-      const prev = strictness;
+      const prev = strictnessRef.current;
       setStrictness(value);
       try {
         await updateUserSettings(user.uid, { scoringStrictness: value });
@@ -131,7 +133,7 @@ const SettingsScreen = () => {
         setStrictness(prev);
       }
     },
-    [user, strictness, refreshProfile]
+    [user, refreshProfile]
   );
 
   const handleAppLockToggle = useCallback(

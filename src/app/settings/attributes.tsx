@@ -18,107 +18,40 @@ import { useThemeContext, type Theme } from '@/theme';
 import { useAttributes } from '@/hooks';
 import type { Attribute, AttributeCategory } from '@/types';
 
-const AttributesScreen = () => {
-  const { theme } = useThemeContext();
-  const { t } = useTranslation('settings');
-  const router = useRouter();
-  const {
-    attributes,
-    addAttribute,
-    addAttributeFromSuggestion,
-    removeAttribute,
-    toggleCategory,
-    suggestions,
-    refreshSuggestions,
-  } = useAttributes();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+interface AddAttributeSectionProps {
+  styles: ReturnType<typeof createStyles>;
+  theme: ReturnType<typeof useThemeContext>['theme'];
+}
 
-  const [newName, setNewName] = useState('');
-  const [newCategory, setNewCategory] = useState<AttributeCategory>('dealbreaker');
+const AddAttributeSection = React.memo(
+  function AddAttributeSection({ styles, theme }: AddAttributeSectionProps) {
+    const { t } = useTranslation('settings');
+    const {
+      addAttribute,
+      addAttributeFromSuggestion,
+      suggestions,
+      refreshSuggestions,
+    } = useAttributes();
 
-  const handleAdd = useCallback(async () => {
-    const trimmed = newName.trim();
-    if (!trimmed) return;
-    await addAttribute(trimmed, newCategory);
-    setNewName('');
-  }, [newName, newCategory, addAttribute]);
+    const [newName, setNewName] = useState('');
+    const [newCategory, setNewCategory] =
+      useState<AttributeCategory>('dealbreaker');
 
-  const handleDelete = useCallback(
-    (attr: Attribute) => {
-      Alert.alert(
-        t('Delete attribute?'),
-        t('This will remove "{{name}}" from all prospects.', { name: attr.name }),
-        [
-          { text: t('Cancel'), style: 'cancel' },
-          {
-            text: t('Delete'),
-            style: 'destructive',
-            onPress: () => removeAttribute(attr.id),
-          },
-        ]
-      );
-    },
-    [t, removeAttribute]
-  );
+    const handleAdd = useCallback(async () => {
+      const trimmed = newName.trim();
+      if (!trimmed) return;
+      await addAttribute(trimmed, newCategory);
+      setNewName('');
+    }, [newName, newCategory, addAttribute]);
 
-  const handleSuggestionTap = useCallback(
-    async (name: string) => {
-      await addAttributeFromSuggestion(name, newCategory);
-    },
-    [newCategory, addAttributeFromSuggestion]
-  );
+    const handleSuggestionTap = useCallback(
+      async (name: string) => {
+        await addAttributeFromSuggestion(name, newCategory);
+      },
+      [newCategory, addAttributeFromSuggestion]
+    );
 
-  const renderAttribute = useCallback(
-    ({ item }: { item: Attribute }) => (
-      <View style={styles.attributeRow}>
-        <Text style={styles.attributeName}>{item.name}</Text>
-        <View style={styles.attributeActions}>
-          <TouchableOpacity
-            style={[
-              styles.categoryBadge,
-              item.category === 'dealbreaker'
-                ? styles.categoryBadgeDealbreaker
-                : styles.categoryBadgeDesired,
-            ]}
-            onPress={() => toggleCategory(item.id)}
-          >
-            <Text
-              style={[
-                styles.categoryBadgeText,
-                item.category === 'dealbreaker'
-                  ? styles.categoryBadgeTextDealbreaker
-                  : styles.categoryBadgeTextDesired,
-              ]}
-            >
-              {t(item.category === 'dealbreaker' ? 'Dealbreaker' : 'Desired')}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={() => handleDelete(item)}
-          >
-            <Ionicons name="trash-outline" size={18} color={theme.colors.error} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    ),
-    [styles, theme, t, toggleCategory, handleDelete]
-  );
-
-  const ListEmptyComponent = useMemo(
-    () => (
-      <View style={styles.emptyState}>
-        <Text style={styles.emptyTitle}>{t('No attributes yet')}</Text>
-        <Text style={styles.emptySubtitle}>
-          {t('Tap + to add your first attribute')}
-        </Text>
-      </View>
-    ),
-    [styles, t]
-  );
-
-  const ListHeaderComponent = useMemo(
-    () => (
+    return (
       <View style={styles.addSection}>
         <View style={styles.addInputRow}>
           <TextInput
@@ -131,7 +64,10 @@ const AttributesScreen = () => {
             onSubmitEditing={handleAdd}
           />
           <TouchableOpacity
-            style={[styles.addButton, !newName.trim() && styles.addButtonDisabled]}
+            style={[
+              styles.addButton,
+              !newName.trim() && styles.addButtonDisabled,
+            ]}
             onPress={handleAdd}
             disabled={!newName.trim()}
           >
@@ -150,7 +86,8 @@ const AttributesScreen = () => {
             <Text
               style={[
                 styles.categoryChipLabel,
-                newCategory === 'dealbreaker' && styles.categoryChipLabelSelected,
+                newCategory === 'dealbreaker' &&
+                  styles.categoryChipLabelSelected,
               ]}
             >
               {t('Dealbreaker')}
@@ -205,18 +142,94 @@ const AttributesScreen = () => {
           </View>
         )}
       </View>
+    );
+  }
+);
+
+
+const AttributesScreen = () => {
+  const { theme } = useThemeContext();
+  const { t } = useTranslation('settings');
+  const router = useRouter();
+  const { attributes, removeAttribute, toggleCategory } = useAttributes();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const handleDelete = useCallback(
+    (attr: Attribute) => {
+      Alert.alert(
+        t('Delete attribute?'),
+        t('This will remove "{{name}}" from all prospects.', {
+          name: attr.name,
+        }),
+        [
+          { text: t('Cancel'), style: 'cancel' },
+          {
+            text: t('Delete'),
+            style: 'destructive',
+            onPress: () => removeAttribute(attr.id),
+          },
+        ]
+      );
+    },
+    [t, removeAttribute]
+  );
+
+  const renderAttribute = useCallback(
+    ({ item }: { item: Attribute }) => (
+      <View style={styles.attributeRow}>
+        <Text style={styles.attributeName}>{item.name}</Text>
+        <View style={styles.attributeActions}>
+          <TouchableOpacity
+            style={[
+              styles.categoryBadge,
+              item.category === 'dealbreaker'
+                ? styles.categoryBadgeDealbreaker
+                : styles.categoryBadgeDesired,
+            ]}
+            onPress={() => toggleCategory(item.id)}
+          >
+            <Text
+              style={[
+                styles.categoryBadgeText,
+                item.category === 'dealbreaker'
+                  ? styles.categoryBadgeTextDealbreaker
+                  : styles.categoryBadgeTextDesired,
+              ]}
+            >
+              {t(item.category === 'dealbreaker' ? 'Dealbreaker' : 'Desired')}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => handleDelete(item)}
+          >
+            <Ionicons
+              name="trash-outline"
+              size={18}
+              color={theme.colors.error}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
     ),
-    [
-      styles,
-      theme,
-      t,
-      newName,
-      newCategory,
-      suggestions,
-      handleAdd,
-      handleSuggestionTap,
-      refreshSuggestions,
-    ]
+    [styles, theme, t, toggleCategory, handleDelete]
+  );
+
+  const ListEmptyComponent = useMemo(
+    () => (
+      <View style={styles.emptyState}>
+        <Text style={styles.emptyTitle}>{t('No attributes yet')}</Text>
+        <Text style={styles.emptySubtitle}>
+          {t('Tap + to add your first attribute')}
+        </Text>
+      </View>
+    ),
+    [styles, t]
+  );
+
+  const ListHeaderComponent = useMemo(
+    () => <AddAttributeSection styles={styles} theme={theme} />,
+    [styles, theme]
   );
 
   return (
