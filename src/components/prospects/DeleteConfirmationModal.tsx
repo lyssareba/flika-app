@@ -162,7 +162,8 @@ const createStyles = (theme: Theme) =>
     subtitle: {
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.textSecondary,
-      textAlign: 'center',
+      alignSelf: 'stretch',
+      paddingHorizontal: 16,
       marginBottom: 12,
     },
     bulletList: {
