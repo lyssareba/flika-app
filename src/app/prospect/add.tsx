@@ -105,14 +105,14 @@ const AddProspectScreen = () => {
 
     setIsSubmitting(true);
     try {
-      await addProspect({
+      const id = await addProspect({
         name: name.trim(),
         photoUri,
         howWeMet,
         notes: notes.trim() || undefined,
         hasMetInPerson: hasMetInPerson!,
       });
-      router.back();
+      router.replace(`/prospect/${id}`);
     } catch (error) {
       console.error('Error adding prospect:', error);
       Alert.alert(tc('Error'), tc('Failed to add prospect. Please try again.'));
