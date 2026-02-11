@@ -199,33 +199,20 @@ const SettingsScreen = () => {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        {/* Appearance Section */}
+        {/* Manage Attributes Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Appearance')}</Text>
-          <View style={styles.sectionContent}>
-            <Text style={styles.settingLabel}>{t('Theme')}</Text>
-            <View style={styles.optionRow}>
-              {THEME_OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.optionChip,
-                    mode === option.value && styles.optionChipSelected,
-                  ]}
-                  onPress={() => setMode(option.value)}
-                >
-                  <Text
-                    style={[
-                      styles.optionChipLabel,
-                      mode === option.value && styles.optionChipLabelSelected,
-                    ]}
-                  >
-                    {t(option.labelKey)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
+          <Text style={styles.sectionTitle}>{t('Manage Attributes')}</Text>
+          <TouchableOpacity
+            style={[styles.sectionContent, styles.actionRow]}
+            onPress={() => router.push('/settings/attributes')}
+          >
+            <Text style={styles.actionRowText}>{t('Your Attributes')}</Text>
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.colors.textMuted}
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Scoring Section */}
@@ -267,6 +254,16 @@ const SettingsScreen = () => {
               value={checkboxView}
               onValueChange={handleCheckboxViewToggle}
             />
+          </View>
+        </View>
+
+        {/* Notifications Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('Notifications')}</Text>
+          <View style={styles.sectionContent}>
+            <Text style={styles.comingSoonText}>
+              {t('Notifications coming soon')}
+            </Text>
           </View>
         </View>
 
@@ -317,29 +314,32 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        {/* Manage Attributes Section */}
+        {/* Appearance Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Manage Attributes')}</Text>
-          <TouchableOpacity
-            style={[styles.sectionContent, styles.actionRow]}
-            onPress={() => router.push('/settings/attributes')}
-          >
-            <Text style={styles.actionRowText}>{t('Your Attributes')}</Text>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={theme.colors.textMuted}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* Notifications Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Notifications')}</Text>
+          <Text style={styles.sectionTitle}>{t('Appearance')}</Text>
           <View style={styles.sectionContent}>
-            <Text style={styles.comingSoonText}>
-              {t('Notifications coming soon')}
-            </Text>
+            <Text style={styles.settingLabel}>{t('Theme')}</Text>
+            <View style={styles.optionRow}>
+              {THEME_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.optionChip,
+                    mode === option.value && styles.optionChipSelected,
+                  ]}
+                  onPress={() => setMode(option.value)}
+                >
+                  <Text
+                    style={[
+                      styles.optionChipLabel,
+                      mode === option.value && styles.optionChipLabelSelected,
+                    ]}
+                  >
+                    {t(option.labelKey)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
 
