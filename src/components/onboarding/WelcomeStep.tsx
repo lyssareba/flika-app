@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import { FlikaMascot } from '@/components/mascot';
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -17,7 +17,7 @@ export const WelcomeStep = ({ onNext }: WelcomeStepProps) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Ionicons name="flame" size={80} color={theme.colors.primary} />
+        <FlikaMascot state="happy" size={100} accessibilityLabel="Flika mascot" />
         <Text style={styles.title}>{t('Welcome')}</Text>
         <Text style={styles.tagline}>
           {t("Your dating companion that helps you find what you're really looking for.")}
