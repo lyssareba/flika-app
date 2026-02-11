@@ -7,9 +7,9 @@ import {
   Modal,
   Pressable,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import { FlikaCelebration } from '@/components/mascot';
 
 interface RelationshipCelebrationModalProps {
   visible: boolean;
@@ -47,9 +47,8 @@ export const RelationshipCelebrationModal = ({
       <View style={styles.container}>
         <Pressable style={styles.overlay} onPress={onClose} />
         <View style={styles.modalContainer}>
-          {/* TODO: Replace with mascot illustration */}
           <View style={styles.iconContainer}>
-            <Ionicons name="heart" size={64} color={theme.colors.primary} />
+            <FlikaCelebration />
           </View>
 
           <Text style={styles.title}>{t('Congratulations!')}</Text>

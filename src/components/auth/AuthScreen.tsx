@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useThemeContext, type Theme } from '@/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { FlikaMascot } from '@/components/mascot';
 
 type AuthView = 'welcome' | 'signIn' | 'signUp' | 'forgotPassword';
 
@@ -132,7 +133,7 @@ export const AuthScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.welcomeContent}>
-          <Ionicons name="flame" size={64} color={theme.colors.primary} />
+          <FlikaMascot state="happy" size={80} accessibilityLabel="Flika mascot" />
           <Text style={styles.appTitle}>Flika</Text>
           <Text style={styles.tagline}>
             {t("Your dating companion that helps you find what you're really looking for.")}

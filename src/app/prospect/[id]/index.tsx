@@ -21,43 +21,44 @@ import { useThemeContext, type Theme } from '@/theme';
 import { useProspects, useCompatibility, useAuth } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { ScoreBreakdownModal, RelationshipCelebrationModal } from '@/components/prospects';
+import { FlikaMascot, getMascotState } from '@/components/mascot';
 import { updateUserSettings, updateProspectCachedScore } from '@/services/firebase';
 import { type StrictnessLevel } from '@/utils/compatibility';
 import type { Prospect, ProspectStatus } from '@/types';
-
-type ScoreMessage = {
-  message: string;
-  icon: 'happy' | 'neutral' | 'thinking' | 'concerned' | 'sad';
-};
 
 const getScoreMessage = (
   score: number | null,
   unknownCount: number,
   totalTraits: number,
   t: (key: string) => string
-): ScoreMessage => {
+): string => {
   if (score === null || totalTraits === 0) {
-    return { message: t('Still learning...'), icon: 'thinking' };
+    return t('Still learning...');
   }
 
   const unknownRatio = unknownCount / totalTraits;
 
+  if (unknownRatio >= 0.75) {
+    return t('Still learning...');
+  }
+
+  if (unknownRatio > 0.5) {
+    return t('Still getting to know them');
+  }
+
   if (score >= 70) {
-    return { message: t('Looking great!'), icon: 'happy' };
+    return t('Looking great!');
   }
 
   if (score >= 50) {
-    if (unknownRatio > 0.5) {
-      return { message: t('Still getting to know them'), icon: 'thinking' };
-    }
-    return { message: t('Some things to consider'), icon: 'neutral' };
+    return t('Some things to consider');
   }
 
   if (score >= 30) {
-    return { message: t('Some important differences'), icon: 'concerned' };
+    return t('Some important differences');
   }
 
-  return { message: t("Might not be the best fit"), icon: 'sad' };
+  return t("Might not be the best fit");
 };
 
 const STATUS_OPTIONS: { value: ProspectStatus; labelKey: string }[] = [
@@ -136,6 +137,17 @@ const ProspectScreen = () => {
       t
     );
   }, [compatibility, prospect?.traits.length, t]);
+
+  const mascotState = useMemo(() => {
+    const totalTraits = prospect?.traits.length ?? 0;
+    const unknownCount = compatibility?.unknownCount ?? 0;
+    return getMascotState({
+      compatibilityScore: compatibility?.overall ?? null,
+      isRelationship: prospect?.status === 'relationship',
+      isLoading,
+      unknownRatio: totalTraits > 0 ? unknownCount / totalTraits : 0,
+    });
+  }, [compatibility, prospect?.status, prospect?.traits.length, isLoading]);
 
   const handleBack = useCallback(() => {
     router.back();
@@ -309,9 +321,18 @@ const ProspectScreen = () => {
         >
           <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          {prospect.name}
-        </Text>
+        <View style={styles.headerCenter}>
+          {prospect.photoUri ? (
+            <Image source={{ uri: prospect.photoUri }} style={styles.headerAvatar} />
+          ) : (
+            <View style={styles.headerAvatarPlaceholder}>
+              <Ionicons name="person" size={18} color={theme.colors.textMuted} />
+            </View>
+          )}
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {prospect.name}
+          </Text>
+        </View>
         <TouchableOpacity
           onPress={handleMenuPress}
           style={styles.headerButton}
@@ -346,26 +367,13 @@ const ProspectScreen = () => {
       )}
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Photo */}
-        <View style={styles.photoSection}>
-          {prospect.photoUri ? (
-            <Image source={{ uri: prospect.photoUri }} style={styles.photo} />
-          ) : (
-            <View style={styles.photoPlaceholder}>
-              <Ionicons name="person" size={64} color={theme.colors.textMuted} />
-            </View>
-          )}
-        </View>
-
         {/* Score Section */}
         <View style={styles.scoreSection}>
-          <View style={styles.scoreRow}>
-            <Text style={styles.scorePercentage}>
-              {compatibility?.overall !== undefined ? `${compatibility.overall}%` : '--'}
-            </Text>
-            <Text style={styles.scoreLabel}>{t('compatible')}</Text>
-          </View>
-          <Text style={styles.scoreMessage}>{scoreMessage.message}</Text>
+          <FlikaMascot state={mascotState} size={56} testID="prospect-mascot" />
+          <Text style={styles.scorePercentage}>
+            {compatibility?.overall !== undefined ? `${compatibility.overall}%` : '--'}
+          </Text>
+          <Text style={styles.scoreMessage}>{scoreMessage}</Text>
           <TouchableOpacity onPress={handleWhyThisScore} style={styles.whyScoreLink}>
             <Text style={styles.whyScoreLinkText}>{t('Why this score?')}</Text>
             <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
@@ -548,13 +556,31 @@ const createStyles = (theme: Theme) =>
     headerButton: {
       padding: 8,
     },
-    headerTitle: {
+    headerCenter: {
       flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    headerAvatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+    },
+    headerAvatarPlaceholder: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: theme.colors.backgroundCard,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    headerTitle: {
       fontSize: theme.typography.fontSize.lg,
       fontWeight: '600',
       color: theme.colors.textPrimary,
-      textAlign: 'center',
-      marginHorizontal: 8,
+      flexShrink: 1,
     },
     menuOverlay: {
       position: 'absolute',
@@ -592,41 +618,17 @@ const createStyles = (theme: Theme) =>
     },
     scrollContent: {
       padding: 16,
-      gap: 20,
-    },
-    photoSection: {
-      alignItems: 'center',
-    },
-    photo: {
-      width: 140,
-      height: 140,
-      borderRadius: 70,
-    },
-    photoPlaceholder: {
-      width: 140,
-      height: 140,
-      borderRadius: 70,
-      backgroundColor: theme.colors.backgroundCard,
-      justifyContent: 'center',
-      alignItems: 'center',
+      paddingBottom: 32,
+      gap: 16,
     },
     scoreSection: {
       alignItems: 'center',
-      gap: 4,
-    },
-    scoreRow: {
-      flexDirection: 'row',
-      alignItems: 'baseline',
-      gap: 8,
+      gap: 6,
     },
     scorePercentage: {
       fontSize: 48,
       fontWeight: '700',
       color: theme.colors.primary,
-    },
-    scoreLabel: {
-      fontSize: theme.typography.fontSize.lg,
-      color: theme.colors.textSecondary,
     },
     scoreMessage: {
       fontSize: theme.typography.fontSize.base,
@@ -636,7 +638,7 @@ const createStyles = (theme: Theme) =>
     whyScoreLink: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: 8,
+      justifyContent: 'center',
     },
     whyScoreLinkText: {
       fontSize: theme.typography.fontSize.sm,
