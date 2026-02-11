@@ -77,3 +77,11 @@ export const isSwipeTutorialDismissed = async (userId: string): Promise<boolean>
   const value = await AsyncStorage.getItem(getSwipeTutorialKey(userId));
   return value ? JSON.parse(value) : false;
 };
+
+export const clearAllUserStorage = async (userId: string): Promise<void> => {
+  await AsyncStorage.multiRemove([
+    getLockTimeoutKey(userId),
+    getLastActiveKey(userId),
+    getSwipeTutorialKey(userId),
+  ]);
+};

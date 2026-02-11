@@ -17,6 +17,7 @@ import { useAuth, useAppLock } from '@/hooks';
 import { updateUserSettings } from '@/services/firebase/firestore';
 import { gatherExportData, shareAccountExport } from '@/services/export';
 import { Toggle } from '@/components/ui';
+import { DeleteAccountModal } from '@/components/settings/DeleteAccountModal';
 import { type StrictnessLevel } from '@/utils/compatibility';
 
 type ThemePreference = 'system' | 'light' | 'dark';
@@ -86,6 +87,7 @@ const SettingsScreen = () => {
   const [biometricEnabled, setBiometricEnabled] = useState(isBiometricEnabled);
   const [lockTimeout, setLockTimeout] = useState(5);
   const [exporting, setExporting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Sync local state when external state changes
   useEffect(() => {
@@ -200,13 +202,6 @@ const SettingsScreen = () => {
       setExporting(false);
     }
   }, [user, userProfile, t]);
-
-  const handleComingSoon = useCallback(
-    (messageKey: string) => {
-      Alert.alert(t(messageKey));
-    },
-    [t]
-  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -383,7 +378,7 @@ const SettingsScreen = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionRow}
-              onPress={() => handleComingSoon('Delete account coming soon')}
+              onPress={() => setShowDeleteModal(true)}
             >
               <Text style={styles.actionRowDestructive}>{t('Delete Account')}</Text>
               <Ionicons
@@ -406,6 +401,11 @@ const SettingsScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      <DeleteAccountModal
+        visible={showDeleteModal}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </SafeAreaView>
   );
 };
