@@ -21,7 +21,7 @@ import { useThemeContext, type Theme } from '@/theme';
 import { useProspects, useCompatibility, useAuth } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { ScoreBreakdownModal, RelationshipCelebrationModal } from '@/components/prospects';
-import { updateUserSettings } from '@/services/firebase';
+import { updateUserSettings, updateProspectCachedScore } from '@/services/firebase';
 import { type StrictnessLevel } from '@/utils/compatibility';
 import type { Prospect, ProspectStatus } from '@/types';
 
@@ -104,9 +104,16 @@ const ProspectScreen = () => {
         setProspect(data);
         setNotesText(data?.notes || '');
         setIsLoading(false);
+
+        // Backfill cached score for existing prospects that don't have one yet
+        if (data && data.cachedScore === undefined && user) {
+          updateProspectCachedScore(user.uid, id, strictness).catch((err) =>
+            console.error('Failed to backfill cached score:', err)
+          );
+        }
       };
       loadProspect();
-    }, [id, getProspectDetails])
+    }, [id, getProspectDetails, user, strictness])
   );
 
   // Calculate compatibility

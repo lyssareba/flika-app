@@ -39,6 +39,7 @@ export {
   resetArchiveTimer,
   // Traits
   updateTrait,
+  updateProspectCachedScore,
   // Date entries
   addDateEntry,
   updateDateEntry,
