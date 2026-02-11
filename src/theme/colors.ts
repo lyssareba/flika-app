@@ -1,30 +1,30 @@
 export const colors = {
-  // Primary - Flika's core (warm coral)
+  // Primary - Vivid burnt orange (from palette #C44900)
   primary: {
-    50: '#FFF5F5',
-    100: '#FFE5E5',
-    200: '#FFCCCC',
-    300: '#FFA3A3',
-    400: '#FF8080',
-    500: '#FF6B6B', // Main primary
-    600: '#E55A5A',
-    700: '#CC4A4A',
-    800: '#B33A3A',
-    900: '#992B2B',
+    50: '#FEF2E6',
+    100: '#FDE0C0',
+    200: '#FAC088',
+    300: '#F59B50',
+    400: '#E07020',
+    500: '#C44900', // Main primary
+    600: '#A53D00',
+    700: '#883200',
+    800: '#6E2800',
+    900: '#5A2100',
   },
 
-  // Secondary - Soft rose
+  // Secondary - Deep teal-green (from palette #183A37)
   secondary: {
-    50: '#FDF8F7',
-    100: '#FBEEED',
-    200: '#F8D9D6',
-    300: '#F4C4BF',
-    400: '#F0AFA8',
-    500: '#F8AFA6', // Main secondary
-    600: '#E89990',
-    700: '#D8837A',
-    800: '#C86D64',
-    900: '#B8574E',
+    50: '#EDF7F6',
+    100: '#D2ECEB',
+    200: '#A5D8D6',
+    300: '#6EBFBC',
+    400: '#3EA19D',
+    500: '#1E6F6A', // Main secondary — derived from palette teal
+    600: '#195C58',
+    700: '#144A47',
+    800: '#103B38',
+    900: '#0C302D',
   },
 
   // Accent - Honey gold (celebrations)
@@ -43,31 +43,31 @@ export const colors = {
 
   // Backgrounds
   background: {
-    light: '#FFF8F0', // Cream - light mode
-    dark: '#1A1A2E', // Deep navy - dark mode
+    light: '#FFF8EF', // Warm cream (tinted by palette sand #EFD6AC)
+    dark: '#04151F', // Near-black navy (palette color)
     card: {
-      light: '#FFFFFF',
-      dark: '#252542',
+      light: '#FFFBF6',
+      dark: '#0F2B2E',
     },
     elevated: {
-      light: '#FFFFFF',
-      dark: '#2D2D4A',
+      light: '#FFFBF6',
+      dark: '#183A37', // Palette color
     },
   },
 
   // Text
   text: {
     primary: {
-      light: '#2D3436', // Charcoal
-      dark: '#F5F5F5',
+      light: '#2A1F18', // Warm near-black
+      dark: '#F0E8DF', // Warm cream
     },
     secondary: {
-      light: '#636E72',
-      dark: '#A0A0B0',
+      light: '#594E45', // ~7.9:1 on card
+      dark: '#B8AFA5', // ~7:1 on card
     },
     muted: {
-      light: '#B2BEC3',
-      dark: '#6B6B80',
+      light: '#766B61', // ~5.1:1 on card
+      dark: '#9D948B', // ~5.3:1 on card
     },
   },
 
@@ -82,19 +82,19 @@ export const colors = {
   // Trait states
   trait: {
     unknown: {
-      background: { light: '#F0F0F0', dark: '#3A3A50' },
-      text: { light: '#757575', dark: '#9E9E9E' },
+      background: { light: '#F0E9E0', dark: '#183A37' },
+      text: { light: '#766B61', dark: '#9D948B' },
     },
     yes: {
       background: { light: '#E8F5E9', dark: '#1B3D1F' },
       text: { light: '#2E7D32', dark: '#81C784' },
     },
     no: {
-      background: { light: '#FFEBEE', dark: '#3D1B1B' },
+      background: { light: '#FFEBEE', dark: '#3D1B2A' },
       text: { light: '#C62828', dark: '#EF9A9A' },
     },
   },
 
-  // Soft peach for subtle backgrounds
-  peach: '#FFE5D9',
+  // Warm sand for subtle backgrounds (palette color #EFD6AC)
+  peach: '#EFD6AC',
 };
