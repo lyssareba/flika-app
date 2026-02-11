@@ -321,6 +321,13 @@ const ProspectScreen = () => {
         >
           <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
         </TouchableOpacity>
+        {prospect.photoUri ? (
+          <Image source={{ uri: prospect.photoUri }} style={styles.headerAvatar} />
+        ) : (
+          <View style={styles.headerAvatarPlaceholder}>
+            <Ionicons name="person" size={18} color={theme.colors.textMuted} />
+          </View>
+        )}
         <Text style={styles.headerTitle} numberOfLines={1}>
           {prospect.name}
         </Text>
@@ -358,34 +365,19 @@ const ProspectScreen = () => {
       )}
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {/* Photo + Score Section */}
-        <View style={styles.profileRow}>
-          <View style={styles.photoSection}>
-            {prospect.photoUri ? (
-              <Image source={{ uri: prospect.photoUri }} style={styles.photo} />
-            ) : (
-              <View style={styles.photoPlaceholder}>
-                <Ionicons name="person" size={40} color={theme.colors.textMuted} />
-              </View>
-            )}
-          </View>
-
-          <View style={styles.scoreSection}>
-            <View style={styles.scoreRow}>
-              <Text style={styles.scorePercentage}>
-                {compatibility?.overall !== undefined ? `${compatibility.overall}%` : '--'}
-              </Text>
-              <Text style={styles.scoreLabel}>{t('compatible')}</Text>
-            </View>
-            <Text style={styles.scoreMessage}>{scoreMessage.message}</Text>
-            <FlikaMascot state={mascotState} size={48} testID="prospect-mascot" />
-          </View>
+        {/* Score Section */}
+        <View style={styles.scoreSection}>
+          <FlikaMascot state={mascotState} size={56} testID="prospect-mascot" />
+          <Text style={styles.scorePercentage}>
+            {compatibility?.overall !== undefined ? `${compatibility.overall}%` : '--'}
+          </Text>
+          <Text style={styles.scoreLabel}>{t('compatible')}</Text>
+          <Text style={styles.scoreMessage}>{scoreMessage.message}</Text>
+          <TouchableOpacity onPress={handleWhyThisScore} style={styles.whyScoreLink}>
+            <Text style={styles.whyScoreLinkText}>{t('Why this score?')}</Text>
+            <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity onPress={handleWhyThisScore} style={styles.whyScoreLink}>
-          <Text style={styles.whyScoreLinkText}>{t('Why this score?')}</Text>
-          <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
-        </TouchableOpacity>
 
         {/* Dealbreaker Warning */}
         {dealbreakersWithNo.length > 0 && (
@@ -563,12 +555,26 @@ const createStyles = (theme: Theme) =>
     headerButton: {
       padding: 8,
     },
+    headerAvatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      marginLeft: 4,
+    },
+    headerAvatarPlaceholder: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: theme.colors.backgroundCard,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginLeft: 4,
+    },
     headerTitle: {
       flex: 1,
       fontSize: theme.typography.fontSize.lg,
       fontWeight: '600',
       color: theme.colors.textPrimary,
-      textAlign: 'center',
       marginHorizontal: 8,
     },
     menuOverlay: {
@@ -610,39 +616,12 @@ const createStyles = (theme: Theme) =>
       paddingBottom: 32,
       gap: 16,
     },
-    profileRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 16,
-    },
-    photoSection: {
-      alignItems: 'center',
-    },
-    photo: {
-      width: 88,
-      height: 88,
-      borderRadius: 44,
-    },
-    photoPlaceholder: {
-      width: 88,
-      height: 88,
-      borderRadius: 44,
-      backgroundColor: theme.colors.backgroundCard,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
     scoreSection: {
-      flex: 1,
       alignItems: 'center',
       gap: 2,
     },
-    scoreRow: {
-      flexDirection: 'row',
-      alignItems: 'baseline',
-      gap: 6,
-    },
     scorePercentage: {
-      fontSize: 36,
+      fontSize: 48,
       fontWeight: '700',
       color: theme.colors.primary,
     },
