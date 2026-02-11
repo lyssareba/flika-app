@@ -17,7 +17,7 @@ export const mockTheme = {
     error: '#EF4444',
     info: '#3B82F6',
     border: '#E0E0E0',
-    peach: '#FFDAB9',
+    softBackground: '#EFD6AC',
     textOnPrimary: '#FFFFFF',
     traitUnknown: '#F3F4F6',
     traitUnknownText: '#6B7280',

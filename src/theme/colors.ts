@@ -95,6 +95,6 @@ export const colors = {
     },
   },
 
-  // Warm sand for subtle backgrounds (palette color #EFD6AC)
-  peach: '#EFD6AC',
+  // Warm sand for subtle decorative backgrounds (palette color #EFD6AC)
+  softBackground: '#EFD6AC',
 };

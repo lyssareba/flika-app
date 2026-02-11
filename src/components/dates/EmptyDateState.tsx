@@ -50,7 +50,7 @@ const createStyles = (theme: Theme) =>
       width: 80,
       height: 80,
       borderRadius: 40,
-      backgroundColor: theme.colors.peach,
+      backgroundColor: theme.colors.softBackground,
       alignItems: 'center',
       justifyContent: 'center',
       marginBottom: 24,
