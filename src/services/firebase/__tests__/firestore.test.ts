@@ -94,8 +94,14 @@ describe('createProspect', () => {
       notes: 'Nice person',
     };
     const attributes = [
-      { id: 'attr-1', name: 'Honesty', category: 'dealbreaker' as const, createdAt: new Date(), order: 1 },
-      { id: 'attr-2', name: 'Humor', category: 'desired' as const, createdAt: new Date(), order: 2 },
+      {
+        id: 'attr-1', name: 'Honesty', category: 'dealbreaker' as const,
+        createdAt: new Date(), order: 1,
+      },
+      {
+        id: 'attr-2', name: 'Humor', category: 'desired' as const,
+        createdAt: new Date(), order: 2,
+      },
     ];
 
     const result = await createProspect(userId, input, attributes);
@@ -242,12 +248,30 @@ describe('updateProspectCachedScore', () => {
     // The function internally calls getProspectTraits which calls getDocs for traits,
     // then getDocs for attributes
     const traitDocs = [
-      { id: 't1', data: { attributeId: 'a1', state: 'yes', updatedAt: { toDate: () => new Date() } } },
-      { id: 't2', data: { attributeId: 'a2', state: 'no', updatedAt: { toDate: () => new Date() } } },
+      {
+        id: 't1',
+        data: { attributeId: 'a1', state: 'yes', updatedAt: { toDate: () => new Date() } },
+      },
+      {
+        id: 't2',
+        data: { attributeId: 'a2', state: 'no', updatedAt: { toDate: () => new Date() } },
+      },
     ];
     const attrDocs = [
-      { id: 'a1', data: { name: 'Honesty', category: 'dealbreaker', createdAt: { toDate: () => new Date() }, order: 1 } },
-      { id: 'a2', data: { name: 'Kindness', category: 'dealbreaker', createdAt: { toDate: () => new Date() }, order: 2 } },
+      {
+        id: 'a1',
+        data: {
+          name: 'Honesty', category: 'dealbreaker',
+          createdAt: { toDate: () => new Date() }, order: 1,
+        },
+      },
+      {
+        id: 'a2',
+        data: {
+          name: 'Kindness', category: 'dealbreaker',
+          createdAt: { toDate: () => new Date() }, order: 2,
+        },
+      },
     ];
 
     mockGetDocs
@@ -335,19 +359,20 @@ describe('addDateEntry', () => {
 
 describe('deleteDateEntry', () => {
   it('deletes date doc and recalculates cachedLastDateAt from remaining dates', async () => {
+    // Use plain Date objects — the toDate helper in firestore.ts passes them through as-is
     const remainingDates = [
       {
         id: 'd2',
         data: {
-          date: { toDate: () => new Date('2025-01-05') },
-          createdAt: { toDate: () => new Date('2025-01-05') },
+          date: new Date('2025-01-05'),
+          createdAt: new Date('2025-01-05'),
         },
       },
       {
         id: 'd3',
         data: {
-          date: { toDate: () => new Date('2025-01-08') },
-          createdAt: { toDate: () => new Date('2025-01-08') },
+          date: new Date('2025-01-08'),
+          createdAt: new Date('2025-01-08'),
         },
       },
     ];
@@ -360,9 +385,10 @@ describe('deleteDateEntry', () => {
     expect(mockDeleteDoc).toHaveBeenCalledTimes(1);
     expect(mockUpdateDoc).toHaveBeenCalledTimes(1);
 
-    const updateData = mockUpdateDoc.mock.calls[0][1];
-    // Should set cachedLastDateAt to most recent remaining date (Jan 8)
-    expect(updateData.cachedLastDateAt).toBeDefined();
+    // Verify Timestamp.fromDate was called with the most recent remaining date (Jan 8)
+    const fromDateCalls = mockTimestampFromDate.mock.calls;
+    const lastFromDateArg = fromDateCalls[fromDateCalls.length - 1][0];
+    expect(lastFromDateArg).toEqual(new Date('2025-01-08'));
   });
 
   it('sets cachedLastDateAt to null when no remaining dates', async () => {
