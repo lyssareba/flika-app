@@ -1,0 +1,11 @@
+{
+  "dateReminder": "It's been a while since you logged a date with {{name}}. Been out recently?",
+  "dealbreakerCheck": "You have {{count}} unknown dealbreakers with {{name}}. Good topics for your next conversation!",
+  "milestoneRelationship": "Congratulations on your relationship with {{name}}!",
+  "milestoneAllDealbreakers": "All dealbreakers confirmed with {{name}}! You really know what matters.",
+  "tip0": "Evaluate traits after each date while the conversation is fresh.",
+  "tip1": "Dealbreakers are weighted more heavily. Focus on what matters most to you.",
+  "tip2": "Use the notes section to remember little details they share.",
+  "tip3": "Log dates regularly to track your journey with each person.",
+  "tip4": "Tap the score to understand what's driving compatibility."
+}

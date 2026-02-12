@@ -95,5 +95,6 @@
   "Could not reorder attribute. Please try again.": "Could not reorder attribute. Please try again.",
   "Could not delete attribute. Please try again.": "Could not delete attribute. Please try again.",
   "Could not save trait change. Please try again.": "Could not save trait change. Please try again.",
-  "Update Failed": "Update Failed"
+  "Update Failed": "Update Failed",
+  "Dismiss": "Dismiss"
 }

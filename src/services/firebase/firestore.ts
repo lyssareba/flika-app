@@ -318,6 +318,8 @@ export const getProspect = async (
     archivedAt: data.archivedAt ? toDate(data.archivedAt) : undefined,
     cachedScore: data.cachedScore ?? undefined,
     cachedDealbreakersWithNo: data.cachedDealbreakersWithNo ?? undefined,
+    cachedLastDateAt: data.cachedLastDateAt ? toDate(data.cachedLastDateAt) : undefined,
+    cachedUnknownDealbreakersCount: data.cachedUnknownDealbreakersCount ?? undefined,
   };
 };
 
@@ -355,6 +357,8 @@ export const getProspects = async (
       archivedAt: data.archivedAt ? toDate(data.archivedAt) : undefined,
       cachedScore: data.cachedScore ?? undefined,
       cachedDealbreakersWithNo: data.cachedDealbreakersWithNo ?? undefined,
+      cachedLastDateAt: data.cachedLastDateAt ? toDate(data.cachedLastDateAt) : undefined,
+      cachedUnknownDealbreakersCount: data.cachedUnknownDealbreakersCount ?? undefined,
     });
   }
 
@@ -548,6 +552,8 @@ export const subscribeToProspects = (
           archivedAt: data.archivedAt ? toDate(data.archivedAt) : undefined,
           cachedScore: data.cachedScore ?? undefined,
           cachedDealbreakersWithNo: data.cachedDealbreakersWithNo ?? undefined,
+          cachedLastDateAt: data.cachedLastDateAt ? toDate(data.cachedLastDateAt) : undefined,
+          cachedUnknownDealbreakersCount: data.cachedUnknownDealbreakersCount ?? undefined,
         };
       });
       onData(prospects);
@@ -632,10 +638,15 @@ export const updateProspectCachedScore = async (
   const traits = await getProspectTraits(userId, prospectId);
   const result = calculateCompatibility(traits, strictness ?? 'normal');
 
+  const unknownDealbreakers = traits.filter(
+    (t) => t.attributeCategory === 'dealbreaker' && t.state === 'unknown'
+  ).length;
+
   const docRef = getUserDoc(userId, 'prospects', prospectId);
   await updateDoc(docRef, {
     cachedScore: result.overall,
     cachedDealbreakersWithNo: result.dealbreakersWithNo.length,
+    cachedUnknownDealbreakersCount: unknownDealbreakers,
   });
 };
 
@@ -682,13 +693,21 @@ export const addDateEntry = async (
     createdAt: Timestamp.now(),
   });
 
-  // Update prospect's updatedAt and potentially status
+  // Update prospect's updatedAt, cachedLastDateAt, and potentially status
   const prospectSnap = await getDoc(prospectDocRef);
   const prospectData = prospectSnap.data();
 
   const updates: Record<string, unknown> = {
     updatedAt: Timestamp.now(),
   };
+
+  // Update cachedLastDateAt if this date is more recent
+  const existingLastDate = prospectData?.cachedLastDateAt
+    ? toDate(prospectData.cachedLastDateAt)
+    : null;
+  if (!existingLastDate || entry.date > existingLastDate) {
+    updates.cachedLastDateAt = Timestamp.fromDate(entry.date);
+  }
 
   // Auto-upgrade from 'talking' to 'dating' on first date
   if (prospectData?.status === 'talking') {

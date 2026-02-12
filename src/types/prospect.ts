@@ -37,6 +37,8 @@ export interface Prospect {
   archivedAt?: Date;
   cachedScore?: number;              // 0-100
   cachedDealbreakersWithNo?: number; // count of dealbreakers with "no"
+  cachedLastDateAt?: Date;
+  cachedUnknownDealbreakersCount?: number;
 }
 
 export interface ProspectInput {

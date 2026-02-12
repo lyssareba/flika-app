@@ -12,3 +12,5 @@ export {
 } from './archiveRetention';
 
 export { isNotEmpty, isValidPassword, passwordsMatch, truncateText } from './validation';
+
+export { generateHomePrompts, generateProspectPrompts, getGeneralTip } from './prompts';

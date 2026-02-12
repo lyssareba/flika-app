@@ -21,5 +21,13 @@ export const FIRESTORE_BATCH_LIMIT = 499;
 export const ARCHIVE_RETENTION_MONTHS = 12;
 export const ARCHIVE_WARNING_MONTHS = 11;
 
+// Prompts
+export const DATE_REMINDER_DAYS = 12;
+export const DEALBREAKER_CHECK_MIN_DATES = 4;
+export const DEALBREAKER_CHECK_MIN_UNKNOWN = 3;
+export const GENERAL_TIP_MAX_DAYS = 30;
+export const GENERAL_TIP_COUNT = 5;
+export const PROMPT_REDISMISS_DAYS = 7;
+
 // UI
 export const NOTES_PREVIEW_MAX_LENGTH = 60;

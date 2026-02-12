@@ -4,8 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
-import { useProspects } from '@/hooks';
+import { useProspects, useHomePrompts } from '@/hooks';
 import { ProspectList, EmptyState } from '@/components/prospects';
+import { PromptBanner } from '@/components/prompts';
+import type { InAppPrompt } from '@/types';
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -15,7 +17,17 @@ const HomeScreen = () => {
     isLoading,
     refreshProspects,
   } = useProspects();
+  const { prompt, dismiss } = useHomePrompts(activeProspects);
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  const handlePromptPress = useCallback(
+    (p: InAppPrompt) => {
+      if (p.prospectId) {
+        router.push(`/prospect/${p.prospectId}`);
+      }
+    },
+    [router]
+  );
 
   const handleProspectPress = useCallback(
     (id: string) => {
@@ -56,6 +68,13 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Prompt Banner */}
+      {prompt && (
+        <View style={styles.promptContainer}>
+          <PromptBanner prompt={prompt} onDismiss={dismiss} onPress={handlePromptPress} />
+        </View>
+      )}
 
       {/* Content */}
       {!isLoading && activeProspects.length === 0 ? (
@@ -101,6 +120,10 @@ const createStyles = (theme: Theme) =>
       minHeight: 44,
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    promptContainer: {
+      paddingHorizontal: 16,
+      paddingBottom: 8,
     },
   });
 
