@@ -8,6 +8,7 @@ module.exports = {
   defaultValue: (locale, namespace, key) => key,
   sort: true,
   createOldCatalogs: false,
+  keepRemoved: true,
   failOnWarnings: false,
   verbose: false,
 };

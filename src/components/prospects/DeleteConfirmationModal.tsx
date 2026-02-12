@@ -57,7 +57,7 @@ export const DeleteConfirmationModal = ({
             </Text>
 
             <Text style={styles.subtitle}>
-              {t('This will permanently delete:')}
+              {t('This will permanently delete')}{':'}
             </Text>
 
             <View style={styles.bulletList}>
