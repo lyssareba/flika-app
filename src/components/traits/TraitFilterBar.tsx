@@ -60,9 +60,10 @@ export const TraitFilterBar: React.FC<TraitFilterBarProps> = ({
           placeholderTextColor={theme.colors.textMuted}
           autoCapitalize="none"
           autoCorrect={false}
+          accessibilityLabel={t('Search traits')}
         />
         {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => onSearchChange('')}>
+          <TouchableOpacity onPress={() => onSearchChange('')} accessibilityRole="button" accessibilityLabel={t('Clear search')}>
             <Ionicons name="close-circle" size={18} color={theme.colors.textMuted} />
           </TouchableOpacity>
         )}
@@ -89,6 +90,7 @@ export const TraitFilterBar: React.FC<TraitFilterBarProps> = ({
               ]}
               onPress={() => onFilterChange(filter.key)}
               accessibilityRole="button"
+              accessibilityLabel={`${filter.label} ${count}`}
               accessibilityState={{ selected: isActive }}
             >
               <Text
@@ -153,6 +155,8 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.backgroundCard,
       paddingHorizontal: 12,
       paddingVertical: 6,
+      minHeight: 44,
+      justifyContent: 'center',
       borderRadius: 16,
       gap: 6,
     },

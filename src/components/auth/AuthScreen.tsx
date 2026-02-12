@@ -144,6 +144,7 @@ export const AuthScreen = () => {
           <TouchableOpacity
             style={styles.primaryButton}
             onPress={() => switchView('signUp')}
+            accessibilityRole="button"
           >
             <Text style={styles.primaryButtonText}>{t('Get Started')}</Text>
           </TouchableOpacity>
@@ -151,6 +152,7 @@ export const AuthScreen = () => {
           <TouchableOpacity
             style={styles.linkContainer}
             onPress={() => switchView('signIn')}
+            accessibilityRole="button"
           >
             <Text style={styles.linkText}>{t('Already have an account?')}</Text>
             <Text style={styles.linkAction}>{tc('Sign In')}</Text>
@@ -187,7 +189,7 @@ export const AuthScreen = () => {
 
             {resetSent ? (
               <>
-                <View style={styles.successBox}>
+                <View style={styles.successBox} accessibilityRole="alert">
                   <Ionicons name="checkmark-circle" size={24} color={theme.colors.success} />
                   <Text style={styles.successText}>
                     {tc('Password reset email sent. Check your inbox.')}
@@ -196,6 +198,7 @@ export const AuthScreen = () => {
                 <TouchableOpacity
                   style={styles.primaryButton}
                   onPress={() => switchView('signIn')}
+                  accessibilityRole="button"
                 >
                   <Text style={styles.primaryButtonText}>{tc('Back to Sign In')}</Text>
                 </TouchableOpacity>
@@ -213,14 +216,16 @@ export const AuthScreen = () => {
                   autoComplete="email"
                   returnKeyType="go"
                   onSubmitEditing={handleResetPassword}
+                  accessibilityLabel={t('Email')}
                 />
 
-                {error && <Text style={styles.errorText}>{error}</Text>}
+                {error && <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="assertive">{error}</Text>}
 
                 <TouchableOpacity
                   style={[styles.primaryButton, loading && styles.buttonDisabled]}
                   onPress={handleResetPassword}
                   disabled={loading}
+                  accessibilityRole="button"
                 >
                   {loading ? (
                     <ActivityIndicator color="#FFFFFF" />
@@ -272,6 +277,7 @@ export const AuthScreen = () => {
               autoCapitalize="words"
               autoComplete="name"
               returnKeyType="next"
+              accessibilityLabel={t('Full Name')}
             />
           )}
 
@@ -285,6 +291,7 @@ export const AuthScreen = () => {
             autoCapitalize="none"
             autoComplete="email"
             returnKeyType="next"
+            accessibilityLabel={t('Email')}
           />
 
           <View style={styles.passwordContainer}>
@@ -298,6 +305,7 @@ export const AuthScreen = () => {
               autoComplete={isSignUp ? 'new-password' : 'current-password'}
               returnKeyType={isSignUp ? 'next' : 'go'}
               onSubmitEditing={isSignUp ? undefined : handleSignIn}
+              accessibilityLabel={t('Password')}
             />
             <TouchableOpacity
               style={styles.passwordToggle}
@@ -325,6 +333,7 @@ export const AuthScreen = () => {
                 autoComplete="new-password"
                 returnKeyType="go"
                 onSubmitEditing={handleSignUp}
+                accessibilityLabel={t('Confirm Password')}
               />
               <TouchableOpacity
                 style={styles.passwordToggle}
@@ -342,10 +351,10 @@ export const AuthScreen = () => {
           )}
 
           {isSignUp && confirmPassword && password !== confirmPassword && (
-            <Text style={styles.errorText}>{tc('Passwords do not match')}</Text>
+            <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="assertive">{tc('Passwords do not match')}</Text>
           )}
 
-          {error && <Text style={styles.errorText}>{error}</Text>}
+          {error && <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="assertive">{error}</Text>}
 
           <TouchableOpacity
             style={[
@@ -354,6 +363,8 @@ export const AuthScreen = () => {
             ]}
             onPress={isSignUp ? handleSignUp : handleSignIn}
             disabled={loading || (isSignUp && !isSignUpFormValid)}
+            accessibilityRole="button"
+            accessibilityState={{ disabled: loading || (isSignUp && !isSignUpFormValid) }}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
@@ -368,6 +379,7 @@ export const AuthScreen = () => {
             <TouchableOpacity
               style={styles.forgotPassword}
               onPress={() => switchView('forgotPassword')}
+              accessibilityRole="button"
             >
               <Text style={styles.forgotPasswordText}>{tc('Forgot password?')}</Text>
             </TouchableOpacity>
@@ -377,7 +389,7 @@ export const AuthScreen = () => {
             <Text style={styles.switchText}>
               {isSignUp ? tc('Already have an account?') : tc("Don't have an account?")}
             </Text>
-            <TouchableOpacity onPress={() => switchView(isSignUp ? 'signIn' : 'signUp')}>
+            <TouchableOpacity onPress={() => switchView(isSignUp ? 'signIn' : 'signUp')} accessibilityRole="button">
               <Text style={styles.switchAction}>
                 {isSignUp ? tc('Sign In') : tc('Sign Up')}
               </Text>
@@ -490,8 +502,8 @@ const createStyles = (theme: Theme) => {
     },
     backButton: {
       marginBottom: 24,
-      width: 40,
-      height: 40,
+      minWidth: 44,
+      minHeight: 44,
       justifyContent: 'center',
     },
     formTitle: {

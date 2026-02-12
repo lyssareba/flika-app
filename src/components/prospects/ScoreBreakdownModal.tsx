@@ -11,6 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import { useReduceMotion } from '@/hooks';
 import type { ScoreBreakdown } from '@/types';
 import { STRICTNESS_SETTINGS, type StrictnessLevel } from '@/utils/compatibility';
 
@@ -39,6 +40,7 @@ export const ScoreBreakdownModal = ({
   const { theme } = useThemeContext();
   const { t } = useTranslation('prospect');
   const { t: tc } = useTranslation('common');
+  const reduceMotion = useReduceMotion();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const multiplier = String(STRICTNESS_SETTINGS[strictness]);
@@ -49,7 +51,7 @@ export const ScoreBreakdownModal = ({
   return (
     <Modal
       visible={visible}
-      animationType="fade"
+      animationType={reduceMotion ? 'none' : 'fade'}
       transparent
       onRequestClose={onClose}
     >
@@ -181,6 +183,7 @@ export const ScoreBreakdownModal = ({
                         ]}
                         onPress={() => onStrictnessChange(level)}
                         accessibilityRole="radio"
+                        accessibilityLabel={`${t(`strictness_${level}`)} ${levelMultiplier}x`}
                         accessibilityState={{ checked: isSelected }}
                       >
                         <Text
@@ -283,7 +286,11 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.textPrimary,
     },
     closeButton: {
-      padding: 4,
+      padding: 10,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     contentContainer: { padding: 20, paddingBottom: 20 },
     overallSection: {

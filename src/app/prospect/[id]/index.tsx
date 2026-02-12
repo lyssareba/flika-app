@@ -18,7 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
-import { useProspects, useCompatibility, useAuth } from '@/hooks';
+import { useProspects, useCompatibility, useAuth, useReduceMotion } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { ScoreBreakdownModal, RelationshipCelebrationModal } from '@/components/prospects';
 import { FlikaMascot, getMascotState } from '@/components/mascot';
@@ -84,6 +84,7 @@ const ProspectScreen = () => {
   } = useProspects();
   const { calculateScore, getBreakdown, strictness } = useCompatibility();
   const { user, refreshProfile } = useAuth();
+  const reduceMotion = useReduceMotion();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [prospect, setProspect] = useState<Prospect | null>(null);
@@ -348,15 +349,15 @@ const ProspectScreen = () => {
         <View style={styles.menuOverlay}>
           <TouchableOpacity style={styles.menuBackdrop} onPress={() => setShowMenu(false)} />
           <View style={styles.menu}>
-            <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleEdit} accessibilityRole="button" accessibilityLabel={tc('Edit')}>
               <Ionicons name="pencil" size={20} color={theme.colors.textPrimary} />
               <Text style={styles.menuItemText}>{tc('Edit')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={handleArchive}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleArchive} accessibilityRole="button" accessibilityLabel={t('Archive')}>
               <Ionicons name="archive" size={20} color={theme.colors.textPrimary} />
               <Text style={styles.menuItemText}>{t('Archive')}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleDelete} accessibilityRole="button" accessibilityLabel={tc('Delete')}>
               <Ionicons name="trash" size={20} color={theme.colors.error} />
               <Text style={[styles.menuItemText, { color: theme.colors.error }]}>
                 {tc('Delete')}
@@ -374,7 +375,7 @@ const ProspectScreen = () => {
             {compatibility?.overall !== undefined ? `${compatibility.overall}%` : '--'}
           </Text>
           <Text style={styles.scoreMessage}>{scoreMessage}</Text>
-          <TouchableOpacity onPress={handleWhyThisScore} style={styles.whyScoreLink}>
+          <TouchableOpacity onPress={handleWhyThisScore} style={styles.whyScoreLink} accessibilityRole="button" accessibilityLabel={t('Why this score?')}>
             <Text style={styles.whyScoreLinkText}>{t('Why this score?')}</Text>
             <Ionicons name="chevron-forward" size={16} color={theme.colors.primary} />
           </TouchableOpacity>
@@ -405,13 +406,13 @@ const ProspectScreen = () => {
 
         {/* Action Buttons */}
         <View style={styles.actionsSection}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleEvaluateTraits}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleEvaluateTraits} accessibilityRole="button" accessibilityLabel={t('Evaluate Traits')}>
             <Ionicons name="checkmark-circle-outline" size={24} color={theme.colors.primary} />
             <Text style={styles.actionButtonText}>{t('Evaluate Traits')}</Text>
             <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionButton} onPress={handleDateHistory}>
+          <TouchableOpacity style={styles.actionButton} onPress={handleDateHistory} accessibilityRole="button" accessibilityLabel={`${t('Date History')} (${prospect.dates.length})`}>
             <Ionicons name="calendar-outline" size={24} color={theme.colors.primary} />
             <Text style={styles.actionButtonText}>
               {t('Date History')} ({prospect.dates.length})
@@ -421,7 +422,7 @@ const ProspectScreen = () => {
         </View>
 
         {/* Notes Section */}
-        <TouchableOpacity style={styles.notesSection} onPress={handleOpenNotesModal}>
+        <TouchableOpacity style={styles.notesSection} onPress={handleOpenNotesModal} accessibilityRole="button" accessibilityLabel={t('Notes')}>
           <View style={styles.notesSectionHeader}>
             <Text style={styles.sectionTitle}>{t('Notes')}</Text>
             <Ionicons name="pencil" size={18} color={theme.colors.primary} />
@@ -444,6 +445,7 @@ const ProspectScreen = () => {
                 ]}
                 onPress={() => handleStatusChange(option.value)}
                 accessibilityRole="button"
+                accessibilityLabel={t(option.labelKey)}
                 accessibilityState={{ selected: prospect.status === option.value }}
               >
                 <Text
@@ -463,7 +465,7 @@ const ProspectScreen = () => {
       {/* Notes Modal */}
       <Modal
         visible={showNotesModal}
-        animationType="slide"
+        animationType={reduceMotion ? 'none' : 'slide'}
         presentationStyle="pageSheet"
         onRequestClose={handleCancelNotes}
       >
@@ -473,11 +475,11 @@ const ProspectScreen = () => {
             style={styles.modalKeyboardView}
           >
             <View style={styles.modalHeader}>
-              <TouchableOpacity onPress={handleCancelNotes} disabled={isSavingNotes}>
+              <TouchableOpacity onPress={handleCancelNotes} disabled={isSavingNotes} accessibilityRole="button" accessibilityLabel={tc('Cancel')}>
                 <Text style={styles.modalCancelText}>{tc('Cancel')}</Text>
               </TouchableOpacity>
               <Text style={styles.modalTitle}>{t('Notes')}</Text>
-              <TouchableOpacity onPress={handleSaveNotes} disabled={isSavingNotes}>
+              <TouchableOpacity onPress={handleSaveNotes} disabled={isSavingNotes} accessibilityRole="button" accessibilityLabel={tc('Save')}>
                 {isSavingNotes ? (
                   <ActivityIndicator size="small" color={theme.colors.primary} />
                 ) : (
@@ -494,6 +496,7 @@ const ProspectScreen = () => {
               multiline
               textAlignVertical="top"
               autoFocus
+              accessibilityLabel={tc('Add any notes...')}
             />
           </KeyboardAvoidingView>
         </SafeAreaView>
@@ -555,6 +558,10 @@ const createStyles = (theme: Theme) =>
     },
     headerButton: {
       padding: 8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     headerCenter: {
       flex: 1,

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   FlatList,
+  AccessibilityInfo,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -108,9 +109,21 @@ const TraitsScreen = () => {
 
   const handleTraitStateChange = useCallback(
     (traitId: string, newState: TraitState) => {
-      traitMutation.mutate({ traitId, state: newState });
+      const trait = prospect?.traits.find((t) => t.id === traitId);
+      traitMutation.mutate(
+        { traitId, state: newState },
+        {
+          onSuccess: () => {
+            if (trait) {
+              AccessibilityInfo.announceForAccessibility(
+                `${trait.attributeName} ${t('set to')} ${t(newState)}`
+              );
+            }
+          },
+        }
+      );
     },
-    [traitMutation]
+    [traitMutation, prospect?.traits, t]
   );
 
   const renderTrait = useCallback(
@@ -193,7 +206,7 @@ const TraitsScreen = () => {
               {searchQuery ? t('No matching traits') : t('No traits')}
             </Text>
             {searchQuery && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <TouchableOpacity onPress={() => setSearchQuery('')} accessibilityRole="button">
                 <Text style={styles.clearSearchText}>{tc('Clear search')}</Text>
               </TouchableOpacity>
             )}
@@ -248,7 +261,10 @@ const createStyles = (theme: Theme) =>
     },
     headerButton: {
       padding: 8,
-      width: 40,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     headerTitle: {
       flex: 1,
