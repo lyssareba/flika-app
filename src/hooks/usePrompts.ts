@@ -46,7 +46,7 @@ export const useHomePrompts = (
     (p: InAppPrompt) => {
       if (!user) return;
       setDismissedKeys((prev) => new Set(prev).add(p.dismissalKey));
-      dismissPrompt(user.uid, p.dismissalKey);
+      dismissPrompt(user.uid, p.dismissalKey).catch(console.error);
     },
     [user]
   );
@@ -81,7 +81,7 @@ export const useProspectPrompts = (
     (p: InAppPrompt) => {
       if (!user) return;
       setDismissedKeys((prev) => new Set(prev).add(p.dismissalKey));
-      dismissPrompt(user.uid, p.dismissalKey);
+      dismissPrompt(user.uid, p.dismissalKey).catch(console.error);
     },
     [user]
   );

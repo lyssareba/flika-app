@@ -745,4 +745,14 @@ export const deleteDateEntry = async (
   const prospectDocRef = getUserDoc(userId, 'prospects', prospectId);
   const dateDocRef = doc(prospectDocRef, 'dates', dateId);
   await deleteDoc(dateDocRef);
+
+  // Recalculate cachedLastDateAt from remaining dates
+  const remainingDates = await getProspectDates(userId, prospectId);
+  const mostRecent = remainingDates.length > 0
+    ? remainingDates.reduce((latest, d) => (d.date > latest.date ? d : latest)).date
+    : null;
+
+  await updateDoc(prospectDocRef, {
+    cachedLastDateAt: mostRecent ? Timestamp.fromDate(mostRecent) : null,
+  });
 };
