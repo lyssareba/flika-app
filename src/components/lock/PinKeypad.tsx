@@ -47,6 +47,7 @@ export const PinKeypad = ({
                   onPress={onBiometric}
                   disabled={disabled}
                   accessibilityLabel={t('Unlock with biometrics')}
+                  accessibilityRole="button"
                 >
                   <Ionicons
                     name="finger-print"
@@ -65,6 +66,7 @@ export const PinKeypad = ({
                   onPress={onDelete}
                   disabled={deleteDisabled || disabled}
                   accessibilityLabel={t('Delete')}
+                  accessibilityRole="button"
                 >
                   <Ionicons
                     name="backspace-outline"
@@ -86,6 +88,7 @@ export const PinKeypad = ({
                 onPress={() => onDigit(key)}
                 disabled={disabled}
                 accessibilityLabel={key}
+                accessibilityRole="button"
               >
                 <Text style={styles.keyText}>{key}</Text>
               </TouchableOpacity>

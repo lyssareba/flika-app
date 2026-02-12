@@ -14,7 +14,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@/hooks';
+import { useTheme, useReduceMotion } from '@/hooks';
 import { formatDateLong } from '@/utils/dateHelpers';
 import { FlameRating } from './FlameRating';
 import { TraitEvaluationCTA } from './TraitEvaluationCTA';
@@ -47,6 +47,7 @@ export const DateForm: React.FC<DateFormProps> = ({
 }) => {
   const { t } = useTranslation('prospect');
   const theme = useTheme();
+  const reduceMotion = useReduceMotion();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [date, setDate] = useState<Date>(
@@ -95,7 +96,7 @@ export const DateForm: React.FC<DateFormProps> = ({
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType={reduceMotion ? 'none' : 'slide'}
       transparent
       onRequestClose={onClose}
     >
@@ -110,6 +111,8 @@ export const DateForm: React.FC<DateFormProps> = ({
               style={styles.headerButton}
               onPress={onClose}
               disabled={isSubmitting}
+              accessibilityRole="button"
+              accessibilityLabel={t('common:Cancel')}
             >
               <Text
                 style={[
@@ -127,6 +130,8 @@ export const DateForm: React.FC<DateFormProps> = ({
               style={styles.headerButton}
               onPress={handleSave}
               disabled={isSubmitting}
+              accessibilityRole="button"
+              accessibilityLabel={t('common:Save')}
             >
               {isSubmitting ? (
                 <ActivityIndicator size="small" color={theme.colors.primary} />
@@ -146,6 +151,8 @@ export const DateForm: React.FC<DateFormProps> = ({
               <TouchableOpacity
                 style={styles.dateButton}
                 onPress={() => setShowDatePicker(true)}
+                accessibilityRole="button"
+                accessibilityLabel={`${t('Date')}: ${formatDateLong(date)}`}
               >
                 <Ionicons
                   name="calendar"
@@ -179,6 +186,7 @@ export const DateForm: React.FC<DateFormProps> = ({
                 onChangeText={setLocation}
                 placeholder={t('Where did you go?')}
                 placeholderTextColor={theme.colors.textMuted}
+                accessibilityLabel={t('Location')}
               />
             </View>
 
@@ -199,6 +207,7 @@ export const DateForm: React.FC<DateFormProps> = ({
                 placeholderTextColor={theme.colors.textMuted}
                 multiline
                 numberOfLines={4}
+                accessibilityLabel={t('Notes')}
               />
             </View>
 

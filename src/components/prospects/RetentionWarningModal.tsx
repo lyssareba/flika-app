@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import { useReduceMotion } from '@/hooks';
 
 interface RetentionWarningModalProps {
   visible: boolean;
@@ -30,12 +31,13 @@ export const RetentionWarningModal = ({
 }: RetentionWarningModalProps) => {
   const { theme } = useThemeContext();
   const { t } = useTranslation('prospect');
+  const reduceMotion = useReduceMotion();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <Modal
       visible={visible}
-      animationType="fade"
+      animationType={reduceMotion ? 'none' : 'fade'}
       transparent
       onRequestClose={onClose}
     >
@@ -61,6 +63,7 @@ export const RetentionWarningModal = ({
               style={styles.restoreButton}
               onPress={onRestore}
               accessibilityRole="button"
+              accessibilityLabel={t('Restore')}
             >
               <Text style={styles.restoreButtonText}>{t('Restore')}</Text>
             </TouchableOpacity>
@@ -69,6 +72,7 @@ export const RetentionWarningModal = ({
               style={styles.keepButton}
               onPress={onKeepInArchive}
               accessibilityRole="button"
+              accessibilityLabel={t('Keep in Archive')}
             >
               <Text style={styles.keepButtonText}>
                 {t('Keep in Archive')}
@@ -80,6 +84,7 @@ export const RetentionWarningModal = ({
                 style={styles.exportButton}
                 onPress={onExport}
                 accessibilityRole="button"
+                accessibilityLabel={t('Export')}
               >
                 <Text style={styles.exportButtonText}>{t('Export')}</Text>
               </TouchableOpacity>
@@ -89,6 +94,7 @@ export const RetentionWarningModal = ({
               style={styles.cancelButton}
               onPress={onClose}
               accessibilityRole="button"
+              accessibilityLabel={t('Close')}
             >
               <Ionicons name="close" size={20} color={theme.colors.textMuted} />
             </TouchableOpacity>

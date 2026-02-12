@@ -155,6 +155,7 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
               setFirstPin('');
             }}
             accessibilityLabel={tc('Back')}
+            accessibilityRole="button"
           >
             <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
           </TouchableOpacity>
@@ -195,7 +196,7 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} accessibilityLabel={tc('Back')}>
+        <TouchableOpacity onPress={onBack} accessibilityLabel={tc('Back')} accessibilityRole="button">
           <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.title}>{t('Protect Your Data')}</Text>
@@ -213,7 +214,7 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
             </View>
           </View>
         ) : (
-          <TouchableOpacity style={styles.optionCard} onPress={handleStartPin}>
+          <TouchableOpacity style={styles.optionCard} onPress={handleStartPin} accessibilityRole="button" accessibilityLabel={t('Set Up PIN')}>
             <View style={styles.optionRow}>
               <Ionicons name="keypad" size={24} color={theme.colors.primary} />
               <Text style={styles.optionLabel}>{t('Set Up PIN')}</Text>
@@ -250,6 +251,7 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
           style={styles.primaryButton}
           onPress={handleFinish}
           accessibilityRole="button"
+          accessibilityLabel={tc('Finish')}
         >
           <Text style={styles.primaryButtonText}>{tc('Finish')}</Text>
         </TouchableOpacity>
@@ -259,6 +261,7 @@ export const SecurityStep = ({ onComplete, onBack }: SecurityStepProps) => {
             onPress={handleFinish}
             disabled={false}
             accessibilityRole="button"
+            accessibilityLabel={t('Skip for now')}
           >
             <Text style={styles.ghostButtonText}>{t('Skip for now')}</Text>
           </TouchableOpacity>
