@@ -79,10 +79,54 @@ export const isSwipeTutorialDismissed = async (userId: string): Promise<boolean>
   return value ? JSON.parse(value) : false;
 };
 
+// ============================================================================
+// Prompt Dismissals
+// ============================================================================
+
+const getPromptDismissalKey = (userId: string, promptKey: string) =>
+  `${userId}_promptDismissed_${promptKey}`;
+
+export const dismissPrompt = async (userId: string, promptKey: string): Promise<void> => {
+  await AsyncStorage.setItem(
+    getPromptDismissalKey(userId, promptKey),
+    JSON.stringify(Date.now())
+  );
+};
+
+export const getDismissedPromptKeys = async (
+  userId: string,
+  redismissDays: number
+): Promise<Set<string>> => {
+  const allKeys = await AsyncStorage.getAllKeys();
+  const prefix = `${userId}_promptDismissed_`;
+  const promptKeys = allKeys.filter((k) => k.startsWith(prefix));
+
+  if (promptKeys.length === 0) return new Set();
+
+  const pairs = await AsyncStorage.multiGet(promptKeys);
+  const cutoff = Date.now() - redismissDays * 24 * 60 * 60 * 1000;
+  const activeKeys = new Set<string>();
+
+  for (const [key, value] of pairs) {
+    if (!value) continue;
+    const timestamp = JSON.parse(value) as number;
+    if (timestamp > cutoff) {
+      activeKeys.add(key.replace(prefix, ''));
+    }
+  }
+
+  return activeKeys;
+};
+
 export const clearAllUserStorage = async (userId: string): Promise<void> => {
+  const allKeys = await AsyncStorage.getAllKeys();
+  const promptPrefix = `${userId}_promptDismissed_`;
+  const promptKeys = allKeys.filter((k) => k.startsWith(promptPrefix));
+
   await AsyncStorage.multiRemove([
     getLockTimeoutKey(userId),
     getLastActiveKey(userId),
     getSwipeTutorialKey(userId),
+    ...promptKeys,
   ]);
 };

@@ -18,9 +18,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
-import { useProspects, useCompatibility, useAuth, useReduceMotion } from '@/hooks';
+import { useProspects, useCompatibility, useAuth, useReduceMotion, useProspectPrompts } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { ScoreBreakdownModal, RelationshipCelebrationModal } from '@/components/prospects';
+import { PromptBanner } from '@/components/prompts';
 import { FlikaMascot, getMascotState } from '@/components/mascot';
 import { updateUserSettings, updateProspectCachedScore } from '@/services/firebase';
 import { type StrictnessLevel } from '@/utils/compatibility';
@@ -95,6 +96,7 @@ const ProspectScreen = () => {
   const [notesText, setNotesText] = useState('');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [showCelebrationModal, setShowCelebrationModal] = useState(false);
+  const { prompts: prospectPrompts, dismiss: dismissPrompt } = useProspectPrompts(prospect);
 
   // Load prospect details when screen comes into focus
   useFocusEffect(
@@ -403,6 +405,11 @@ const ProspectScreen = () => {
             </Text>
           </View>
         )}
+
+        {/* Prompt Banners */}
+        {prospectPrompts.map((p) => (
+          <PromptBanner key={p.id} prompt={p} onDismiss={dismissPrompt} />
+        ))}
 
         {/* Action Buttons */}
         <View style={styles.actionsSection}>

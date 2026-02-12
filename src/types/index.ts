@@ -14,3 +14,4 @@ export type {
 } from './prospect';
 export type { CompatibilityScore, ScoreBreakdown } from './compatibility';
 export type { ExportData, ProspectExportData } from './export';
+export type { PromptType, InAppPrompt } from './prompt';

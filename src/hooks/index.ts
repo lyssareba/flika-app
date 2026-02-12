@@ -28,6 +28,9 @@ export { useDateMutations } from './useDateMutations';
 export { useAttributes } from './useAttributes';
 export { useProspects } from './useProspects';
 
+// Prompts
+export { useHomePrompts, useProspectPrompts } from './usePrompts';
+
 // Accessibility
 export { useReduceMotion } from './useReduceMotion';
 export { useAccessibilityMode } from './useAccessibilityMode';

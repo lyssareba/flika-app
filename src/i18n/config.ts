@@ -7,6 +7,7 @@ import enProspect from './locales/en/prospect.json';
 import enTraits from './locales/en/traits.json';
 import enSettings from './locales/en/settings.json';
 import enOnboarding from './locales/en/onboarding.json';
+import enPrompts from './locales/en/prompts.json';
 
 const resources = {
   en: {
@@ -15,6 +16,7 @@ const resources = {
     traits: enTraits,
     settings: enSettings,
     onboarding: enOnboarding,
+    prompts: enPrompts,
   },
 };
 
@@ -22,7 +24,7 @@ i18n.use(initReactI18next).init({
   resources,
   lng: Localization.getLocales()[0]?.languageCode ?? 'en',
   fallbackLng: 'en',
-  ns: ['common', 'prospect', 'traits', 'settings', 'onboarding'],
+  ns: ['common', 'prospect', 'traits', 'settings', 'onboarding', 'prompts'],
   defaultNS: 'common',
   interpolation: {
     escapeValue: false,
