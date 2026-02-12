@@ -17,6 +17,8 @@ import { useTranslation } from 'react-i18next';
 import { useThemeContext, type Theme } from '@/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { FlikaMascot } from '@/components/mascot';
+import { MIN_PASSWORD_LENGTH } from '@/constants';
+import { isNotEmpty, isValidPassword, passwordsMatch } from '@/utils';
 
 type AuthView = 'welcome' | 'signIn' | 'signUp' | 'forgotPassword';
 
@@ -40,12 +42,12 @@ export const AuthScreen = () => {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const isSignUpFormValid =
-    displayName.trim() &&
-    email.trim() &&
+    isNotEmpty(displayName) &&
+    isNotEmpty(email) &&
     password &&
     confirmPassword &&
-    password === confirmPassword &&
-    password.length >= 6;
+    passwordsMatch(password, confirmPassword) &&
+    isValidPassword(password);
 
   const clearForm = () => {
     setPassword('');
@@ -82,12 +84,12 @@ export const AuthScreen = () => {
       setError(tc('Please fill in all fields'));
       return;
     }
-    if (password !== confirmPassword) {
+    if (!passwordsMatch(password, confirmPassword)) {
       setError(tc('Passwords do not match'));
       return;
     }
-    if (password.length < 6) {
-      setError(tc('Password must be at least 6 characters'));
+    if (!isValidPassword(password)) {
+      setError(tc('Password must be at least {{count}} characters', { count: MIN_PASSWORD_LENGTH }));
       return;
     }
 
@@ -410,7 +412,7 @@ export const AuthScreen = () => {
   );
 };
 
-const getAuthErrorMessage = (err: unknown, t: (key: string) => string): string => {
+const getAuthErrorMessage = (err: unknown, t: (key: string, options?: Record<string, unknown>) => string): string => {
   const code = (err as { code?: string })?.code;
   switch (code) {
     case 'auth/email-already-in-use':
@@ -418,7 +420,7 @@ const getAuthErrorMessage = (err: unknown, t: (key: string) => string): string =
     case 'auth/invalid-email':
       return t('Invalid email address');
     case 'auth/weak-password':
-      return t('Password must be at least 6 characters');
+      return t('Password must be at least {{count}} characters', { count: MIN_PASSWORD_LENGTH });
     case 'auth/user-not-found':
     case 'auth/wrong-password':
     case 'auth/invalid-credential':

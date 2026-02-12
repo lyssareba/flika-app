@@ -56,7 +56,7 @@
   "Please fill in all fields": "Please fill in all fields",
   "Please enter your email": "Please enter your email",
   "Passwords do not match": "Passwords do not match",
-  "Password must be at least 6 characters": "Password must be at least 6 characters",
+  "Password must be at least {{count}} characters": "Password must be at least {{count}} characters",
   "This email is already registered": "This email is already registered",
   "Invalid email address": "Invalid email address",
   "Invalid email or password": "Invalid email or password",

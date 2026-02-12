@@ -10,3 +10,5 @@ export {
   isExpiringSoon,
   isApproachingExpiry,
 } from './archiveRetention';
+
+export { isNotEmpty, isValidPassword, passwordsMatch, truncateText } from './validation';

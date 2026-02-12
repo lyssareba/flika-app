@@ -14,8 +14,7 @@ import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
 import { useAppLock } from '@/hooks';
 import { PinKeypad } from '@/components/lock';
-
-const PIN_LENGTH = 4;
+import { PIN_LENGTH } from '@/constants';
 
 type PinState = 'idle' | 'entering' | 'confirming' | 'done' | 'error';
 
