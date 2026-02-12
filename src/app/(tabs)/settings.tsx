@@ -216,6 +216,7 @@ const SettingsScreen = () => {
           <TouchableOpacity
             style={[styles.sectionContent, styles.actionRow]}
             onPress={() => router.push('/settings/attributes')}
+            accessibilityRole="button"
           >
             <Text style={styles.actionRowText}>{t('Your Attributes')}</Text>
             <Ionicons
@@ -240,6 +241,9 @@ const SettingsScreen = () => {
                     strictness === option.value && styles.optionChipSelected,
                   ]}
                   onPress={() => handleStrictnessChange(option.value)}
+                  accessibilityRole="radio"
+                  accessibilityLabel={t(option.labelKey)}
+                  accessibilityState={{ selected: strictness === option.value }}
                 >
                   <Text
                     style={[
@@ -300,6 +304,9 @@ const SettingsScreen = () => {
                           lockTimeout === minutes && styles.optionChipSelected,
                         ]}
                         onPress={() => handleTimeoutChange(minutes)}
+                        accessibilityRole="radio"
+                        accessibilityLabel={t('{{count}} minutes', { count: minutes })}
+                        accessibilityState={{ selected: lockTimeout === minutes }}
                       >
                         <Text
                           style={[
@@ -339,6 +346,9 @@ const SettingsScreen = () => {
                     mode === option.value && styles.optionChipSelected,
                   ]}
                   onPress={() => setMode(option.value)}
+                  accessibilityRole="radio"
+                  accessibilityLabel={t(option.labelKey)}
+                  accessibilityState={{ selected: mode === option.value }}
                 >
                   <Text
                     style={[
@@ -362,6 +372,8 @@ const SettingsScreen = () => {
               style={styles.actionRow}
               onPress={handleExportData}
               disabled={exporting}
+              accessibilityRole="button"
+              accessibilityLabel={exporting ? t('Exporting...') : t('Export My Data')}
             >
               <Text style={[styles.actionRowText, exporting && styles.actionRowTextDisabled]}>
                 {exporting ? t('Exporting...') : t('Export My Data')}
@@ -379,6 +391,8 @@ const SettingsScreen = () => {
             <TouchableOpacity
               style={styles.actionRow}
               onPress={() => setShowDeleteModal(true)}
+              accessibilityRole="button"
+              accessibilityLabel={t('Delete Account')}
             >
               <Text style={styles.actionRowDestructive}>{t('Delete Account')}</Text>
               <Ionicons
@@ -395,7 +409,7 @@ const SettingsScreen = () => {
           <Text style={styles.sectionTitle}>{t('Account')}</Text>
           <View style={styles.sectionContent}>
             <Text style={styles.emailText}>{userProfile?.email}</Text>
-            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} accessibilityRole="button" accessibilityLabel={t('Sign Out')}>
               <Text style={styles.actionRowDestructive}>{t('Sign Out')}</Text>
             </TouchableOpacity>
           </View>
@@ -472,6 +486,8 @@ const createStyles = (theme: Theme) =>
     optionChip: {
       paddingHorizontal: 14,
       paddingVertical: 8,
+      minHeight: 44,
+      justifyContent: 'center',
       borderRadius: theme.borderRadius.lg,
       borderWidth: 1,
       borderColor: theme.colors.border,

@@ -62,6 +62,7 @@ const AddAttributeSection = React.memo(
             placeholderTextColor={theme.colors.textMuted}
             returnKeyType="done"
             onSubmitEditing={handleAdd}
+            accessibilityLabel={t('Add attribute')}
           />
           <TouchableOpacity
             style={[
@@ -70,6 +71,8 @@ const AddAttributeSection = React.memo(
             ]}
             onPress={handleAdd}
             disabled={!newName.trim()}
+            accessibilityRole="button"
+            accessibilityLabel={t('Add')}
           >
             <Text style={styles.addButtonText}>{t('Add')}</Text>
           </TouchableOpacity>
@@ -82,6 +85,9 @@ const AddAttributeSection = React.memo(
               newCategory === 'dealbreaker' && styles.categoryChipSelected,
             ]}
             onPress={() => setNewCategory('dealbreaker')}
+            accessibilityRole="radio"
+            accessibilityLabel={t('Dealbreaker')}
+            accessibilityState={{ selected: newCategory === 'dealbreaker' }}
           >
             <Text
               style={[
@@ -99,6 +105,9 @@ const AddAttributeSection = React.memo(
               newCategory === 'desired' && styles.categoryChipSelected,
             ]}
             onPress={() => setNewCategory('desired')}
+            accessibilityRole="radio"
+            accessibilityLabel={t('Desired')}
+            accessibilityState={{ selected: newCategory === 'desired' }}
           >
             <Text
               style={[
@@ -115,7 +124,7 @@ const AddAttributeSection = React.memo(
           <View style={styles.suggestionsSection}>
             <View style={styles.suggestionsHeader}>
               <Text style={styles.suggestionsTitle}>{t('Suggestions')}</Text>
-              <TouchableOpacity onPress={refreshSuggestions}>
+              <TouchableOpacity onPress={refreshSuggestions} accessibilityRole="button" accessibilityLabel={t('Refresh suggestions')}>
                 <Ionicons
                   name="refresh"
                   size={18}
@@ -129,6 +138,8 @@ const AddAttributeSection = React.memo(
                   key={name}
                   style={styles.suggestionChip}
                   onPress={() => handleSuggestionTap(name)}
+                  accessibilityRole="button"
+                  accessibilityLabel={name}
                 >
                   <Ionicons
                     name="add"
@@ -187,6 +198,8 @@ const AttributesScreen = () => {
                 : styles.categoryBadgeDesired,
             ]}
             onPress={() => toggleCategory(item.id)}
+            accessibilityRole="button"
+            accessibilityLabel={t(item.category === 'dealbreaker' ? 'Dealbreaker' : 'Desired')}
           >
             <Text
               style={[
@@ -202,6 +215,8 @@ const AttributesScreen = () => {
           <TouchableOpacity
             style={styles.deleteButton}
             onPress={() => handleDelete(item)}
+            accessibilityRole="button"
+            accessibilityLabel={`${t('Delete')} ${item.name}`}
           >
             <Ionicons
               name="trash-outline"
@@ -238,6 +253,8 @@ const AttributesScreen = () => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel={t('Go back')}
         >
           <Ionicons
             name="arrow-back"
@@ -283,6 +300,10 @@ const createStyles = (theme: Theme) =>
     },
     backButton: {
       marginRight: 12,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     headerTitle: {
       flex: 1,
@@ -321,6 +342,8 @@ const createStyles = (theme: Theme) =>
     categoryBadge: {
       paddingHorizontal: 10,
       paddingVertical: 4,
+      minHeight: 44,
+      justifyContent: 'center',
       borderRadius: theme.borderRadius.full,
     },
     categoryBadgeDealbreaker: {
@@ -340,7 +363,11 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.traitYesText,
     },
     deleteButton: {
-      padding: 4,
+      padding: 10,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     emptyState: {
       alignItems: 'center',
@@ -447,6 +474,7 @@ const createStyles = (theme: Theme) =>
       gap: 4,
       paddingHorizontal: 12,
       paddingVertical: 6,
+      minHeight: 44,
       borderRadius: theme.borderRadius.full,
       borderWidth: 1,
       borderColor: theme.colors.primary,

@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import { useReduceMotion } from '@/hooks';
 import { FlikaCelebration } from '@/components/mascot';
 
 interface RelationshipCelebrationModalProps {
@@ -35,12 +36,13 @@ export const RelationshipCelebrationModal = ({
   const { theme } = useThemeContext();
   const { t } = useTranslation('prospect');
   const { t: tc } = useTranslation('common');
+  const reduceMotion = useReduceMotion();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <Modal
       visible={visible}
-      animationType="fade"
+      animationType={reduceMotion ? 'none' : 'fade'}
       transparent
       onRequestClose={onClose}
     >
@@ -63,6 +65,7 @@ export const RelationshipCelebrationModal = ({
                   style={styles.primaryButton}
                   onPress={onArchiveOthers}
                   accessibilityRole="button"
+                  accessibilityLabel={t('Archive others')}
                 >
                   <Text style={styles.primaryButtonText}>
                     {t('Archive others')}
@@ -72,6 +75,7 @@ export const RelationshipCelebrationModal = ({
                   style={styles.secondaryButton}
                   onPress={onKeepOthers}
                   accessibilityRole="button"
+                  accessibilityLabel={t('Keep them for now')}
                 >
                   <Text style={styles.secondaryButtonText}>
                     {t('Keep them for now')}
@@ -85,6 +89,7 @@ export const RelationshipCelebrationModal = ({
                 style={styles.primaryButton}
                 onPress={onClose}
                 accessibilityRole="button"
+                accessibilityLabel={tc('Done')}
               >
                 <Text style={styles.primaryButtonText}>{tc('Done')}</Text>
               </TouchableOpacity>

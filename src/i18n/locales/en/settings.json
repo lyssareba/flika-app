@@ -86,5 +86,7 @@
   "Deleting your account...": "Deleting your account...",
   "Incorrect password. Please try again.": "Incorrect password. Please try again.",
   "Could not delete account. Please try again.": "Could not delete account. Please try again.",
-  "Password": "Password"
+  "Password": "Password",
+  "Refresh suggestions": "Refresh suggestions",
+  "Go back": "Go back"
 }

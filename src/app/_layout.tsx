@@ -1,4 +1,4 @@
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text as RNText, TextInput as RNTextInput } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -17,6 +17,12 @@ import { AuthScreen } from '@/components/auth';
 
 // Initialize i18n - import triggers initialization
 import '@/i18n';
+
+// Limit font scaling to 1.5x to prevent layout breakage
+// @ts-expect-error -- defaultProps deprecated but functional in RN
+RNText.defaultProps = { ...(RNText.defaultProps || {}), maxFontSizeMultiplier: 1.5 };
+// @ts-expect-error -- defaultProps deprecated but functional in RN
+RNTextInput.defaultProps = { ...(RNTextInput.defaultProps || {}), maxFontSizeMultiplier: 1.5 };
 
 // Create a client
 const queryClient = new QueryClient({

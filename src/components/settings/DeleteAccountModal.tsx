@@ -13,7 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/hooks';
+import { useAuth, useReduceMotion } from '@/hooks';
 import { deleteAccount } from '@/services/firebase/deleteAccount';
 import { gatherExportData, shareAccountExport } from '@/services/export';
 
@@ -27,6 +27,7 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
   const { t } = useTranslation('settings');
   const { t: tc } = useTranslation('common');
   const { user, userProfile } = useAuth();
+  const reduceMotion = useReduceMotion();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -78,7 +79,7 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
   return (
     <Modal
       visible={visible}
-      animationType="fade"
+      animationType={reduceMotion ? 'none' : 'fade'}
       transparent
       onRequestClose={handleCancel}
     >
@@ -137,6 +138,7 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
                   style={styles.exportButton}
                   onPress={handleExport}
                   accessibilityRole="button"
+                  accessibilityLabel={t('Export My Data First')}
                 >
                   <Text style={styles.exportButtonText}>
                     {t('Export My Data First')}
@@ -147,6 +149,7 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
                   style={styles.deleteButton}
                   onPress={() => setStep(2)}
                   accessibilityRole="button"
+                  accessibilityLabel={t('Delete Immediately')}
                 >
                   <Text style={styles.deleteButtonText}>
                     {t('Delete Immediately')}
@@ -157,6 +160,7 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
                   style={styles.cancelButton}
                   onPress={handleCancel}
                   accessibilityRole="button"
+                  accessibilityLabel={tc('Cancel')}
                 >
                   <Text style={styles.cancelButtonText}>{tc('Cancel')}</Text>
                 </TouchableOpacity>
@@ -182,6 +186,7 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
                     if (error) setError('');
                   }}
                   editable={!loading}
+                  accessibilityLabel={t('Password')}
                 />
 
                 {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -200,6 +205,7 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
                   onPress={handleDelete}
                   disabled={loading || !password.trim()}
                   accessibilityRole="button"
+                  accessibilityLabel={t('Delete My Account')}
                 >
                   <Text style={styles.deleteButtonText}>
                     {t('Delete My Account')}
@@ -215,6 +221,7 @@ export const DeleteAccountModal = ({ visible, onCancel }: DeleteAccountModalProp
                   }}
                   disabled={loading}
                   accessibilityRole="button"
+                  accessibilityLabel={t('Go Back')}
                 >
                   <Text style={styles.cancelButtonText}>{t('Go Back')}</Text>
                 </TouchableOpacity>

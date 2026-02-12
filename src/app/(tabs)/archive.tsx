@@ -166,7 +166,7 @@ const ArchiveScreen = () => {
                 {formatArchivedDate(item.archivedAt)}
               </Text>
               {expiringSoon && (
-                <View style={[styles.warningBadge, styles.warningBadgeExpiring]}>
+                <View style={[styles.warningBadge, styles.warningBadgeExpiring]} accessible={true} accessibilityLabel={t('Less than a month left')} accessibilityLiveRegion="polite">
                   <Ionicons name="warning" size={12} color={theme.colors.error} />
                   <Text style={[styles.warningBadgeText, { color: theme.colors.error }]}>
                     {t('Less than a month left')}
@@ -174,7 +174,7 @@ const ArchiveScreen = () => {
                 </View>
               )}
               {!expiringSoon && approachingExpiry && monthsLeft !== null && (
-                <View style={styles.warningBadge}>
+                <View style={styles.warningBadge} accessible={true} accessibilityLabel={t(monthsLeft === 1 ? '{{count}} month left' : '{{count}} months left', { count: monthsLeft })} accessibilityLiveRegion="polite">
                   <Ionicons name="time-outline" size={12} color={theme.colors.warning} />
                   <Text style={[styles.warningBadgeText, { color: theme.colors.warning }]}>
                     {t(monthsLeft === 1 ? '{{count}} month left' : '{{count}} months left', {
@@ -390,11 +390,19 @@ const createStyles = (theme: Theme) =>
     },
     restoreButton: {
       padding: 8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
       borderRadius: 8,
       backgroundColor: theme.colors.primary + '15',
     },
     deleteButton: {
       padding: 8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
       borderRadius: 8,
       backgroundColor: theme.colors.error + '15',
     },

@@ -97,6 +97,10 @@ const createStyles = (theme: Theme) =>
     },
     headerButton: {
       padding: 8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 

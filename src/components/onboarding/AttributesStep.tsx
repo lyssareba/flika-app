@@ -48,7 +48,7 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} accessibilityLabel={tc('Back')}>
+        <TouchableOpacity onPress={onBack} accessibilityLabel={tc('Back')} accessibilityRole="button">
           <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
         </TouchableOpacity>
         <Text style={styles.title}>{t('What matters to you?')}</Text>
@@ -66,12 +66,14 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
           placeholderTextColor={theme.colors.textMuted}
           onSubmitEditing={handleAdd}
           returnKeyType="done"
+          accessibilityLabel={t('Type or pick from below...')}
         />
         <TouchableOpacity
           style={[styles.addButton, !inputValue.trim() && styles.addButtonDisabled]}
           onPress={handleAdd}
           disabled={!inputValue.trim()}
           accessibilityLabel={tc('Add')}
+          accessibilityRole="button"
         >
           <Ionicons name="add" size={24} color={theme.colors.textOnPrimary} />
         </TouchableOpacity>
@@ -81,7 +83,7 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
         <View style={styles.suggestionsSection}>
           <View style={styles.suggestionsHeader}>
             <Text style={styles.sectionLabel}>{t('Suggestions (tap to add):')}</Text>
-            <TouchableOpacity onPress={refreshSuggestions} accessibilityLabel={tc('Refresh')}>
+            <TouchableOpacity onPress={refreshSuggestions} accessibilityLabel={tc('Refresh')} accessibilityRole="button">
               <Ionicons name="refresh" size={18} color={theme.colors.primary} />
             </TouchableOpacity>
           </View>
@@ -91,6 +93,8 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
                 key={name}
                 style={styles.chip}
                 onPress={() => handleSuggestionPress(name)}
+                accessibilityRole="button"
+                accessibilityLabel={name}
               >
                 <Text style={styles.chipText}>{name}</Text>
               </TouchableOpacity>
@@ -132,6 +136,7 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
           onPress={onNext}
           disabled={!hasMinimumAttributes}
           accessibilityRole="button"
+          accessibilityLabel={tc('Next')}
         >
           <Text style={styles.primaryButtonText}>{tc('Next')}</Text>
         </TouchableOpacity>

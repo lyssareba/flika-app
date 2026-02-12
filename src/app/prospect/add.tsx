@@ -179,6 +179,7 @@ const AddProspectScreen = () => {
               placeholderTextColor={theme.colors.textMuted}
               autoCapitalize="words"
               autoCorrect={false}
+              accessibilityLabel={tc('Enter name')}
             />
           </View>
 
@@ -271,6 +272,7 @@ const AddProspectScreen = () => {
               multiline
               numberOfLines={4}
               textAlignVertical="top"
+              accessibilityLabel={tc('Add any notes...')}
             />
           </View>
         </ScrollView>
@@ -317,6 +319,10 @@ const createStyles = (theme: Theme) =>
     backButton: {
       padding: 8,
       marginLeft: -8,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     headerTitle: {
       flex: 1,

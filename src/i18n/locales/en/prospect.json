@@ -103,5 +103,10 @@
   "Export First": "Export First",
   "Export": "Export",
   "Export failed": "Export failed",
-  "Could not export data. Please try again.": "Could not export data. Please try again."
+  "Could not export data. Please try again.": "Could not export data. Please try again.",
+  "Expand details": "Expand details",
+  "Collapse details": "Collapse details",
+  "Edit date": "Edit date",
+  "Delete date": "Delete date",
+  "Close": "Close"
 }

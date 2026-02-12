@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@/hooks';
+import { useTheme, useReduceMotion } from '@/hooks';
 import { formatDateLong, getTraitsConfirmedOnDate } from '@/utils/dateHelpers';
 import { FlameRating } from './FlameRating';
 import type { Theme } from '@/theme';
@@ -39,6 +39,7 @@ export const DateCard: React.FC<DateCardProps> = ({
 }) => {
   const { t } = useTranslation('prospect');
   const theme = useTheme();
+  const reduceMotion = useReduceMotion();
   const [expanded, setExpanded] = useState(false);
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -48,7 +49,9 @@ export const DateCard: React.FC<DateCardProps> = ({
   );
 
   const toggleExpanded = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    if (!reduceMotion) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    }
     setExpanded(!expanded);
   };
 
@@ -77,6 +80,8 @@ export const DateCard: React.FC<DateCardProps> = ({
               style={styles.expandButton}
               onPress={toggleExpanded}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityRole="button"
+              accessibilityLabel={expanded ? t('Collapse details') : t('Expand details')}
             >
               <Ionicons
                 name={expanded ? 'chevron-up' : 'chevron-down'}
@@ -136,6 +141,8 @@ export const DateCard: React.FC<DateCardProps> = ({
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => onEdit(dateEntry)}
+              accessibilityRole="button"
+              accessibilityLabel={t('Edit date')}
             >
               <Ionicons
                 name="pencil"
@@ -147,6 +154,8 @@ export const DateCard: React.FC<DateCardProps> = ({
             <TouchableOpacity
               style={styles.actionButton}
               onPress={() => onDelete(dateEntry)}
+              accessibilityRole="button"
+              accessibilityLabel={t('Delete date')}
             >
               <Ionicons name="trash" size={16} color={theme.colors.error} />
               <Text style={[styles.actionText, styles.deleteText]}>
@@ -187,7 +196,11 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.textPrimary,
     },
     expandButton: {
-      padding: 4,
+      padding: 10,
+      minWidth: 44,
+      minHeight: 44,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     ratingRow: {
       marginTop: 12,
@@ -254,6 +267,9 @@ const createStyles = (theme: Theme) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 4,
+      minHeight: 44,
+      paddingVertical: 10,
+      paddingHorizontal: 8,
     },
     actionText: {
       fontSize: theme.typography.fontSize.sm,

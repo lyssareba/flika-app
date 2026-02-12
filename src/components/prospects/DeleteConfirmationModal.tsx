@@ -10,6 +10,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
+import { useReduceMotion } from '@/hooks';
 
 interface DeleteConfirmationModalProps {
   visible: boolean;
@@ -33,12 +34,13 @@ export const DeleteConfirmationModal = ({
   const { theme } = useThemeContext();
   const { t } = useTranslation('prospect');
   const { t: tc } = useTranslation('common');
+  const reduceMotion = useReduceMotion();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <Modal
       visible={visible}
-      animationType="fade"
+      animationType={reduceMotion ? 'none' : 'fade'}
       transparent
       onRequestClose={onCancel}
     >
@@ -96,6 +98,7 @@ export const DeleteConfirmationModal = ({
               style={styles.deleteButton}
               onPress={onDelete}
               accessibilityRole="button"
+              accessibilityLabel={t('Delete Permanently')}
             >
               <Text style={styles.deleteButtonText}>
                 {t('Delete Permanently')}
@@ -107,6 +110,7 @@ export const DeleteConfirmationModal = ({
                 style={styles.exportButton}
                 onPress={onExport}
                 accessibilityRole="button"
+                accessibilityLabel={t('Export First')}
               >
                 <Text style={styles.exportButtonText}>{t('Export First')}</Text>
               </TouchableOpacity>
@@ -116,6 +120,7 @@ export const DeleteConfirmationModal = ({
               style={styles.cancelButton}
               onPress={onCancel}
               accessibilityRole="button"
+              accessibilityLabel={tc('Cancel')}
             >
               <Text style={styles.cancelButtonText}>{tc('Cancel')}</Text>
             </TouchableOpacity>
