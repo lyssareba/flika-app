@@ -352,7 +352,7 @@ export const AuthScreen = () => {
             </View>
           )}
 
-          {isSignUp && confirmPassword && password !== confirmPassword && (
+          {isSignUp && confirmPassword && !passwordsMatch(password, confirmPassword) && (
             <Text style={styles.errorText} accessibilityRole="alert" accessibilityLiveRegion="assertive">{tc('Passwords do not match')}</Text>
           )}
 
