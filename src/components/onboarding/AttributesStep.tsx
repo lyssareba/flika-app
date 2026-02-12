@@ -82,7 +82,7 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
       {suggestions.length > 0 && (
         <View style={styles.suggestionsSection}>
           <View style={styles.suggestionsHeader}>
-            <Text style={styles.sectionLabel}>{t('Suggestions (tap to add):')}</Text>
+            <Text style={styles.sectionLabel}>{t('Suggestions (tap to add)')}{':'}</Text>
             <TouchableOpacity onPress={refreshSuggestions} accessibilityLabel={tc('Refresh')} accessibilityRole="button">
               <Ionicons name="refresh" size={18} color={theme.colors.primary} />
             </TouchableOpacity>
@@ -104,7 +104,7 @@ export const AttributesStep = ({ onNext, onBack }: AttributesStepProps) => {
       )}
 
       <View style={styles.listSection}>
-        <Text style={styles.sectionLabel}>{t('Your attributes:')}</Text>
+        <Text style={styles.sectionLabel}>{t('Your attributes')}{':'}</Text>
         <FlatList
           data={attributes}
           keyExtractor={(item) => item.id}

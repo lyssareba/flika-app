@@ -127,12 +127,14 @@
   "Status": "Status",
   "Still getting to know them": "Still getting to know them",
   "Still learning...": "Still learning...",
+  "Suggestions (tap to add)": "Suggestions (tap to add)",
   "Tap to mark as dealbreaker": "Tap to mark as dealbreaker",
   "These are weighted 60% in compatibility scoring": "These are weighted 60% in compatibility scoring",
   "This account has been disabled": "This account has been disabled",
   "This action cannot be undone.": "This action cannot be undone.",
   "This email is already registered": "This email is already registered",
   "This will move {{name}} back to your active prospects.": "This will move {{name}} back to your active prospects.",
+  "This will permanently delete": "This will permanently delete",
   "today": "today",
   "Too many attempts. Please try again later.": "Too many attempts. Please try again later.",
   "Type or pick from below...": "Type or pick from below...",
@@ -148,6 +150,7 @@
   "Wrong PIN, try again": "Wrong PIN, try again",
   "yesterday": "yesterday",
   "You can always set this up later in Settings.": "You can always set this up later in Settings.",
+  "Your attributes": "Your attributes",
   "Your dating companion that helps you find what you're really looking for.": "Your dating companion that helps you find what you're really looking for.",
   "Your profile and account": "Your profile and account"
 }
