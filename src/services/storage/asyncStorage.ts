@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DEFAULT_LOCK_TIMEOUT } from '@/constants';
 
 // Key generators - scope all lock settings to user ID
 const getLockTimeoutKey = (userId: string) => `${userId}_appLockTimeout`;
@@ -16,7 +17,7 @@ export const setLockTimeout = async (userId: string, minutes: number): Promise<v
  */
 export const getLockTimeout = async (userId: string): Promise<number> => {
   const value = await AsyncStorage.getItem(getLockTimeoutKey(userId));
-  return value ? JSON.parse(value) : 10;
+  return value ? JSON.parse(value) : DEFAULT_LOCK_TIMEOUT;
 };
 
 /**

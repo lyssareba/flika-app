@@ -16,10 +16,10 @@ import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
 import { useReduceMotion } from '@/hooks';
 import type { Trait, TraitState } from '@/types';
+import { SWIPE_THRESHOLD, SWIPE_MAX_RATIO } from '@/constants';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const SWIPE_THRESHOLD = 80;
-const MAX_SWIPE = SCREEN_WIDTH * 0.4;
+const MAX_SWIPE = SCREEN_WIDTH * SWIPE_MAX_RATIO;
 
 interface TraitSwipeRowProps {
   trait: Trait;

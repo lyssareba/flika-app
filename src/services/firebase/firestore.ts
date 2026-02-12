@@ -30,6 +30,7 @@ import {
   DateEntry,
 } from '@/types';
 import { calculateCompatibility, type StrictnessLevel } from '@/utils/compatibility';
+import { FIRESTORE_BATCH_LIMIT, DEFAULT_LOCK_TIMEOUT } from '@/constants';
 
 // Helper to convert Firestore Timestamps to Dates
 const toDate = (timestamp: Timestamp | Date): Date => {
@@ -61,7 +62,7 @@ export const createUserProfile = async (
     quietHoursEnd: '08:00',
     recapFrequency: 'weekly',
     appLockEnabled: false,
-    appLockTimeout: 10,
+    appLockTimeout: DEFAULT_LOCK_TIMEOUT,
     biometricEnabled: false,
     useCheckboxView: false,
   };
@@ -172,8 +173,6 @@ export const deleteAttribute = async (
   await deleteDoc(docRef);
 };
 
-const BATCH_LIMIT = 499;
-
 /**
  * Commit a batch and return a fresh one when the operation count reaches
  * the Firestore limit (500 operations per batch).
@@ -182,7 +181,7 @@ const commitIfFull = async (
   batch: ReturnType<typeof writeBatch>,
   count: number
 ): Promise<{ batch: ReturnType<typeof writeBatch>; count: number }> => {
-  if (count >= BATCH_LIMIT) {
+  if (count >= FIRESTORE_BATCH_LIMIT) {
     await batch.commit();
     return { batch: writeBatch(db), count: 0 };
   }

@@ -20,6 +20,8 @@ import { Toggle } from '@/components/ui';
 import { DeleteAccountModal } from '@/components/settings/DeleteAccountModal';
 import { type StrictnessLevel } from '@/utils/compatibility';
 
+import { LOCK_TIMEOUT_OPTIONS } from '@/constants';
+
 type ThemePreference = 'system' | 'light' | 'dark';
 
 const THEME_OPTIONS: { value: ThemePreference; labelKey: string }[] = [
@@ -54,8 +56,6 @@ const STRICTNESS_OPTIONS: {
     descKey: 'Strict: "No" has 2.5× impact',
   },
 ];
-
-const TIMEOUT_OPTIONS = [1, 5, 10, 15];
 
 const SettingsScreen = () => {
   const { theme, mode, setMode } = useThemeContext();
@@ -296,7 +296,7 @@ const SettingsScreen = () => {
                 <View style={styles.settingRow}>
                   <Text style={styles.settingLabel}>{t('Lock after')}</Text>
                   <View style={styles.optionRow}>
-                    {TIMEOUT_OPTIONS.map((minutes) => (
+                    {LOCK_TIMEOUT_OPTIONS.map((minutes) => (
                       <TouchableOpacity
                         key={minutes}
                         style={[

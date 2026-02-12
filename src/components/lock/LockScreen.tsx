@@ -11,8 +11,7 @@ import { useThemeContext, type Theme } from '@/theme';
 import { useAppLock } from '@/hooks/useAppLock';
 import { useTranslation } from 'react-i18next';
 import { PinKeypad } from './PinKeypad';
-
-const PIN_LENGTH = 4;
+import { PIN_LENGTH } from '@/constants';
 
 export const LockScreen = () => {
   const { t } = useTranslation('common');

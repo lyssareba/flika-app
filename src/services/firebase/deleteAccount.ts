@@ -13,14 +13,13 @@ import {
 import { db } from './config';
 import { clearAllSecureStorage } from '@/services/storage/secureStorage';
 import { clearAllUserStorage } from '@/services/storage/asyncStorage';
-
-const BATCH_LIMIT = 499;
+import { FIRESTORE_BATCH_LIMIT } from '@/constants';
 
 const commitIfFull = async (
   batch: ReturnType<typeof writeBatch>,
   count: number
 ): Promise<{ batch: ReturnType<typeof writeBatch>; count: number }> => {
-  if (count >= BATCH_LIMIT) {
+  if (count >= FIRESTORE_BATCH_LIMIT) {
     await batch.commit();
     return { batch: writeBatch(db), count: 0 };
   }

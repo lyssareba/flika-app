@@ -12,6 +12,7 @@ import { useAuthContext } from './AuthContext';
 import { useAttributesQuery, useAttributeMutations, queryKeys } from '@/hooks';
 import type { Attribute, AttributeCategory } from '@/types';
 import { getRandomPresets } from '@/constants/translations/presetAttributes';
+import { MIN_ATTRIBUTES, SUGGESTION_COUNT } from '@/constants';
 
 interface AttributesContextType {
   attributes: Attribute[];
@@ -26,9 +27,6 @@ interface AttributesContextType {
   refreshSuggestions: () => void;
   hasMinimumAttributes: boolean;
 }
-
-const MIN_ATTRIBUTES = 3;
-const SUGGESTION_COUNT = 5;
 
 const AttributesContext = createContext<AttributesContextType | undefined>(undefined);
 

@@ -12,6 +12,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useTheme, useReduceMotion } from '@/hooks';
 import { formatDateLong, getTraitsConfirmedOnDate } from '@/utils/dateHelpers';
+import { truncateText } from '@/utils';
+import { NOTES_PREVIEW_MAX_LENGTH } from '@/constants';
 import { FlameRating } from './FlameRating';
 import type { Theme } from '@/theme';
 import type { DateEntry, Trait } from '@/types/prospect';
@@ -55,11 +57,6 @@ export const DateCard: React.FC<DateCardProps> = ({
     setExpanded(!expanded);
   };
 
-  const truncateNotes = (notes: string, maxLength: number = 60): string => {
-    if (notes.length <= maxLength) return notes;
-    return notes.substring(0, maxLength).trim() + '...';
-  };
-
   return (
     <TouchableOpacity
       style={styles.container}
@@ -99,7 +96,7 @@ export const DateCard: React.FC<DateCardProps> = ({
           {/* Notes - preview or full */}
           {dateEntry.notes && (
             <Text style={expanded ? styles.notesFull : styles.notesPreview}>
-              {expanded ? dateEntry.notes : truncateNotes(dateEntry.notes)}
+              {expanded ? dateEntry.notes : truncateText(dateEntry.notes, NOTES_PREVIEW_MAX_LENGTH)}
             </Text>
           )}
         </View>

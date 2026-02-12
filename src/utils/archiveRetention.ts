@@ -1,5 +1,4 @@
-const RETENTION_MONTHS = 12;
-const WARNING_MONTHS = 11;
+import { ARCHIVE_RETENTION_MONTHS, ARCHIVE_WARNING_MONTHS } from '@/constants';
 
 /**
  * Get the number of full months remaining before archived data expires.
@@ -8,7 +7,7 @@ const WARNING_MONTHS = 11;
 export const getMonthsUntilExpiry = (archivedAt: Date): number => {
   const now = new Date();
   const expiryDate = new Date(archivedAt);
-  expiryDate.setMonth(expiryDate.getMonth() + RETENTION_MONTHS);
+  expiryDate.setMonth(expiryDate.getMonth() + ARCHIVE_RETENTION_MONTHS);
 
   const diffMs = expiryDate.getTime() - now.getTime();
   if (diffMs <= 0) return 0;
@@ -39,5 +38,5 @@ export const isExpiringSoon = (archivedAt: Date): boolean => {
  */
 export const isApproachingExpiry = (archivedAt: Date): boolean => {
   const months = getMonthsUntilExpiry(archivedAt);
-  return months >= 1 && months <= (RETENTION_MONTHS - WARNING_MONTHS + 1);
+  return months >= 1 && months <= (ARCHIVE_RETENTION_MONTHS - ARCHIVE_WARNING_MONTHS + 1);
 };
