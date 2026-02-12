@@ -81,11 +81,21 @@ jest.mock('firebase/firestore', () => ({
   query: jest.fn(),
   where: jest.fn(),
   orderBy: jest.fn(),
+  onSnapshot: jest.fn(() => jest.fn()),
+  writeBatch: jest.fn(() => ({
+    set: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    commit: jest.fn(() => Promise.resolve()),
+  })),
   serverTimestamp: jest.fn(() => new Date()),
-  Timestamp: {
-    fromDate: jest.fn((date) => ({ toDate: () => date })),
-    now: jest.fn(() => ({ toDate: () => new Date() })),
-  },
+  Timestamp: Object.assign(
+    function MockTimestamp() {},
+    {
+      fromDate: jest.fn((date) => ({ toDate: () => date })),
+      now: jest.fn(() => ({ toDate: () => new Date() })),
+    }
+  ),
 }));
 
 // Mock i18next

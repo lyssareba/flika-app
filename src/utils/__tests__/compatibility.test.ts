@@ -2,6 +2,7 @@ import {
   calculateCompatibility,
   calculateCategoryScore,
   getScoreBreakdown,
+  STRICTNESS_SETTINGS,
 } from '../compatibility';
 import type { Trait } from '@/types';
 
@@ -305,5 +306,100 @@ describe('getScoreBreakdown', () => {
     expect(breakdown[0].score).toBe(100);
     expect(breakdown[1].total).toBe(0);
     expect(breakdown[1].score).toBe(100);
+  });
+});
+
+describe('STRICTNESS_SETTINGS', () => {
+  it('exports all 4 strictness levels with correct coefficients', () => {
+    expect(STRICTNESS_SETTINGS.noEffect).toBe(1.0);
+    expect(STRICTNESS_SETTINGS.gentle).toBe(1.5);
+    expect(STRICTNESS_SETTINGS.normal).toBe(2.0);
+    expect(STRICTNESS_SETTINGS.strict).toBe(2.5);
+    expect(Object.keys(STRICTNESS_SETTINGS)).toHaveLength(4);
+  });
+});
+
+describe('noEffect strictness level', () => {
+  it('treats no the same as yes (1.0 multiplier) in calculateCategoryScore', () => {
+    const traits = [
+      createTrait({ attributeCategory: 'desired', state: 'yes' }),
+      createTrait({ attributeCategory: 'desired', state: 'no' }),
+    ];
+    // 2 traits, impact = 50 each
+    // yes: +50, no with 1.0 LA: -50
+    // 0 + 50 - 50 = 0
+    expect(calculateCategoryScore(traits, 1.0)).toBe(0);
+  });
+
+  it('produces higher scores than gentle for mixed traits', () => {
+    const traits = [
+      createTrait({ attributeCategory: 'dealbreaker', state: 'yes' }),
+      createTrait({ attributeCategory: 'dealbreaker', state: 'yes' }),
+      createTrait({ attributeCategory: 'dealbreaker', state: 'yes' }),
+      createTrait({ attributeCategory: 'dealbreaker', state: 'no' }),
+    ];
+
+    const noEffect = calculateCompatibility(traits, 'noEffect');
+    const gentle = calculateCompatibility(traits, 'gentle');
+    // 4 traits, impact = 25. 3 yes = +75, 1 no = -25 * LA
+    // noEffect (1.0): 75 - 25 = 50
+    // gentle (1.5): 75 - 37.5 = 37.5 → 38
+    expect(noEffect.dealbreakersScore).toBe(50);
+    expect(noEffect.dealbreakersScore).toBeGreaterThan(gentle.dealbreakersScore);
+  });
+
+  it('calculateCompatibility with noEffect strictness', () => {
+    const traits = [
+      createTrait({ attributeCategory: 'dealbreaker', state: 'yes' }),
+      createTrait({ attributeCategory: 'dealbreaker', state: 'no' }),
+      createTrait({ attributeCategory: 'desired', state: 'yes' }),
+      createTrait({ attributeCategory: 'desired', state: 'no' }),
+    ];
+    const result = calculateCompatibility(traits, 'noEffect');
+    // Dealbreakers: 2 traits, impact=50. yes:+50, no:-50 = 0
+    // Desired: 2 traits, impact=50. yes:+50, no:-50 = 0
+    // Overall: 0 * 0.6 + 0 * 0.4 = 0
+    expect(result.overall).toBe(0);
+    expect(result.dealbreakersScore).toBe(0);
+    expect(result.desiredScore).toBe(0);
+  });
+});
+
+describe('large trait count', () => {
+  it('handles 20+ traits with correct rounding', () => {
+    const traits: Trait[] = [];
+    // 20 dealbreaker traits: 15 yes, 5 no
+    for (let i = 0; i < 15; i++) {
+      traits.push(createTrait({ attributeCategory: 'dealbreaker', state: 'yes' }));
+    }
+    for (let i = 0; i < 5; i++) {
+      traits.push(createTrait({ attributeCategory: 'dealbreaker', state: 'no' }));
+    }
+
+    const result = calculateCompatibility(traits, 'normal');
+    // 20 traits, impact = 5 each
+    // 15 yes = +75, 5 no with 2.0 LA = -50
+    // 75 - 50 = 25
+    expect(result.dealbreakersScore).toBe(25);
+    // No desired traits → desiredScore = 100
+    // Overall: 25 * 0.6 + 100 * 0.4 = 15 + 40 = 55
+    expect(result.overall).toBe(55);
+    expect(result.confirmedYesCount).toBe(15);
+    expect(result.confirmedNoCount).toBe(5);
+    expect(result.unknownCount).toBe(0);
+  });
+
+  it('rounds scores to integers', () => {
+    // 3 traits: 2 yes, 1 no → impact=33.33
+    // 2*33.33 - 1*33.33*2 = 66.67 - 66.67 = 0
+    const traits = [
+      createTrait({ attributeCategory: 'desired', state: 'yes' }),
+      createTrait({ attributeCategory: 'desired', state: 'yes' }),
+      createTrait({ attributeCategory: 'desired', state: 'no' }),
+    ];
+    const result = calculateCompatibility(traits, 'normal');
+    // Score is a rounded integer
+    expect(Number.isInteger(result.overall)).toBe(true);
+    expect(Number.isInteger(result.desiredScore)).toBe(true);
   });
 });
