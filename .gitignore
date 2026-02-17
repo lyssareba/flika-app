@@ -9,6 +9,9 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Spec
+flika-app-specification.md
+
 # Native
 .kotlin/
 *.orig.*

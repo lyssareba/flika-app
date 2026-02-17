@@ -41,6 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     '@react-native-community/datetimepicker',
+    'react-native-purchases',
   ],
   experiments: {
     typedRoutes: true,
@@ -53,5 +54,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET,
     firebaseMessagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
     firebaseAppId: process.env.FIREBASE_APP_ID,
+    revenuecatAndroidApiKey: process.env.REVENUECAT_ANDROID_API_KEY,
+    revenuecatIosApiKey: process.env.REVENUECAT_IOS_API_KEY,
   },
 });
