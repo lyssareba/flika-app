@@ -46,5 +46,11 @@ app-example
 /ios
 /android
 
+# Credentials
+credentials/*.json
+!credentials/.gitkeep
+google-services.json
+google-services-dev.json
+
 # palette exploration
 .palette-options/

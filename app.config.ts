@@ -1,17 +1,33 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 
+const IS_DEV = process.env.APP_VARIANT === 'development';
+const IS_PREVIEW = process.env.APP_VARIANT === 'preview';
+
+const getAppName = () => {
+  if (IS_DEV) return 'Flika (Dev)';
+  if (IS_PREVIEW) return 'Flika (Preview)';
+  return 'Flika';
+};
+
+const getPackageName = () => {
+  if (IS_DEV) return 'com.getflika.flika.dev';
+  if (IS_PREVIEW) return 'com.getflika.flika.preview';
+  return 'com.getflika.flika';
+};
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'flika-app',
-  slug: 'flika-app',
+  name: getAppName(),
+  slug: 'flika',
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: 'flikaapp',
+  scheme: 'flika',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
   ios: {
     supportsTablet: true,
+    bundleIdentifier: getPackageName(),
   },
   android: {
     adaptiveIcon: {
@@ -21,6 +37,19 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       monochromeImage: './assets/images/android-icon-monochrome.png',
     },
     edgeToEdgeEnabled: true,
+    package: getPackageName(),
+    versionCode: 1,
+    permissions: [
+      'USE_BIOMETRIC',
+      'USE_FINGERPRINT',
+      'CAMERA',
+      'READ_EXTERNAL_STORAGE',
+      'WRITE_EXTERNAL_STORAGE',
+    ],
+    blockedPermissions: ['android.permission.READ_PHONE_STATE', 'android.permission.RECORD_AUDIO'],
+    ...(IS_DEV && {
+      googleServicesFile: './google-services-dev.json',
+    }),
   },
   web: {
     output: 'static',
@@ -41,7 +70,31 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     '@react-native-community/datetimepicker',
-    'react-native-purchases',
+    'expo-secure-store',
+    'expo-local-authentication',
+    [
+      'expo-build-properties',
+      {
+        android: {
+          minSdkVersion: 24,
+          compileSdkVersion: 34,
+          targetSdkVersion: 34,
+          buildToolsVersion: '34.0.0',
+        },
+      },
+    ],
+    [
+      'expo-camera',
+      {
+        cameraPermission: 'Allow Flika to access your camera to take photos.',
+      },
+    ],
+    [
+      'expo-image-picker',
+      {
+        photosPermission: 'Allow Flika to access your photos to add images.',
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
@@ -56,5 +109,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     firebaseAppId: process.env.FIREBASE_APP_ID,
     revenuecatAndroidApiKey: process.env.REVENUECAT_ANDROID_API_KEY,
     revenuecatIosApiKey: process.env.REVENUECAT_IOS_API_KEY,
+    eas: {
+      projectId: process.env.EAS_PROJECT_ID,
+    },
+    appVariant: process.env.APP_VARIANT ?? 'production',
   },
 });
