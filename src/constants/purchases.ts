@@ -15,4 +15,5 @@ export const RC_OFFERINGS = {
 export const RC_PRODUCTS = {
   MONTHLY: 'flika_premium_monthly',
   ANNUAL: 'flika_premium_annual',
+  LIFETIME: 'flika_premium_lifetime',
 } as const;
