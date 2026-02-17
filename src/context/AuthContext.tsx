@@ -17,6 +17,7 @@ import {
   resetPassword as firebaseResetPassword,
 } from '@/services/firebase/auth';
 import { createUserProfile, getUserProfile } from '@/services/firebase/firestore';
+import * as purchasesService from '@/services/purchases';
 import { queryKeys } from '@/hooks/queryKeys';
 import type { UserProfile } from '@/types';
 
@@ -42,12 +43,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Flag to skip profile fetch in onAuthStateChanged during signup
   const isSigningUp = useRef(false);
 
+  // Initialize RevenueCat SDK
+  useEffect(() => {
+    purchasesService.initialize().catch(() => {
+      // SDK init failure is non-fatal; purchases will be unavailable
+    });
+  }, []);
+
   // Listen to Firebase auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(async (firebaseUser) => {
       setUser(firebaseUser);
 
       if (firebaseUser) {
+        purchasesService.loginUser(firebaseUser.uid).catch(() => {
+          // RevenueCat login failure is non-fatal
+        });
+
         // Skip profile fetch if signup is handling it
         if (!isSigningUp.current) {
           try {
@@ -65,6 +77,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
       } else {
+        purchasesService.logoutUser().catch(() => {
+          // RevenueCat logout failure is non-fatal
+        });
         setUserProfile(null);
         // Clear all query caches on sign out
         queryClient.clear();
@@ -135,6 +150,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const signOut = useCallback(async () => {
+    await purchasesService.logoutUser().catch(() => {
+      // RevenueCat logout failure is non-fatal
+    });
     await firebaseSignOut();
     setUserProfile(null);
     // Clear all query caches
