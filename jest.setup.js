@@ -148,6 +148,6 @@ jest.mock('@expo/vector-icons', () => {
 // Silence console warnings in tests
 const originalWarn = console.warn;
 console.warn = (...args) => {
-  if (typeof args[0] === 'string' && args[0].includes('Firebase')) return;
+  if (typeof args[0] === 'string' && (args[0].includes('Firebase') || args[0].includes('[env]'))) return;
   originalWarn(...args);
 };

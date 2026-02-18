@@ -47,9 +47,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'WRITE_EXTERNAL_STORAGE',
     ],
     blockedPermissions: ['android.permission.READ_PHONE_STATE', 'android.permission.RECORD_AUDIO'],
-    ...(IS_DEV && {
-      googleServicesFile: './google-services-dev.json',
-    }),
+    googleServicesFile: IS_DEV ? './google-services-dev.json' : './google-services.json',
   },
   web: {
     output: 'static',

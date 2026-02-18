@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import Purchases, { type CustomerInfo } from 'react-native-purchases';
-import Constants from 'expo-constants';
+import { env } from '@/config';
 import { RC_ENTITLEMENTS } from '@/constants/purchases';
 
 let initialized = false;
@@ -13,8 +13,8 @@ export async function initialize(): Promise<void> {
   if (initialized) return;
 
   const apiKey = Platform.select<string | undefined>({
-    android: Constants.expoConfig?.extra?.revenuecatAndroidApiKey,
-    ios: Constants.expoConfig?.extra?.revenuecatIosApiKey,
+    android: env.revenuecatAndroidApiKey || undefined,
+    ios: env.revenuecatIosApiKey || undefined,
   });
 
   if (!apiKey) {
