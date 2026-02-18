@@ -1,23 +1,15 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
-import Constants from 'expo-constants';
-
-const extra = Constants.expoConfig?.extra;
-
-if (!extra?.firebaseApiKey) {
-  console.warn(
-    'Firebase configuration is missing. Make sure you have a .env file with the required variables.'
-  );
-}
+import { env } from '@/config';
 
 const firebaseConfig = {
-  apiKey: extra?.firebaseApiKey,
-  authDomain: extra?.firebaseAuthDomain,
-  projectId: extra?.firebaseProjectId,
-  storageBucket: extra?.firebaseStorageBucket,
-  messagingSenderId: extra?.firebaseMessagingSenderId,
-  appId: extra?.firebaseAppId,
+  apiKey: env.firebaseApiKey,
+  authDomain: env.firebaseAuthDomain,
+  projectId: env.firebaseProjectId,
+  storageBucket: env.firebaseStorageBucket,
+  messagingSenderId: env.firebaseMessagingSenderId,
+  appId: env.firebaseAppId,
 };
 
 // Initialize Firebase only if it hasn't been initialized already
