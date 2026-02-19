@@ -17,7 +17,7 @@ import {
   resetPassword as firebaseResetPassword,
 } from '@/services/firebase/auth';
 import { createUserProfile, getUserProfile } from '@/services/firebase/firestore';
-import * as purchasesService from '@/services/purchases';
+import { purchasesService } from '@/services/purchases';
 import { queryKeys } from '@/hooks/queryKeys';
 import type { UserProfile } from '@/types';
 

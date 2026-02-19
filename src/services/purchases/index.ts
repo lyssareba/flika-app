@@ -1,8 +1,1 @@
-export {
-  initialize,
-  loginUser,
-  logoutUser,
-  getCustomerInfo,
-  checkPremiumFromInfo,
-  isInitialized,
-} from './purchases';
+export { purchasesService } from './purchasesService';

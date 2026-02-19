@@ -1,0 +1,20 @@
+{
+  "errors": {
+    "cancelled": "Purchase was cancelled.",
+    "default": "Something went wrong. Please try again.",
+    "invalid": "The purchase was invalid. Please try again.",
+    "network": "Network error. Please check your connection and try again.",
+    "notAllowed": "Purchases are not allowed on this device.",
+    "notAvailable": "This product is not available for purchase.",
+    "paymentPending": "Your payment is pending. Please wait for confirmation.",
+    "receiptInUse": "This purchase is already associated with another account."
+  },
+  "errors.cancelled": "errors.cancelled",
+  "errors.default": "errors.default",
+  "errors.invalid": "errors.invalid",
+  "errors.network": "errors.network",
+  "errors.notAllowed": "errors.notAllowed",
+  "errors.notAvailable": "errors.notAvailable",
+  "errors.paymentPending": "errors.paymentPending",
+  "errors.receiptInUse": "errors.receiptInUse"
+}
