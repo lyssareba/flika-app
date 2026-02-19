@@ -7,6 +7,7 @@ import {
   AppLockProvider,
   AttributesProvider,
   AuthProvider,
+  PremiumProvider,
   ProspectsProvider,
 } from '@/context';
 import { LockScreen } from '@/components/lock';
@@ -70,15 +71,17 @@ const AuthGate = () => {
     return <AuthScreen />;
   }
 
-  // Authenticated → app lock check → attributes → prospects → main app
+  // Authenticated → premium → app lock → attributes → prospects → main app
   return (
-    <AppLockProvider userId={user.uid}>
-      <AttributesProvider>
-        <ProspectsProvider>
-          <AppContent />
-        </ProspectsProvider>
-      </AttributesProvider>
-    </AppLockProvider>
+    <PremiumProvider>
+      <AppLockProvider userId={user.uid}>
+        <AttributesProvider>
+          <ProspectsProvider>
+            <AppContent />
+          </ProspectsProvider>
+        </AttributesProvider>
+      </AppLockProvider>
+    </PremiumProvider>
   );
 };
 
