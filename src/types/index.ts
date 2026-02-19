@@ -15,3 +15,9 @@ export type {
 export type { CompatibilityScore, ScoreBreakdown } from './compatibility';
 export type { ExportData, ProspectExportData } from './export';
 export type { PromptType, InAppPrompt } from './prompt';
+export type {
+  EntitlementId,
+  PremiumEntitlement,
+  SubscriptionPeriod,
+  SubscriptionPackage,
+} from './premium';
