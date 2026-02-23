@@ -18,7 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
-import { useProspects, useCompatibility, useAuth, useReduceMotion, useProspectPrompts } from '@/hooks';
+import { useProspects, useCompatibility, useAuth, useReduceMotion, useProspectPrompts, useFeatureAccess, usePremiumFeature } from '@/hooks';
 import { useTranslation } from 'react-i18next';
 import { ScoreBreakdownModal, RelationshipCelebrationModal } from '@/components/prospects';
 import { PromptBanner } from '@/components/prompts';
@@ -86,6 +86,8 @@ const ProspectScreen = () => {
   const { calculateScore, getBreakdown, strictness } = useCompatibility();
   const { user, refreshProfile } = useAuth();
   const reduceMotion = useReduceMotion();
+  const { hasCompatibilityBreakdown, canArchiveMore } = useFeatureAccess();
+  const { requirePremium } = usePremiumFeature();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   const [prospect, setProspect] = useState<Prospect | null>(null);
@@ -170,6 +172,11 @@ const ProspectScreen = () => {
     setShowMenu(false);
     if (!prospect) return;
 
+    if (!canArchiveMore) {
+      requirePremium(() => {}, { feature: 'prospects' });
+      return;
+    }
+
     Alert.alert(t('Archive'), `Archive ${prospect.name}?`, [
       { text: tc('Cancel'), style: 'cancel' },
       {
@@ -180,7 +187,7 @@ const ProspectScreen = () => {
         },
       },
     ]);
-  }, [prospect, t, tc, archive, router]);
+  }, [prospect, t, tc, archive, router, canArchiveMore, requirePremium]);
 
   const handleDelete = useCallback(async () => {
     setShowMenu(false);
@@ -244,8 +251,12 @@ const ProspectScreen = () => {
   }, [router, id]);
 
   const handleWhyThisScore = useCallback(() => {
-    setShowScoreModal(true);
-  }, []);
+    if (hasCompatibilityBreakdown) {
+      setShowScoreModal(true);
+    } else {
+      requirePremium(() => {}, { feature: 'breakdown' });
+    }
+  }, [hasCompatibilityBreakdown, requirePremium]);
 
   const handleOpenNotesModal = useCallback(() => {
     setNotesText(prospect?.notes || '');

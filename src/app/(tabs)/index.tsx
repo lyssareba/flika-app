@@ -3,20 +3,25 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { useThemeContext, type Theme } from '@/theme';
-import { useProspects, useHomePrompts } from '@/hooks';
+import { useProspects, useHomePrompts, useFeatureAccess, usePremiumFeature } from '@/hooks';
 import { ProspectList, EmptyState } from '@/components/prospects';
 import { PromptBanner } from '@/components/prompts';
+import { UpgradeBanner } from '@/components/premium';
 import type { InAppPrompt } from '@/types';
 
 const HomeScreen = () => {
   const router = useRouter();
   const { theme } = useThemeContext();
+  const { t: tp } = useTranslation('premium');
   const {
     activeProspects,
     isLoading,
     refreshProspects,
   } = useProspects();
+  const { canAddProspect, activeProspectCount, activeProspectLimit } = useFeatureAccess();
+  const { requirePremium } = usePremiumFeature();
   const { prompt, dismiss } = useHomePrompts(activeProspects);
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -37,8 +42,12 @@ const HomeScreen = () => {
   );
 
   const handleAddPress = useCallback(() => {
-    router.push('/prospect/add');
-  }, [router]);
+    if (canAddProspect) {
+      router.push('/prospect/add');
+    } else {
+      requirePremium(() => {}, { feature: 'prospects' });
+    }
+  }, [canAddProspect, requirePremium, router]);
 
   const handleSettingsPress = useCallback(() => {
     router.push('/settings');
@@ -73,6 +82,22 @@ const HomeScreen = () => {
       {prompt && (
         <View style={styles.promptContainer}>
           <PromptBanner prompt={prompt} onDismiss={dismiss} onPress={handlePromptPress} />
+        </View>
+      )}
+
+      {/* Slots Indicator */}
+      {activeProspectLimit !== Infinity && (
+        <View style={styles.slotsContainer}>
+          <Text style={styles.slotsText}>
+            {tp('home.slotsUsed', { count: activeProspectCount, limit: activeProspectLimit })}
+          </Text>
+        </View>
+      )}
+
+      {/* Upgrade Banner */}
+      {activeProspectLimit !== Infinity && (
+        <View style={styles.bannerContainer}>
+          <UpgradeBanner />
         </View>
       )}
 
@@ -122,6 +147,18 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
     },
     promptContainer: {
+      paddingHorizontal: 16,
+      paddingBottom: 8,
+    },
+    slotsContainer: {
+      paddingHorizontal: 16,
+      paddingBottom: 4,
+    },
+    slotsText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textMuted,
+    },
+    bannerContainer: {
       paddingHorizontal: 16,
       paddingBottom: 8,
     },

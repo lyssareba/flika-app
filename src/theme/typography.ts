@@ -24,41 +24,42 @@ export const typography = {
   },
 
   // Predefined text styles
+  // NOTE: React Native lineHeight is in pixels (not a multiplier like CSS).
   styles: {
     h1: {
       fontSize: 30,
       fontWeight: '700' as const,
-      lineHeight: 1.2,
+      lineHeight: 36,
     },
     h2: {
       fontSize: 24,
       fontWeight: '600' as const,
-      lineHeight: 1.3,
+      lineHeight: 31,
     },
     h3: {
       fontSize: 20,
       fontWeight: '600' as const,
-      lineHeight: 1.4,
+      lineHeight: 28,
     },
     body: {
       fontSize: 16,
       fontWeight: '400' as const,
-      lineHeight: 1.5,
+      lineHeight: 24,
     },
     bodySmall: {
       fontSize: 14,
       fontWeight: '400' as const,
-      lineHeight: 1.5,
+      lineHeight: 21,
     },
     caption: {
       fontSize: 12,
       fontWeight: '400' as const,
-      lineHeight: 1.4,
+      lineHeight: 17,
     },
     label: {
       fontSize: 14,
       fontWeight: '500' as const,
-      lineHeight: 1.4,
+      lineHeight: 20,
     },
   },
 };

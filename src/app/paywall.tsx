@@ -115,9 +115,12 @@ const PaywallScreen = () => {
       return getFallbackPlans(t);
     }
 
-    return offerings.availablePackages
+    const mapped = offerings.availablePackages
       .map((pkg) => getPackageDetails(pkg, t))
       .filter((p): p is PackageDetails => p !== null);
+
+    // Fall back when offerings exist but no products match known IDs
+    return mapped.length > 0 ? mapped : getFallbackPlans(t);
   }, [offerings, t]);
 
   // Pre-select annual plan

@@ -1,4 +1,10 @@
 {
+  "Are you sure you want to delete this date?": "Are you sure you want to delete this date?",
+  "Date History": "Date History",
+  "dates.slotsUsed": "{{count}} of {{limit}} dates logged",
+  "Delete Date": "Delete Date",
+  "home.slotsUsed": "{{count}} of {{limit}} prospects",
+  "Log a Date": "Log a Date",
   "paywall.alert.noPurchasesMessage": "We couldn't find any previous purchases to restore.",
   "paywall.alert.noPurchasesTitle": "No Purchases Found",
   "paywall.alert.purchaseFailedTitle": "Purchase Failed",

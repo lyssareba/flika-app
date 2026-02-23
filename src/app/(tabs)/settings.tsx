@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useThemeContext, type Theme } from '@/theme';
-import { useAuth, useAppLock } from '@/hooks';
+import { useAuth, useAppLock, useFeatureAccess, usePremiumFeature } from '@/hooks';
 import { updateUserSettings } from '@/services/firebase/firestore';
 import { gatherExportData, shareAccountExport } from '@/services/export';
 import { Toggle } from '@/components/ui';
@@ -72,6 +72,8 @@ const SettingsScreen = () => {
     hasPinSet,
   } = useAppLock();
   const router = useRouter();
+  const { hasDataExport } = useFeatureAccess();
+  const { requirePremium } = usePremiumFeature();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // Local state for optimistic updates
@@ -191,6 +193,10 @@ const SettingsScreen = () => {
   }, [t, signOut]);
 
   const handleExportData = useCallback(async () => {
+    if (!hasDataExport) {
+      requirePremium(() => {}, { feature: 'export' });
+      return;
+    }
     if (!user || !userProfile) return;
     setExporting(true);
     try {
@@ -201,7 +207,7 @@ const SettingsScreen = () => {
     } finally {
       setExporting(false);
     }
-  }, [user, userProfile, t]);
+  }, [user, userProfile, t, hasDataExport, requirePremium]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>

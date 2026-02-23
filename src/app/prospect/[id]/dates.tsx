@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { useTheme, useProspects, useDateMutations } from '@/hooks';
+import { useTheme, useProspects, useDateMutations, useFeatureAccess, usePremiumFeature } from '@/hooks';
 import {
   DateCard,
   DateForm,
@@ -35,9 +35,12 @@ const DatesScreen = () => {
   const theme = useTheme();
   const { t } = useTranslation('prospect');
   const { t: tc } = useTranslation('common');
+  const { t: tp } = useTranslation('premium');
   const { getProspectDetails, refreshProspects } = useProspects();
   const { addDate, updateDate, deleteDate, isAdding, isUpdating } =
     useDateMutations(id || '');
+  const { getDateLimit } = useFeatureAccess();
+  const { requirePremium } = usePremiumFeature();
 
   const [prospect, setProspect] = useState<Prospect | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,14 +92,23 @@ const DatesScreen = () => {
     return result;
   }, [prospect?.dates]);
 
+  const dateAccess = useMemo(
+    () => getDateLimit(prospect?.dates.length ?? 0),
+    [getDateLimit, prospect?.dates.length]
+  );
+
   const handleBack = useCallback(() => {
     router.back();
   }, [router]);
 
   const handleAddDate = useCallback(() => {
+    if (!dateAccess.canAddDate) {
+      requirePremium(() => {}, { feature: 'dates' });
+      return;
+    }
     setEditingDate(null);
     setShowDateForm(true);
-  }, []);
+  }, [dateAccess.canAddDate, requirePremium]);
 
   const handleEditDate = useCallback((dateEntry: DateEntry) => {
     setEditingDate(dateEntry);
@@ -247,6 +259,15 @@ const DatesScreen = () => {
         </TouchableOpacity>
       </View>
 
+      {/* Date Slots Indicator */}
+      {dateAccess.dateLimit !== Infinity && (
+        <View style={styles.slotsContainer}>
+          <Text style={styles.slotsText}>
+            {tp('dates.slotsUsed', { count: dateAccess.dateCount, limit: dateAccess.dateLimit })}
+          </Text>
+        </View>
+      )}
+
       {/* Content */}
       {hasDates ? (
         <SectionList
@@ -335,6 +356,14 @@ const createStyles = (theme: Theme) =>
       fontWeight: '600',
       color: theme.colors.textPrimary,
       textAlign: 'center',
+    },
+    slotsContainer: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    slotsText: {
+      fontSize: theme.typography.fontSize.sm,
+      color: theme.colors.textMuted,
     },
     listContent: {
       padding: 16,
