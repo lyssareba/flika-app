@@ -34,3 +34,7 @@ export { useHomePrompts, useProspectPrompts } from './usePrompts';
 // Accessibility
 export { useReduceMotion } from './useReduceMotion';
 export { useAccessibilityMode } from './useAccessibilityMode';
+
+// Premium
+export { useFeatureAccess } from './useFeatureAccess';
+export { usePremiumFeature } from './usePremiumFeature';

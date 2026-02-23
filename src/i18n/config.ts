@@ -9,6 +9,7 @@ import enSettings from './locales/en/settings.json';
 import enOnboarding from './locales/en/onboarding.json';
 import enPrompts from './locales/en/prompts.json';
 import enPurchases from './locales/en/purchases.json';
+import enPremium from './locales/en/premium.json';
 
 const resources = {
   en: {
@@ -19,6 +20,7 @@ const resources = {
     onboarding: enOnboarding,
     prompts: enPrompts,
     purchases: enPurchases,
+    premium: enPremium,
   },
 };
 
@@ -26,7 +28,7 @@ i18n.use(initReactI18next).init({
   resources,
   lng: Localization.getLocales()[0]?.languageCode ?? 'en',
   fallbackLng: 'en',
-  ns: ['common', 'prospect', 'traits', 'settings', 'onboarding', 'prompts', 'purchases'],
+  ns: ['common', 'prospect', 'traits', 'settings', 'onboarding', 'prompts', 'purchases', 'premium'],
   defaultNS: 'common',
   interpolation: {
     escapeValue: false,
