@@ -47,6 +47,7 @@ export const UpgradeBanner = ({
         <TouchableOpacity
           onPress={onDismiss}
           accessibilityRole="button"
+          accessibilityLabel={t('common:Dismiss')}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Ionicons name="close" size={18} color={theme.colors.textMuted} />

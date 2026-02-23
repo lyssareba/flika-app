@@ -82,7 +82,7 @@ const createStyles = (theme: Theme, compact: boolean) =>
   StyleSheet.create({
     container: {
       flexDirection: compact ? 'row' : 'column',
-      alignItems: compact ? 'center' : 'center',
+      alignItems: 'center',
       gap: compact ? theme.spacing[2] : theme.spacing[3],
       padding: theme.spacing[4],
       borderWidth: 1,
