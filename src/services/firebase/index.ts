@@ -46,6 +46,14 @@ export {
   deleteDateEntry,
 } from './firestore';
 
+// Early Adopter services
+export {
+  getEarlyAdopterStatus,
+  claimEarlyAdopterSlot,
+  isUserEarlyAdopter,
+  getEarlyAdopterSlot,
+} from './earlyAdopterService';
+
 // Cloud Functions (stubs)
 export {
   triggerDatingRecap,

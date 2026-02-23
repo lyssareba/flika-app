@@ -29,5 +29,8 @@ export const GENERAL_TIP_MAX_DAYS = 30;
 export const GENERAL_TIP_COUNT = 5;
 export const PROMPT_REDISMISS_DAYS = 7;
 
+// Early Adopter
+export const EARLY_ADOPTER_MAX_SLOTS = 100;
+
 // UI
 export const NOTES_PREVIEW_MAX_LENGTH = 60;

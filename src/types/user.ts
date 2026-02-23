@@ -19,4 +19,7 @@ export interface UserProfile {
   createdAt: Date;
   settings: UserSettings;
   onboardingCompleted: boolean;
+  isEarlyAdopter?: boolean;
+  earlyAdopterSlot?: number;
+  earlyAdopterClaimedAt?: Date;
 }
