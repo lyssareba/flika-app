@@ -57,6 +57,15 @@ export const UpgradeBanner = ({
   );
 };
 
+/** Convert a hex color (#RGB or #RRGGBB) to rgba with the given opacity (0–1). */
+const hexToRgba = (hex: string, opacity: number): string => {
+  const shorthand = /^#([a-f\d])([a-f\d])([a-f\d])$/i;
+  const full = hex.replace(shorthand, (_, r, g, b) => r + r + g + g + b + b);
+  const result = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(full);
+  if (!result) return hex;
+  return `rgba(${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}, ${opacity})`;
+};
+
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
@@ -66,7 +75,7 @@ const createStyles = (theme: Theme) =>
       paddingHorizontal: theme.spacing[4],
       paddingVertical: theme.spacing[3],
       borderRadius: theme.borderRadius.lg,
-      backgroundColor: theme.colors.primaryLight + '1A',
+      backgroundColor: hexToRgba(theme.colors.primaryLight, 0.1),
     },
     message: {
       ...theme.typography.styles.bodySmall,

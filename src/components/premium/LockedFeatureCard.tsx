@@ -9,7 +9,9 @@ import { useThemeContext, type Theme } from '@/theme';
 const PAYWALL_ROUTE = '/paywall' as RelativePathString;
 
 interface LockedFeatureCardProps {
+  /** i18n key (looked up in the premium namespace) or pre-translated display string */
   feature: string;
+  /** i18n key or pre-translated description */
   description?: string;
   compact?: boolean;
   onUpgrade?: () => void;
@@ -26,6 +28,11 @@ export const LockedFeatureCard = ({
   const router = useRouter();
   const styles = useMemo(() => createStyles(theme, compact), [theme, compact]);
 
+  const featureLabel = t(feature, { defaultValue: feature });
+  const descriptionLabel = description
+    ? t(description, { defaultValue: description })
+    : undefined;
+
   const handleUpgrade = () => {
     if (onUpgrade) {
       onUpgrade();
@@ -34,38 +41,18 @@ export const LockedFeatureCard = ({
     }
   };
 
-  if (compact) {
-    return (
-      <View style={styles.container}>
-        <Ionicons
-          name="lock-closed"
-          size={16}
-          color={theme.colors.textMuted}
-        />
-        <Text style={styles.featureName} numberOfLines={1}>
-          {feature}
-        </Text>
-        <TouchableOpacity
-          onPress={handleUpgrade}
-          accessibilityRole="button"
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.upgradeText}>{t('Upgrade to Premium')}</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <Ionicons
         name="lock-closed"
-        size={24}
+        size={compact ? 16 : 24}
         color={theme.colors.textMuted}
       />
-      <Text style={styles.featureName}>{feature}</Text>
-      {description && (
-        <Text style={styles.description}>{description}</Text>
+      <Text style={styles.featureName} numberOfLines={compact ? 1 : undefined}>
+        {featureLabel}
+      </Text>
+      {!compact && descriptionLabel && (
+        <Text style={styles.description}>{descriptionLabel}</Text>
       )}
       <TouchableOpacity
         onPress={handleUpgrade}
