@@ -91,15 +91,10 @@ export const PremiumProvider = ({ children }: { children: React.ReactNode }) => 
   }, [offerings, updateFromCustomerInfo]);
 
   const restore = useCallback(async (): Promise<boolean> => {
-    try {
-      const info = await purchasesService.restorePurchases();
-      if (!info) return false;
-      updateFromCustomerInfo(info);
-      return purchasesService.checkPremiumFromInfo(info);
-    } catch (error) {
-      console.error('Failed to restore purchases:', error);
-      return false;
-    }
+    const info = await purchasesService.restorePurchases();
+    if (!info) return false;
+    updateFromCustomerInfo(info);
+    return purchasesService.checkPremiumFromInfo(info);
   }, [updateFromCustomerInfo]);
 
   useEffect(() => {

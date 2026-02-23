@@ -80,16 +80,16 @@ const getPackageDetails = (
   return null;
 };
 
-const FALLBACK_PLANS: PackageDetails[] = [
+const getFallbackPlans = (t: (key: string) => string): PackageDetails[] => [
   {
-    title: 'Annual',
+    title: t('paywall.plan.annual'),
     price: '---',
     pricePerMonth: '---',
-    badge: 'BEST VALUE',
+    badge: t('paywall.plan.bestValue'),
     identifier: '$rc_annual',
   },
   {
-    title: 'Monthly',
+    title: t('paywall.plan.monthly'),
     price: '---',
     pricePerMonth: '---',
     identifier: '$rc_monthly',
@@ -113,7 +113,7 @@ const PaywallScreen = () => {
 
   const plans = useMemo(() => {
     if (!offerings?.availablePackages?.length) {
-      return FALLBACK_PLANS;
+      return getFallbackPlans(t);
     }
 
     return offerings.availablePackages
