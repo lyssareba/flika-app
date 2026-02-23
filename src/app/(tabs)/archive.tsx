@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useThemeContext, type Theme } from '@/theme';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
-import { useProspects, useAuth } from '@/hooks';
+import { useProspects, useAuth, useFeatureAccess, usePremiumFeature } from '@/hooks';
 import type { ProspectListData } from '@/services/firebase/firestore';
 import { getProspectSummary } from '@/services/firebase/firestore';
 import { gatherProspectExportData, shareProspectExport } from '@/services/export';
@@ -36,6 +36,8 @@ const ArchiveScreen = () => {
   const { archivedProspects, restore, remove, resetArchiveTimer, refreshProspects, isLoading } =
     useProspects();
   const { user } = useAuth();
+  const { hasDataExport } = useFeatureAccess();
+  const { requirePremium } = usePremiumFeature();
 
   // Delete confirmation modal state
   const [deleteTarget, setDeleteTarget] = useState<ProspectListData | null>(null);
@@ -116,6 +118,10 @@ const ArchiveScreen = () => {
   }, []);
 
   const handleExportProspect = useCallback(async (prospectId: string) => {
+    if (!hasDataExport) {
+      requirePremium(() => {}, { feature: 'export' });
+      return;
+    }
     if (!user) return;
     try {
       const data = await gatherProspectExportData(user.uid, prospectId);
@@ -123,7 +129,7 @@ const ArchiveScreen = () => {
     } catch {
       Alert.alert(t('Export failed'), t('Could not export data. Please try again.'));
     }
-  }, [user, t]);
+  }, [user, t, hasDataExport, requirePremium]);
 
   const formatArchivedDate = useCallback(
     (date?: Date) => {
