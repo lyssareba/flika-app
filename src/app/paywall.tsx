@@ -50,29 +50,29 @@ const getPackageDetails = (
   if (id === RC_PRODUCTS.ANNUAL) {
     const monthlyPrice = pkg.product.price / 12;
     return {
-      title: t('paywall.plan.annual'),
-      price: `${priceString}/${t('paywall.plan.yr')}`,
-      pricePerMonth: `${pkg.product.currencyCode} ${monthlyPrice.toFixed(2)}/${t('paywall.plan.mo')}`,
-      badge: t('paywall.plan.bestValue'),
-      savings: t('paywall.plan.save50'),
+      title: t('premium:paywall.plan.annual'),
+      price: `${priceString}/${t('premium:paywall.plan.yr')}`,
+      pricePerMonth: `${pkg.product.currencyCode} ${monthlyPrice.toFixed(2)}/${t('premium:paywall.plan.mo')}`,
+      badge: t('premium:paywall.plan.bestValue'),
+      savings: t('premium:paywall.plan.save50'),
       identifier: pkg.identifier,
     };
   }
 
   if (id === RC_PRODUCTS.MONTHLY) {
     return {
-      title: t('paywall.plan.monthly'),
-      price: `${priceString}/${t('paywall.plan.mo')}`,
-      pricePerMonth: `${priceString}/${t('paywall.plan.mo')}`,
+      title: t('premium:paywall.plan.monthly'),
+      price: `${priceString}/${t('premium:paywall.plan.mo')}`,
+      pricePerMonth: `${priceString}/${t('premium:paywall.plan.mo')}`,
       identifier: pkg.identifier,
     };
   }
 
   if (id === RC_PRODUCTS.LIFETIME) {
     return {
-      title: t('paywall.plan.lifetime'),
+      title: t('premium:paywall.plan.lifetime'),
       price: priceString,
-      pricePerMonth: t('paywall.plan.oneTime'),
+      pricePerMonth: t('premium:paywall.plan.oneTime'),
       identifier: pkg.identifier,
     };
   }
@@ -82,14 +82,14 @@ const getPackageDetails = (
 
 const getFallbackPlans = (t: (key: string) => string): PackageDetails[] => [
   {
-    title: t('paywall.plan.annual'),
+    title: t('premium:paywall.plan.annual'),
     price: '---',
     pricePerMonth: '---',
-    badge: t('paywall.plan.bestValue'),
+    badge: t('premium:paywall.plan.bestValue'),
     identifier: '$rc_annual',
   },
   {
-    title: t('paywall.plan.monthly'),
+    title: t('premium:paywall.plan.monthly'),
     price: '---',
     pricePerMonth: '---',
     identifier: '$rc_monthly',
@@ -101,7 +101,6 @@ const PaywallScreen = () => {
   const { feature } = useLocalSearchParams<{ feature?: string }>();
   const { theme } = useThemeContext();
   const { t } = useTranslation('premium');
-  const { t: tc } = useTranslation('common');
   const { offerings, purchase, restore } = usePremium();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -153,7 +152,7 @@ const PaywallScreen = () => {
       const success = await restore();
       if (success) {
         Alert.alert(t('paywall.alert.restoredTitle'), t('paywall.alert.restoredMessage'), [
-          { text: tc('OK'), onPress: () => router.back() },
+          { text: t('common:OK'), onPress: () => router.back() },
         ]);
       } else {
         Alert.alert(
@@ -169,7 +168,7 @@ const PaywallScreen = () => {
     } finally {
       setIsRestoring(false);
     }
-  }, [isRestoring, restore, router, t, tc]);
+  }, [isRestoring, restore, router, t]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -179,7 +178,7 @@ const PaywallScreen = () => {
           onPress={() => router.back()}
           style={styles.closeButton}
           accessibilityRole="button"
-          accessibilityLabel={tc('Close')}
+          accessibilityLabel={t('common:Close')}
         >
           <Ionicons name="close" size={24} color={theme.colors.textPrimary} />
         </TouchableOpacity>
