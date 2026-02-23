@@ -95,9 +95,11 @@ const HomeScreen = () => {
       )}
 
       {/* Upgrade Banner */}
-      <View style={styles.bannerContainer}>
-        <UpgradeBanner />
-      </View>
+      {activeProspectLimit !== Infinity && (
+        <View style={styles.bannerContainer}>
+          <UpgradeBanner />
+        </View>
+      )}
 
       {/* Content */}
       {!isLoading && activeProspects.length === 0 ? (
