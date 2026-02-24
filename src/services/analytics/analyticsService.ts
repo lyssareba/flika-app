@@ -4,8 +4,12 @@ import { app } from '@/services/firebase/config';
 let analytics: Analytics | null = null;
 
 export async function initializeAnalytics(): Promise<void> {
-  if (await isSupported()) {
-    analytics = getAnalytics(app);
+  try {
+    if (await isSupported()) {
+      analytics = getAnalytics(app);
+    }
+  } catch {
+    // Analytics is non-critical — silently continue without it
   }
 }
 

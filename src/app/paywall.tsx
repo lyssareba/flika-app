@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -108,6 +108,8 @@ const PaywallScreen = () => {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const offeringsRef = useRef(offerings);
+  offeringsRef.current = offerings;
 
   useEffect(() => {
     paywallViewed(feature ?? 'direct');
@@ -141,7 +143,7 @@ const PaywallScreen = () => {
     try {
       const success = await purchase(effectiveSelection);
       if (success) {
-        const selectedPkg = offerings?.availablePackages?.find(
+        const selectedPkg = offeringsRef.current?.availablePackages?.find(
           (pkg) => pkg.identifier === effectiveSelection
         );
         purchaseCompleted(
@@ -150,22 +152,24 @@ const PaywallScreen = () => {
           selectedPkg?.product.currencyCode ?? 'USD'
         );
         router.back();
+      } else {
+        purchaseFailed(effectiveSelection);
       }
     } catch (error) {
       const purchaseError = error as Parameters<typeof getPurchaseErrorMessage>[0];
       if (shouldShowError(purchaseError)) {
         purchaseFailed(effectiveSelection, purchaseError.code?.toString());
-        Alert.alert(
-          t('paywall.alert.purchaseFailedTitle'),
-          getPurchaseErrorMessage(purchaseError)
-        );
       } else {
         purchaseCancelled(effectiveSelection);
       }
+      Alert.alert(
+        t('paywall.alert.purchaseFailedTitle'),
+        getPurchaseErrorMessage(purchaseError)
+      );
     } finally {
       setIsPurchasing(false);
     }
-  }, [effectiveSelection, isPurchasing, purchase, offerings, router, t]);
+  }, [effectiveSelection, isPurchasing, purchase, router, t]);
 
   const handleRestore = useCallback(async () => {
     if (isRestoring) return;
