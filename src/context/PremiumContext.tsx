@@ -15,6 +15,7 @@ import { purchasesService } from '@/services/purchases';
 import { FEATURE_FLAGS } from '@/config';
 import { RC_ENTITLEMENTS } from '@/constants/purchases';
 import { shouldShowError } from '@/utils/purchaseErrors';
+import { isUserEarlyAdopter } from '@/services/firebase/earlyAdopterService';
 import { useAuth } from '@/hooks/useAuth';
 
 interface PremiumContextType {
@@ -33,20 +34,27 @@ const PremiumContext = createContext<PremiumContextType | undefined>(undefined);
 export const PremiumProvider = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   const [actualPremium, setActualPremium] = useState(false);
-  const [isEarlyAdopter, setIsEarlyAdopter] = useState(false);
+  const [rcEarlyAdopter, setRcEarlyAdopter] = useState(false);
+  const [firebaseEarlyAdopter, setFirebaseEarlyAdopter] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [offerings, setOfferings] = useState<PurchasesOffering | null>(null);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
 
+  const isEarlyAdopter = useMemo(() => {
+    if (!FEATURE_FLAGS.earlyAdopterEnabled) return false;
+    return rcEarlyAdopter || firebaseEarlyAdopter;
+  }, [rcEarlyAdopter, firebaseEarlyAdopter]);
+
   const isPremium = useMemo(() => {
     if (!FEATURE_FLAGS.paywallEnabled) return true;
+    if (isEarlyAdopter) return true;
     return actualPremium;
-  }, [actualPremium]);
+  }, [actualPremium, isEarlyAdopter]);
 
   const updateFromCustomerInfo = useCallback((info: CustomerInfo) => {
     setCustomerInfo(info);
     setActualPremium(purchasesService.checkPremiumFromInfo(info));
-    setIsEarlyAdopter(
+    setRcEarlyAdopter(
       info.entitlements.active[RC_ENTITLEMENTS.EARLY_ADOPTER] !== undefined
     );
   }, []);
@@ -54,19 +62,23 @@ export const PremiumProvider = ({ children }: { children: React.ReactNode }) => 
   const refreshStatus = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [info, currentOfferings] = await Promise.all([
+      const uid = user?.uid;
+      const [info, currentOfferings, fbEarlyAdopter] = await Promise.all([
         purchasesService.getCustomerInfo(),
         purchasesService.getOfferings(),
+        uid ? isUserEarlyAdopter(uid).catch(() => false) : Promise.resolve(false),
       ]);
       if (info) {
         updateFromCustomerInfo(info);
       }
       setOfferings(currentOfferings);
+      setFirebaseEarlyAdopter(fbEarlyAdopter);
     } catch (error) {
       console.error('Failed to refresh premium status:', error);
     } finally {
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateFromCustomerInfo]);
 
   const purchase = useCallback(async (packageId: string): Promise<boolean> => {
@@ -102,7 +114,8 @@ export const PremiumProvider = ({ children }: { children: React.ReactNode }) => 
       refreshStatus();
     } else {
       setActualPremium(false);
-      setIsEarlyAdopter(false);
+      setRcEarlyAdopter(false);
+      setFirebaseEarlyAdopter(false);
       setCustomerInfo(null);
       setOfferings(null);
       setIsLoading(false);

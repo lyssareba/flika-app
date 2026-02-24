@@ -118,6 +118,17 @@ class PurchasesService {
   }
 
   /**
+   * Set early adopter attributes on RevenueCat for segmentation.
+   */
+  async setEarlyAdopterAttribute(slotNumber: number): Promise<void> {
+    if (!this.initialized) return;
+    await Purchases.setAttributes({
+      early_adopter: 'true',
+      early_adopter_slot: String(slotNumber),
+    });
+  }
+
+  /**
    * Whether the RevenueCat SDK has been initialized.
    */
   isInitialized(): boolean {

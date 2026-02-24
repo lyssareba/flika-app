@@ -94,6 +94,11 @@ export const getUserProfile = async (userId: string): Promise<UserProfile | null
     createdAt: toDate(data.createdAt),
     settings: data.settings,
     onboardingCompleted: data.onboardingCompleted ?? false,
+    isEarlyAdopter: data.isEarlyAdopter ?? undefined,
+    earlyAdopterSlot: data.earlyAdopterSlot ?? undefined,
+    earlyAdopterClaimedAt: data.earlyAdopterClaimedAt
+      ? toDate(data.earlyAdopterClaimedAt)
+      : undefined,
   };
 };
 
