@@ -36,7 +36,8 @@ export const OnboardingFlow = ({ onComplete }: OnboardingFlowProps) => {
           setStep('earlyAdopter');
           return;
         }
-      } catch {
+      } catch (error) {
+        console.error('Early adopter claim failed:', error);
         // Claim failed — fall through to normal completion
       }
     }
