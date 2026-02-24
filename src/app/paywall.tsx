@@ -15,21 +15,12 @@ import { useTranslation } from 'react-i18next';
 import { type PurchasesPackage } from 'react-native-purchases';
 import { useThemeContext, type Theme } from '@/theme';
 import { usePremium } from '@/context/PremiumContext';
-import { RC_PRODUCTS } from '@/constants/purchases';
+import { RC_PRODUCTS, PREMIUM_FEATURES } from '@/constants/purchases';
 import { getPurchaseErrorMessage } from '@/utils/purchaseErrors';
 import { PAYWALL_MESSAGES } from '@/config/paywallMessages';
 import { FlikaMascot } from '@/components/mascot';
 import { FeatureList } from '@/components/premium/FeatureList';
 import { PlanOption } from '@/components/premium/PlanOption';
-
-const PREMIUM_FEATURES = [
-  'paywall.feature.unlimitedProspects',
-  'paywall.feature.compatibilityBreakdown',
-  'paywall.feature.unlimitedDates',
-  'paywall.feature.dataExport',
-  'paywall.feature.cloudSync',
-  'paywall.feature.prioritySupport',
-];
 
 interface PackageDetails {
   title: string;

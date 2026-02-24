@@ -62,10 +62,11 @@ export const PremiumProvider = ({ children }: { children: React.ReactNode }) => 
   const refreshStatus = useCallback(async () => {
     try {
       setIsLoading(true);
+      const uid = user?.uid;
       const [info, currentOfferings, fbEarlyAdopter] = await Promise.all([
         purchasesService.getCustomerInfo(),
         purchasesService.getOfferings(),
-        user ? isUserEarlyAdopter(user.uid).catch(() => false) : Promise.resolve(false),
+        uid ? isUserEarlyAdopter(uid).catch(() => false) : Promise.resolve(false),
       ]);
       if (info) {
         updateFromCustomerInfo(info);
@@ -77,7 +78,8 @@ export const PremiumProvider = ({ children }: { children: React.ReactNode }) => 
     } finally {
       setIsLoading(false);
     }
-  }, [updateFromCustomerInfo, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateFromCustomerInfo]);
 
   const purchase = useCallback(async (packageId: string): Promise<boolean> => {
     if (!offerings) return false;

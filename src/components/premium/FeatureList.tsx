@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useThemeContext, type Theme } from '@/theme';
 
 interface FeatureListProps {
-  features: string[];
+  features: readonly string[];
 }
 
 export const FeatureList = ({ features }: FeatureListProps) => {

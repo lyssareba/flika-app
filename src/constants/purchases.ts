@@ -17,3 +17,12 @@ export const RC_PRODUCTS = {
   ANNUAL: 'flika_premium_annual',
   LIFETIME: 'flika_premium_lifetime',
 } as const;
+
+export const PREMIUM_FEATURES = [
+  'paywall.feature.unlimitedProspects',
+  'paywall.feature.compatibilityBreakdown',
+  'paywall.feature.unlimitedDates',
+  'paywall.feature.dataExport',
+  'paywall.feature.cloudSync',
+  'paywall.feature.prioritySupport',
+] as const;

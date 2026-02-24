@@ -9,8 +9,12 @@ service cloud.firestore {
     // Early adopter counter — authenticated users can claim slots
     match /counters/earlyAdopters {
       allow read: if request.auth != null;
-      allow write: if request.auth != null
+      allow create: if request.auth != null
         && request.resource.data.count is int
+        && request.resource.data.count == 1;
+      allow update: if request.auth != null
+        && request.resource.data.count is int
+        && request.resource.data.count == resource.data.count + 1
         && request.resource.data.count <= 100;
     }
 

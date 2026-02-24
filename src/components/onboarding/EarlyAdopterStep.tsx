@@ -6,19 +6,11 @@ import { useThemeContext, type Theme } from '@/theme';
 import { FlikaMascot } from '@/components/mascot';
 import { FeatureList } from '@/components/premium/FeatureList';
 import { EARLY_ADOPTER_MAX_SLOTS } from '@/constants';
-
-const PREMIUM_FEATURES = [
-  'paywall.feature.unlimitedProspects',
-  'paywall.feature.compatibilityBreakdown',
-  'paywall.feature.unlimitedDates',
-  'paywall.feature.dataExport',
-  'paywall.feature.cloudSync',
-  'paywall.feature.prioritySupport',
-];
+import { PREMIUM_FEATURES } from '@/constants/purchases';
 
 interface EarlyAdopterStepProps {
   slotNumber: number;
-  onNext: () => void;
+  onNext: () => Promise<void>;
 }
 
 export const EarlyAdopterStep = ({ slotNumber, onNext }: EarlyAdopterStepProps) => {
