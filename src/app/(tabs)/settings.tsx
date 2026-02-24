@@ -14,11 +14,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useThemeContext, type Theme } from '@/theme';
 import { useAuth, useAppLock, useFeatureAccess, usePremiumFeature } from '@/hooks';
+import { usePremium } from '@/context/PremiumContext';
 import { updateUserSettings } from '@/services/firebase/firestore';
 import { gatherExportData, shareAccountExport } from '@/services/export';
 import { Toggle } from '@/components/ui';
 import { DeleteAccountModal } from '@/components/settings/DeleteAccountModal';
+import { SubscriptionStatus } from '@/components/settings/SubscriptionStatus';
 import { type StrictnessLevel } from '@/utils/compatibility';
+import { FEATURE_FLAGS } from '@/config';
 
 import { LOCK_TIMEOUT_OPTIONS } from '@/constants';
 
@@ -60,7 +63,9 @@ const STRICTNESS_OPTIONS: {
 const SettingsScreen = () => {
   const { theme, mode, setMode } = useThemeContext();
   const { t } = useTranslation('settings');
+  const { t: tPremium } = useTranslation('premium');
   const { user, userProfile, signOut, refreshProfile } = useAuth();
+  const { restore } = usePremium();
   const {
     isAppLockEnabled,
     isBiometricEnabled,
@@ -89,6 +94,7 @@ const SettingsScreen = () => {
   const [biometricEnabled, setBiometricEnabled] = useState(isBiometricEnabled);
   const [lockTimeout, setLockTimeout] = useState(5);
   const [exporting, setExporting] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Sync local state when external state changes
@@ -209,6 +215,33 @@ const SettingsScreen = () => {
     }
   }, [user, userProfile, t, hasDataExport, requirePremium]);
 
+  const handleRestore = useCallback(async () => {
+    if (isRestoring) return;
+
+    setIsRestoring(true);
+    try {
+      const success = await restore();
+      if (success) {
+        Alert.alert(
+          tPremium('paywall.alert.restoredTitle'),
+          tPremium('paywall.alert.restoredMessage')
+        );
+      } else {
+        Alert.alert(
+          tPremium('paywall.alert.noPurchasesTitle'),
+          tPremium('paywall.alert.noPurchasesMessage')
+        );
+      }
+    } catch {
+      Alert.alert(
+        tPremium('paywall.alert.restoreFailedTitle'),
+        tPremium('paywall.alert.restoreFailedMessage')
+      );
+    } finally {
+      setIsRestoring(false);
+    }
+  }, [isRestoring, restore, tPremium]);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -216,6 +249,42 @@ const SettingsScreen = () => {
       </View>
 
       <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        {/* Subscription Section */}
+        {FEATURE_FLAGS.paywallEnabled && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('Subscription')}</Text>
+            <View style={styles.sectionContent}>
+              <SubscriptionStatus />
+              <TouchableOpacity
+                style={styles.actionRow}
+                onPress={handleRestore}
+                disabled={isRestoring}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isRestoring
+                    ? tPremium('subscription.restoring')
+                    : tPremium('subscription.restorePurchases')
+                }
+              >
+                <Text style={[styles.actionRowText, isRestoring && styles.actionRowTextDisabled]}>
+                  {isRestoring
+                    ? tPremium('subscription.restoring')
+                    : tPremium('subscription.restorePurchases')}
+                </Text>
+                {isRestoring ? (
+                  <ActivityIndicator size="small" color={theme.colors.primary} />
+                ) : (
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={theme.colors.textMuted}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
         {/* Manage Attributes Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('Manage Attributes')}</Text>
