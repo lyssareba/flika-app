@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -16,7 +16,17 @@ import { type PurchasesPackage } from 'react-native-purchases';
 import { useThemeContext, type Theme } from '@/theme';
 import { usePremium } from '@/context/PremiumContext';
 import { RC_PRODUCTS, PREMIUM_FEATURES } from '@/constants/purchases';
-import { getPurchaseErrorMessage } from '@/utils/purchaseErrors';
+import { getPurchaseErrorMessage, shouldShowError } from '@/utils/purchaseErrors';
+import {
+  paywallViewed,
+  planSelected,
+  purchaseInitiated,
+  purchaseCompleted,
+  purchaseCancelled,
+  purchaseFailed,
+  restorePurchasesAttempted,
+  restorePurchasesCompleted,
+} from '@/services/analytics';
 import { PAYWALL_MESSAGES } from '@/config/paywallMessages';
 import { FlikaMascot } from '@/components/mascot';
 import { FeatureList } from '@/components/premium/FeatureList';
@@ -98,6 +108,12 @@ const PaywallScreen = () => {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const offeringsRef = useRef(offerings);
+  offeringsRef.current = offerings;
+
+  useEffect(() => {
+    paywallViewed(feature ?? 'direct');
+  }, [feature]);
 
   const messages = PAYWALL_MESSAGES[feature ?? 'default'] ?? PAYWALL_MESSAGES.default;
 
@@ -122,16 +138,33 @@ const PaywallScreen = () => {
   const handlePurchase = useCallback(async () => {
     if (!effectiveSelection || isPurchasing) return;
 
+    purchaseInitiated(effectiveSelection);
     setIsPurchasing(true);
     try {
       const success = await purchase(effectiveSelection);
       if (success) {
+        const selectedPkg = offeringsRef.current?.availablePackages?.find(
+          (pkg) => pkg.identifier === effectiveSelection
+        );
+        purchaseCompleted(
+          effectiveSelection,
+          selectedPkg?.product.price ?? 0,
+          selectedPkg?.product.currencyCode ?? 'USD'
+        );
         router.back();
+      } else {
+        purchaseFailed(effectiveSelection);
       }
     } catch (error) {
+      const purchaseError = error as Parameters<typeof getPurchaseErrorMessage>[0];
+      if (shouldShowError(purchaseError)) {
+        purchaseFailed(effectiveSelection, purchaseError.code?.toString());
+      } else {
+        purchaseCancelled(effectiveSelection);
+      }
       Alert.alert(
         t('paywall.alert.purchaseFailedTitle'),
-        getPurchaseErrorMessage(error as Parameters<typeof getPurchaseErrorMessage>[0])
+        getPurchaseErrorMessage(purchaseError)
       );
     } finally {
       setIsPurchasing(false);
@@ -141,9 +174,11 @@ const PaywallScreen = () => {
   const handleRestore = useCallback(async () => {
     if (isRestoring) return;
 
+    restorePurchasesAttempted();
     setIsRestoring(true);
     try {
       const success = await restore();
+      restorePurchasesCompleted(success);
       if (success) {
         Alert.alert(t('paywall.alert.restoredTitle'), t('paywall.alert.restoredMessage'), [
           { text: t('common:OK'), onPress: () => router.back() },
@@ -155,6 +190,7 @@ const PaywallScreen = () => {
         );
       }
     } catch {
+      restorePurchasesCompleted(false);
       Alert.alert(
         t('paywall.alert.restoreFailedTitle'),
         t('paywall.alert.restoreFailedMessage')
@@ -208,7 +244,10 @@ const PaywallScreen = () => {
               badge={plan.badge}
               savings={plan.savings}
               selected={effectiveSelection === plan.identifier}
-              onSelect={() => setSelectedPlan(plan.identifier)}
+              onSelect={() => {
+                planSelected(plan.identifier);
+                setSelectedPlan(plan.identifier);
+              }}
             />
           ))}
         </View>
