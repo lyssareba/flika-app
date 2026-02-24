@@ -21,6 +21,8 @@ export const SubscriptionStatus = () => {
   useEffect(() => {
     if (isPremium && !isEarlyAdopter) {
       purchasesService.getManagementURL().then(setManagementURL).catch(() => {});
+    } else {
+      setManagementURL(null);
     }
   }, [isPremium, isEarlyAdopter]);
 
@@ -141,13 +143,13 @@ const createStyles = (theme: Theme) =>
       fontWeight: '600',
     },
     badgeTextEarlyAdopter: {
-      color: '#FFFFFF',
+      color: theme.colors.textOnPrimary,
     },
     badgePremium: {
       backgroundColor: theme.colors.primary,
     },
     badgeTextPremium: {
-      color: '#FFFFFF',
+      color: theme.colors.textOnPrimary,
     },
     label: {
       fontSize: theme.typography.fontSize.base,
@@ -175,7 +177,7 @@ const createStyles = (theme: Theme) =>
     upgradeButtonText: {
       fontSize: theme.typography.fontSize.base,
       fontWeight: '600',
-      color: '#FFFFFF',
+      color: theme.colors.textOnPrimary,
     },
     manageLink: {
       fontSize: theme.typography.fontSize.sm,
