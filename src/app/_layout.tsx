@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { View, StyleSheet, Text as RNText, TextInput as RNTextInput } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -15,6 +16,7 @@ import { OnboardingFlow } from '@/components/onboarding';
 import { useAppLock } from '@/hooks';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthScreen } from '@/components/auth';
+import { initializeAnalytics } from '@/services/analytics';
 
 // Initialize i18n - import triggers initialization
 import '@/i18n';
@@ -105,6 +107,10 @@ const styles = StyleSheet.create({
 });
 
 const RootLayout = () => {
+  useEffect(() => {
+    initializeAnalytics();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>

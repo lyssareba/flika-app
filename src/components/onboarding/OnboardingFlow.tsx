@@ -4,6 +4,7 @@ import { completeOnboarding } from '@/services/firebase/firestore';
 import { claimEarlyAdopterSlot } from '@/services/firebase/earlyAdopterService';
 import { purchasesService } from '@/services/purchases';
 import { FEATURE_FLAGS } from '@/config';
+import { earlyAdopterClaimed } from '@/services/analytics';
 import { WelcomeStep } from './WelcomeStep';
 import { AttributesStep } from './AttributesStep';
 import { DealbreakersStep } from './DealbreakersStep';
@@ -32,6 +33,7 @@ export const OnboardingFlow = ({ onComplete }: OnboardingFlowProps) => {
         const result = await claimEarlyAdopterSlot(user.uid);
         if (result.success && result.slotNumber != null) {
           setEarlyAdopterSlot(result.slotNumber);
+          earlyAdopterClaimed(result.slotNumber);
           purchasesService.setEarlyAdopterAttribute(result.slotNumber).catch(() => {});
           setStep('earlyAdopter');
           return;
