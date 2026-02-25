@@ -324,7 +324,7 @@ const ProspectScreen = () => {
   const unknownCount = compatibility?.unknownCount ?? 0;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
