@@ -90,7 +90,7 @@ export const ProspectList = ({
           status={item.status}
           compatibilityScore={item.cachedScore ?? null}
           dealbreakersWithNoCount={item.cachedDealbreakersWithNo ?? 0}
-          lastDateAt={item.updatedAt} // Approximation - actual last date from dates subcollection
+          lastDateAt={item.cachedLastDateAt}
           createdAt={item.createdAt}
           onPress={onProspectPress}
         />
