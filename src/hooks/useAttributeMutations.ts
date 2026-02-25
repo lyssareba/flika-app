@@ -181,6 +181,7 @@ export const useAttributeMutations = () => {
           a.id === attributeId ? { ...a, category: newCategory } : a
         )
       );
+      queryClient.invalidateQueries({ queryKey: queryKeys.prospects.all });
     },
   });
 
