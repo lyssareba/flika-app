@@ -174,8 +174,13 @@ export const useAttributeMutations = () => {
       );
       console.error('Toggle category error:', error);
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.attributes.list() });
+    onSuccess: ({ attributeId, newCategory }) => {
+      queryClient.setQueryData<Attribute[]>(
+        queryKeys.attributes.list(),
+        (old) => old?.map((a) =>
+          a.id === attributeId ? { ...a, category: newCategory } : a
+        )
+      );
       queryClient.invalidateQueries({ queryKey: queryKeys.prospects.all });
     },
   });
