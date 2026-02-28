@@ -266,46 +266,52 @@ const SettingsScreen = () => {
                     : tPremium('subscription.restorePurchases')
                 }
               >
-                <Text style={[styles.actionRowText, isRestoring && styles.actionRowTextDisabled]}>
-                  {isRestoring
-                    ? tPremium('subscription.restoring')
-                    : tPremium('subscription.restorePurchases')}
-                </Text>
-                {isRestoring ? (
-                  <ActivityIndicator size="small" color={theme.colors.primary} />
-                ) : (
-                  <Ionicons
-                    name="chevron-forward"
-                    size={20}
-                    color={theme.colors.textMuted}
-                  />
-                )}
+                <View style={styles.actionRowLeft}>
+                  {isRestoring ? (
+                    <ActivityIndicator size="small" color={theme.colors.primary} />
+                  ) : (
+                    <Ionicons
+                      name="refresh-outline"
+                      size={20}
+                      color={theme.colors.textMuted}
+                      style={styles.rowIcon}
+                    />
+                  )}
+                  <Text style={[styles.actionRowText, isRestoring && styles.actionRowTextDisabled]}>
+                    {isRestoring
+                      ? tPremium('subscription.restoring')
+                      : tPremium('subscription.restorePurchases')}
+                  </Text>
+                </View>
               </TouchableOpacity>
             </View>
           </View>
         )}
 
-        {/* Manage Attributes Section */}
+        {/* Traits & Scoring Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Manage Attributes')}</Text>
-          <TouchableOpacity
-            style={[styles.sectionContent, styles.actionRow]}
-            onPress={() => router.push('/settings/attributes')}
-            accessibilityRole="button"
-          >
-            <Text style={styles.actionRowText}>{t('Your Attributes')}</Text>
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={theme.colors.textMuted}
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* Scoring Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Scoring')}</Text>
+          <Text style={styles.sectionTitle}>{t('Traits & Scoring')}</Text>
           <View style={styles.sectionContent}>
+            <TouchableOpacity
+              style={styles.actionRow}
+              onPress={() => router.push('/settings/attributes')}
+              accessibilityRole="button"
+            >
+              <View style={styles.actionRowLeft}>
+                <Ionicons
+                  name="list-outline"
+                  size={20}
+                  color={theme.colors.textMuted}
+                  style={styles.rowIcon}
+                />
+                <Text style={styles.actionRowText}>{t('Your Attributes')}</Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={theme.colors.textMuted}
+              />
+            </TouchableOpacity>
             <Text style={styles.settingLabel}>{t('Scoring Strictness')}</Text>
             <View style={styles.optionRow}>
               {STRICTNESS_OPTIONS.map((option) => (
@@ -335,25 +341,40 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        {/* Accessibility Section */}
+        {/* Display Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Accessibility')}</Text>
+          <Text style={styles.sectionTitle}>{t('Display')}</Text>
           <View style={styles.sectionContent}>
+            <Text style={styles.settingLabel}>{t('Theme')}</Text>
+            <View style={styles.optionRow}>
+              {THEME_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.optionChip,
+                    mode === option.value && styles.optionChipSelected,
+                  ]}
+                  onPress={() => setMode(option.value)}
+                  accessibilityRole="radio"
+                  accessibilityLabel={t(option.labelKey)}
+                  accessibilityState={{ selected: mode === option.value }}
+                >
+                  <Text
+                    style={[
+                      styles.optionChipLabel,
+                      mode === option.value && styles.optionChipLabelSelected,
+                    ]}
+                  >
+                    {t(option.labelKey)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <Toggle
               label={t('Use checkbox view instead of swipes')}
               value={checkboxView}
               onValueChange={handleCheckboxViewToggle}
             />
-          </View>
-        </View>
-
-        {/* Notifications Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Notifications')}</Text>
-          <View style={styles.sectionContent}>
-            <Text style={styles.comingSoonText}>
-              {t('Notifications coming soon')}
-            </Text>
           </View>
         </View>
 
@@ -407,42 +428,11 @@ const SettingsScreen = () => {
           </View>
         </View>
 
-        {/* Appearance Section */}
+        {/* Account Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Appearance')}</Text>
+          <Text style={styles.sectionTitle}>{t('Account')}</Text>
           <View style={styles.sectionContent}>
-            <Text style={styles.settingLabel}>{t('Theme')}</Text>
-            <View style={styles.optionRow}>
-              {THEME_OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.optionChip,
-                    mode === option.value && styles.optionChipSelected,
-                  ]}
-                  onPress={() => setMode(option.value)}
-                  accessibilityRole="radio"
-                  accessibilityLabel={t(option.labelKey)}
-                  accessibilityState={{ selected: mode === option.value }}
-                >
-                  <Text
-                    style={[
-                      styles.optionChipLabel,
-                      mode === option.value && styles.optionChipLabelSelected,
-                    ]}
-                  >
-                    {t(option.labelKey)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
-
-        {/* Data Management Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Data Management')}</Text>
-          <View style={styles.sectionContent}>
+            <Text style={styles.emailText}>{userProfile?.email}</Text>
             <TouchableOpacity
               style={styles.actionRow}
               onPress={handleExportData}
@@ -450,42 +440,54 @@ const SettingsScreen = () => {
               accessibilityRole="button"
               accessibilityLabel={exporting ? t('Exporting...') : t('Export My Data')}
             >
-              <Text style={[styles.actionRowText, exporting && styles.actionRowTextDisabled]}>
-                {exporting ? t('Exporting...') : t('Export My Data')}
-              </Text>
-              {exporting ? (
-                <ActivityIndicator size="small" color={theme.colors.primary} />
-              ) : (
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color={theme.colors.textMuted}
-                />
-              )}
+              <View style={styles.actionRowLeft}>
+                {exporting ? (
+                  <ActivityIndicator size="small" color={theme.colors.primary} />
+                ) : (
+                  <Ionicons
+                    name="download-outline"
+                    size={20}
+                    color={theme.colors.textMuted}
+                    style={styles.rowIcon}
+                  />
+                )}
+                <Text style={[styles.actionRowText, exporting && styles.actionRowTextDisabled]}>
+                  {exporting ? t('Exporting...') : t('Export My Data')}
+                </Text>
+              </View>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.actionRow}
+              onPress={handleSignOut}
+              accessibilityRole="button"
+              accessibilityLabel={t('Sign Out')}
+            >
+              <View style={styles.actionRowLeft}>
+                <Ionicons
+                  name="log-out-outline"
+                  size={20}
+                  color={theme.colors.error}
+                  style={styles.rowIcon}
+                />
+                <Text style={styles.actionRowDestructive}>{t('Sign Out')}</Text>
+              </View>
+            </TouchableOpacity>
+            <View style={styles.divider} />
             <TouchableOpacity
               style={styles.actionRow}
               onPress={() => setShowDeleteModal(true)}
               accessibilityRole="button"
               accessibilityLabel={t('Delete Account')}
             >
-              <Text style={styles.actionRowDestructive}>{t('Delete Account')}</Text>
-              <Ionicons
-                name="chevron-forward"
-                size={20}
-                color={theme.colors.error}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Account Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('Account')}</Text>
-          <View style={styles.sectionContent}>
-            <Text style={styles.emailText}>{userProfile?.email}</Text>
-            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} accessibilityRole="button" accessibilityLabel={t('Sign Out')}>
-              <Text style={styles.actionRowDestructive}>{t('Sign Out')}</Text>
+              <View style={styles.actionRowLeft}>
+                <Ionicons
+                  name="trash-outline"
+                  size={20}
+                  color={theme.colors.error}
+                  style={styles.rowIcon}
+                />
+                <Text style={styles.actionRowDestructive}>{t('Delete Account')}</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -537,8 +539,14 @@ const createStyles = (theme: Theme) =>
     },
     sectionContent: {
       backgroundColor: theme.colors.backgroundCard,
+      borderRadius: theme.borderRadius.lg,
+      marginHorizontal: 16,
       paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingVertical: 12,
+      gap: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      ...theme.shadows.sm,
     },
     settingRow: {
       paddingVertical: 8,
@@ -546,7 +554,7 @@ const createStyles = (theme: Theme) =>
     settingLabel: {
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.textPrimary,
-      marginBottom: 8,
+      marginBottom: 4,
     },
     settingDescription: {
       fontSize: theme.typography.fontSize.sm,
@@ -586,6 +594,10 @@ const createStyles = (theme: Theme) =>
       justifyContent: 'space-between',
       paddingVertical: 12,
     },
+    actionRowLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
     actionRowText: {
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.textPrimary,
@@ -597,18 +609,17 @@ const createStyles = (theme: Theme) =>
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.error,
     },
-    comingSoonText: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.textMuted,
-      paddingVertical: 8,
+    rowIcon: {
+      marginRight: 12,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: theme.colors.border,
     },
     emailText: {
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.textSecondary,
       paddingVertical: 8,
-    },
-    signOutButton: {
-      paddingVertical: 12,
     },
   });
 
