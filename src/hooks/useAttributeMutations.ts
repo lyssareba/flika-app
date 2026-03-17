@@ -129,22 +129,18 @@ export const useAttributeMutations = () => {
   });
 
   const toggleCategoryMutation = useMutation({
-    mutationFn: async (attributeId: string) => {
+    mutationFn: async ({
+      attributeId,
+      newCategory,
+    }: {
+      attributeId: string;
+      newCategory: AttributeCategory;
+    }) => {
       if (!user) throw new Error('User not authenticated');
-
-      // Get current category from cache
-      const attributes = queryClient.getQueryData<Attribute[]>(
-        queryKeys.attributes.list()
-      );
-      const attribute = attributes?.find((a) => a.id === attributeId);
-      if (!attribute) throw new Error('Attribute not found');
-
-      const newCategory: AttributeCategory =
-        attribute.category === 'dealbreaker' ? 'desired' : 'dealbreaker';
       await updateAttribute(user.uid, attributeId, { category: newCategory });
       return { attributeId, newCategory };
     },
-    onMutate: async (attributeId) => {
+    onMutate: async ({ attributeId, newCategory }) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.attributes.list() });
 
       const previousAttributes = queryClient.getQueryData<Attribute[]>(
@@ -155,9 +151,7 @@ export const useAttributeMutations = () => {
         queryClient.setQueryData<Attribute[]>(
           queryKeys.attributes.list(),
           previousAttributes.map((a) =>
-            a.id === attributeId
-              ? { ...a, category: a.category === 'dealbreaker' ? 'desired' : 'dealbreaker' }
-              : a
+            a.id === attributeId ? { ...a, category: newCategory } : a
           )
         );
       }
@@ -270,7 +264,16 @@ export const useAttributeMutations = () => {
 
   return {
     addAttribute: createMutation.mutate,
-    toggleCategory: toggleCategoryMutation.mutate,
+    toggleCategory: (attributeId: string) => {
+      const attributes = queryClient.getQueryData<Attribute[]>(
+        queryKeys.attributes.list()
+      );
+      const attribute = attributes?.find((a) => a.id === attributeId);
+      if (!attribute) return;
+      const newCategory: AttributeCategory =
+        attribute.category === 'dealbreaker' ? 'desired' : 'dealbreaker';
+      toggleCategoryMutation.mutate({ attributeId, newCategory });
+    },
     updateCategory: updateCategoryMutation.mutate,
     reorderAttribute: reorderMutation.mutate,
     removeAttribute: deleteMutation.mutate,
