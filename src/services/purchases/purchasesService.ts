@@ -7,6 +7,8 @@ import Purchases, {
 import { env } from '@/config';
 import { RC_ENTITLEMENTS } from '@/constants/purchases';
 
+const isTestKey = (key: string) => key.startsWith('test_');
+
 class PurchasesService {
   private initialized = false;
 
@@ -25,6 +27,13 @@ class PurchasesService {
     if (!apiKey) {
       console.warn(
         'RevenueCat: No API key found for this platform. Purchases will not be available.'
+      );
+      return;
+    }
+
+    if (!__DEV__ && isTestKey(apiKey)) {
+      console.warn(
+        'RevenueCat: Skipping initialization — test API key cannot be used in release builds.'
       );
       return;
     }
