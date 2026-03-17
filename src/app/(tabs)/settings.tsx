@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useThemeContext, type Theme } from '@/theme';
+import { env , FEATURE_FLAGS } from '@/config';
 import { useAuth, useAppLock, useFeatureAccess, usePremiumFeature } from '@/hooks';
 import { usePremium } from '@/context/PremiumContext';
 import { updateUserSettings } from '@/services/firebase/firestore';
@@ -21,8 +22,8 @@ import { Toggle } from '@/components/ui';
 import { DeleteAccountModal } from '@/components/settings/DeleteAccountModal';
 import { SubscriptionStatus } from '@/components/settings/SubscriptionStatus';
 import { type StrictnessLevel } from '@/utils/compatibility';
-import { FEATURE_FLAGS } from '@/config';
 
+import * as Updates from 'expo-updates';
 import { LOCK_TIMEOUT_OPTIONS } from '@/constants';
 
 type ThemePreference = 'system' | 'light' | 'dark';
@@ -491,6 +492,14 @@ const SettingsScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
+        {/* Version Info - dev/preview only */}
+        {!env.isProd && (
+          <Text style={styles.versionText}>
+            {Updates.updateId
+              ? `Update: ${Updates.updateId.slice(0, 8)}`
+              : 'Embedded bundle'}
+          </Text>
+        )}
       </ScrollView>
 
       <DeleteAccountModal
@@ -620,6 +629,12 @@ const createStyles = (theme: Theme) =>
       fontSize: theme.typography.fontSize.base,
       color: theme.colors.textSecondary,
       paddingVertical: 8,
+    },
+    versionText: {
+      fontSize: theme.typography.fontSize.xs,
+      color: theme.colors.textMuted,
+      textAlign: 'center',
+      paddingVertical: 16,
     },
   });
 
