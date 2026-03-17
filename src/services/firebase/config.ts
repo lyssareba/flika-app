@@ -22,6 +22,6 @@ if (getApps().length === 0) {
 
 // Initialize services
 const auth: Auth = getAuth(app);
-const db: Firestore = getFirestore(app);
+const db: Firestore = env.isProd ? getFirestore(app) : getFirestore(app, 'development');
 
 export { app, auth, db };
