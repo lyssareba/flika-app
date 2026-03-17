@@ -25,6 +25,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'flika',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
+  updates: {
+    url: 'https://u.expo.dev/6535d9c4-e17e-4073-98b1-b4a8d84d7e7d',
+  },
+  runtimeVersion: {
+    policy: 'appVersion',
+  },
   ios: {
     supportsTablet: true,
     bundleIdentifier: getPackageName(),
@@ -108,7 +114,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     revenuecatAndroidApiKey: process.env.REVENUECAT_ANDROID_API_KEY,
     revenuecatIosApiKey: process.env.REVENUECAT_IOS_API_KEY,
     eas: {
-      projectId: process.env.EAS_PROJECT_ID,
+      projectId: '6535d9c4-e17e-4073-98b1-b4a8d84d7e7d',
     },
     appVariant: process.env.APP_VARIANT ?? 'production',
   },

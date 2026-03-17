@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "594671550029",
+    "project_id": "flika-dd6a5",
+    "storage_bucket": "flika-dd6a5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:594671550029:android:98b3d704a91928617ca604",
+        "android_client_info": {
+          "package_name": "com.getflika.flika"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8FHPX-SvRG2WkxtCLiYgHzFVJ8Jyr1Os"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
